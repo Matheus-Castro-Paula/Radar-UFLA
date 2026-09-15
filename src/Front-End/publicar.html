@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Publicar item — Radar UFLA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <header class="site-header simple">
+    <a class="back-link" href="index.html">← Voltar ao feed</a>
+    <h1 class="page-title">Publicar item</h1>
+  </header>
+
+  <main class="publish-main">
+    <form id="publish-form" class="publish-form">
+      <div class="segmented" role="radiogroup" aria-label="Este item é achado ou perdido">
+        <label class="segmented-option active">
+          <input type="radio" name="tipo" value="achados" checked /> Um achado
+        </label>
+        <label class="segmented-option">
+          <input type="radio" name="tipo" value="perdidos" /> Uma perda
+        </label>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-fields">
+          <label class="field">
+            <span class="field-label">Título</span>
+            <input type="text" name="titulo" placeholder="Ex: Molho de chaves com chaveiro azul" required />
+          </label>
+
+          <label class="field">
+            <span class="field-label">Categoria</span>
+            <select name="categoria" id="categoria">
+              <option value="objeto">Objeto pessoal</option>
+              <option value="eletronico">Eletrônico</option>
+              <option value="documento">Documento (sem foto)</option>
+              <option value="material">Material acadêmico</option>
+              <option value="outro">Outro</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span class="field-label">Descrição</span>
+            <textarea name="descricao" rows="4" placeholder="Detalhes que ajudem a identificar o item"></textarea>
+          </label>
+
+          <div class="field-row">
+            <label class="field">
+              <span class="field-label">Local</span>
+              <input type="text" name="local" placeholder="Ex: Bloco 3, sala 12" />
+            </label>
+            <label class="field">
+              <span class="field-label">Horário</span>
+              <input type="text" name="horario" placeholder="Ex: hoje, 14h30" />
+            </label>
+          </div>
+        </div>
+
+        <div class="upload-area" id="upload-area">
+          <div class="upload-icon">📷</div>
+          <p>Arraste uma foto ou clique para escolher</p>
+          <p class="upload-hint">(upload real será integrado na Sprint 2)</p>
+        </div>
+      </div>
+
+      <p class="field-note" id="doc-note" hidden>
+        Itens da categoria "Documento" não exibem foto, por segurança — apenas a descrição textual será publicada.
+      </p>
+
+      <button type="submit" class="btn-submit">Publicar</button>
+    </form>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

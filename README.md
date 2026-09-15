@@ -16,13 +16,13 @@
 
 ### Integrantes
 
-| Nome completo                      | Usuário no GitHub           | Responsabilidade principal                                                     | Outras contribuições                |
-| ---------------------------------- | --------------------------- | ------------------------------------------------------------------------------ | ----------------------------------- |
-| Luis Gustavo Borges Vilela Marques | `@luisgustavoborges150-web` | PO / Scrum Master — backlog, Issues, organização das sprints, atas de reunião  | Apoio na documentação geral         |
-| Bernardo Thomaz de Oliveira        | `@BernarDEVthomaz`          | Tech Lead — decisões de arquitetura e de projeto, apoio técnico a Front e Back | Apoio no plano e execução de testes |
-| Rodrigo Penha Silva                | `@rodrigopenha13`           | Front-end — telas de feed, formulário de postagem, busca                       | Apoio na documentação de requisitos |
-| Matheus de Castro Paula            | `@Matheus-Castro-Paula`     | Back-end — API, autenticação, regras de negócio                                | Apoio na execução de testes         |
-| Arthur Ramos Xisto                 | `@Artxisto`                 | Back-end — API, modelagem de dados, banco de dados                             | Apoio na execução de testes         |
+| Nome completo                      | Usuário no GitHub       | Responsabilidade principal                                                     | Outras contribuições                |
+| ---------------------------------- | ----------------------- | ------------------------------------------------------------------------------ | ----------------------------------- |
+| Luis Gustavo Borges Vilela Marques | `@Luis-Marques06`       | PO / Scrum Master — backlog, Issues, organização das sprints, atas de reunião  | Apoio na documentação geral         |
+| Bernardo Thomaz de Oliveira        | `@BernarDEVthomaz`      | Tech Lead — decisões de arquitetura e de projeto, apoio técnico a Front e Back | Apoio no plano e execução de testes |
+| Rodrigo Penha Silva                | `@rodrigopenha13`       | Front-end — telas de feed, formulário de postagem, busca                       | Apoio na documentação de requisitos |
+| Matheus de Castro Paula            | `@Matheus-Castro-Paula` | Back-end — API, autenticação, regras de negócio                                | Apoio na execução de testes         |
+| Arthur Ramos Xisto                 | `@Artxisto`             | Back-end — API, modelagem de dados, banco de dados                             | Apoio na execução de testes         |
 
 > O grupo possui 5 integrantes. A atribuição de uma responsabilidade principal não dispensa a participação colaborativa nas demais atividades.
 
