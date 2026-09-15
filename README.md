@@ -4,25 +4,25 @@
 
 ## 1. Identificação do projeto
 
-| Campo                       | Informação                                           |
-| --------------------------- | ---------------------------------------------------- |
-| Nome do projeto             | Radar UFLA                                           |
-| Problema escolhido          | Achados e perdidos na UFLA                           |
-| Turma/semestre              | Engenharia de Software — 2026/2                      |
-| Professor                   | Prof. Johnatan Oliveira                              |
-| Link do GitHub Project      | `https://github.com/Matheus-Castro-Paula/Radar-UFLA` |
-| Link da aplicação publicada | ``                                                   |
-| Link do vídeo final         | ``                                                   |
+| Campo                       | Informação                                                 |
+| --------------------------- | ---------------------------------------------------------- |
+| Nome do projeto             | Radar UFLA                                                 |
+| Problema escolhido          | Achados e perdidos na UFLA                                 |
+| Turma/semestre              | Engenharia de Software — 2026/2                            |
+| Professor                   | Prof. Johnatan Oliveira                                    |
+| Link do GitHub Project      | `https://github.com/users/Matheus-Castro-Paula/projects/2` |
+| Link da aplicação publicada | ``                                                         |
+| Link do vídeo final         | ``                                                         |
 
 ### Integrantes
 
-| Nome completo                      | Usuário no GitHub       | Responsabilidade principal                                                     | Outras contribuições                |
-| ---------------------------------- | ----------------------- | ------------------------------------------------------------------------------ | ----------------------------------- |
-| Luis Gustavo Borges Vilela Marques | `@`                     | PO / Scrum Master — backlog, Issues, organização das sprints, atas de reunião  | Apoio na documentação geral         |
-| Bernardo Thomaz de Oliveira        | `@BernarDEVthomaz`      | Tech Lead — decisões de arquitetura e de projeto, apoio técnico a Front e Back | Apoio no plano e execução de testes |
-| Rodrigo Penha Silva                | `@`                     | Front-end — telas de feed, formulário de postagem, busca                       | Apoio na documentação de requisitos |
-| Matheus de Castro Paula            | `@Matheus-Castro-Paula` | Back-end — API, autenticação, regras de negócio                                | Apoio na execução de testes         |
-| Arthur Ramos Xisto                 | `@Artxisto`             | Back-end — API, modelagem de dados, banco de dados                             | Apoio na execução de testes         |
+| Nome completo                      | Usuário no GitHub           | Responsabilidade principal                                                     | Outras contribuições                |
+| ---------------------------------- | --------------------------- | ------------------------------------------------------------------------------ | ----------------------------------- |
+| Luis Gustavo Borges Vilela Marques | `@luisgustavoborges150-web` | PO / Scrum Master — backlog, Issues, organização das sprints, atas de reunião  | Apoio na documentação geral         |
+| Bernardo Thomaz de Oliveira        | `@BernarDEVthomaz`          | Tech Lead — decisões de arquitetura e de projeto, apoio técnico a Front e Back | Apoio no plano e execução de testes |
+| Rodrigo Penha Silva                | `@rodrigopenha13`           | Front-end — telas de feed, formulário de postagem, busca                       | Apoio na documentação de requisitos |
+| Matheus de Castro Paula            | `@Matheus-Castro-Paula`     | Back-end — API, autenticação, regras de negócio                                | Apoio na execução de testes         |
+| Arthur Ramos Xisto                 | `@Artxisto`                 | Back-end — API, modelagem de dados, banco de dados                             | Apoio na execução de testes         |
 
 > O grupo possui 5 integrantes. A atribuição de uma responsabilidade principal não dispensa a participação colaborativa nas demais atividades.
 
@@ -43,13 +43,52 @@
 ## 3. Estrutura do repositório
 
 ```text
-.
+Radar UFLA/
+│
+├── .github/
+│   └── ISSUE_TEMPLATE/
+│
 ├── docs/
+│   ├── arquitetura/
+│   │   └── arquitetura.md
+│   │
+│   ├── modelagem/
+│   │   ├── imagens/
+│   │   └── modelagem.md
+│   │
+│   ├── padroes/
+│   │   └── padroes-de-projeto.md
+│   │
+│   ├── projeto/
+│   │   └── decisoes-de-projeto.md
+│   │
 │   ├── requisitos/
 │   │   └── requisitos.md
+│   │
 │   ├── sprints/
+│   │   ├── sprint-01.md
+│   │   ├── sprint-02.md
+│   │   ├── sprint-03.md
+│   │   ├── sprint-04.md
+│   │   ├── sprint-05.md
+│   │   ├── sprint-06.md
+│   │   ├── sprint-07.md
+│   │   └── sprint-08.md
+│   │
+│   ├── testes/
+│   │   ├── evidencias-testes.md
+│   │   └── plano-de-testes.md
+│   │
 │   ├── backlog-produto.md
+│   ├── uso-de-ia.md
 │   └── visao-geral.md
+│
+├── rubrica/
+│   └── autoavaliacao-entregas.md
+│
+├── src/
+│
+├── tests/
 │
 └── README.md
 ```
@@ -74,4 +113,5 @@
 ## 6. Execução da aplicação
 
 ``
+
 # Radar-UFLA
