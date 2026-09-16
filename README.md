@@ -4,15 +4,15 @@
 
 ## 1. Identificação do projeto
 
-| Campo                       | Informação                                                 |
-| --------------------------- | ---------------------------------------------------------- |
-| Nome do projeto             | Radar UFLA                                                 |
-| Problema escolhido          | Achados e perdidos na UFLA                                 |
-| Turma/semestre              | Engenharia de Software — 2026/2                            |
-| Professor                   | Prof. Johnatan Oliveira                                    |
-| Link do GitHub Project      | `https://github.com/users/Matheus-Castro-Paula/projects/2` |
-| Link da aplicação publicada | ``                                                         |
-| Link do vídeo final         | ``                                                         |
+| Campo                       | Informação                                                          |
+| --------------------------- | ------------------------------------------------------------------- |
+| Nome do projeto             | Radar UFLA                                                          |
+| Problema escolhido          | Achados e perdidos na UFLA                                          |
+| Turma/semestre              | Engenharia de Software — 2026/2                                     |
+| Professor                   | Prof. Johnatan Oliveira                                             |
+| Link do GitHub Project      | [Project](https://github.com/users/Matheus-Castro-Paula/projects/2) |
+| Link da aplicação publicada | —                                                                   |
+| Link do vídeo final         | —                                                                   |
 
 ### Integrantes
 
@@ -66,6 +66,10 @@ Radar UFLA/
 │   │   └── requisitos.md
 │   │
 │   ├── sprints/
+│   │   ├── evidencias/
+│   │   │   ├── sprint-01-execucao.png
+│   │   │   └── sprint-01-project.png
+│   │   │
 │   │   ├── sprint-01.md
 │   │   ├── sprint-02.md
 │   │   ├── sprint-03.md
@@ -87,6 +91,11 @@ Radar UFLA/
 │   └── autoavaliacao-entregas.md
 │
 ├── src/
+│   └── Front-End/
+│       ├── app.js
+│       ├── index.html
+│       ├── publicar.html
+│       └── styles.css
 │
 ├── tests/
 │
@@ -112,6 +121,25 @@ Radar UFLA/
 
 ## 6. Execução da aplicação
 
-``
+Pré-requisitos: Python 3 instalado (usado apenas para servir os arquivos estáticos localmente).
 
-# Radar-UFLA
+1. Clone o repositório:
+
+```bash
+   git clone https://github.com/Matheus-Castro-Paula/Radar-UFLA.git
+   cd Radar-UFLA
+```
+
+2. Rode o servidor local apontando para a pasta do front-end:
+
+```bash
+   # Linux/Mac
+   python3 -m http.server 8000 --directory src/Front-End
+
+   # Windows
+   python -m http.server 8000 --directory src/Front-End
+```
+
+3. Abra `http://localhost:8000` no navegador.
+
+> Nesta etapa (Sprint 1), a aplicação é apenas o front-end estático, com dados de exemplo fixos no código. O back-end (Node.js/Express) será adicionado em `src/Back-End/` a partir da Sprint 2.
