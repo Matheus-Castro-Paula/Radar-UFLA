@@ -1,5 +1,7 @@
 # Visão geral do produto
 
+> **Criado na Sprint 1 e atualizado sempre que o problema ou escopo mudar.**
+
 ## 1. Problema escolhido
 
 **Título:** Falta de um canal centralizado para achados e perdidos na UFLA
@@ -68,6 +70,7 @@ O Radar UFLA não é um formulário ou CRUD genérico de "cadastro de itens": a 
 
 ## 7. Histórico de mudanças
 
-| Data/sprint | Mudança                  | Motivo            | Issue/decisão relacionada |
-| ----------- | ------------------------ | ----------------- | ------------------------- |
-| Sprint 1    | Criação da visão inicial | Início do projeto | ``                        |
+| Data/sprint | Mudança                                                               | Motivo                                                                           | Issue/decisão relacionada |
+| ----------- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------- | ------------------------- |
+| Sprint 1    | Criação da visão inicial                                              | Início do projeto                                                                | `#1`                      |
+| Sprint 2    | Refinamento da visão e consolidação do escopo incremental da Sprint 2 | Alinhamento com o documento oficial de requisitos e inclusão do upload de mídias | `#14`                     |
