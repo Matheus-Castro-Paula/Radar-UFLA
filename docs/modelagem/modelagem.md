@@ -16,6 +16,60 @@ Este documento apresenta os modelos UML (Estruturais e Comportamentais) do proje
 ### 2.3 Diagrama de Classes / MER (Estrutural)
 *(Diagrama com as entidades Usuario, Anuncio, FotoAnuncio e Comentario)*
 
+### 2.3 Diagrama de Classes / MER (Estrutural)
+
+```mermaid
+erDiagram
+    USUARIOS ||--o{ ANUNCIO : cria
+    USUARIOS ||--o{ COMENTARIO : escreve
+    ANUNCIO ||--o{ FOTO_ANUNCIO : possui
+    ANUNCIO ||--o{ COMENTARIO : recebe
+
+    USUARIOS {
+        int id PK
+        string nome
+        string email UK
+        string senha_hash
+        string reset_password_token
+        datetime reset_password_expires
+    }
+    ANUNCIO {
+        int id PK
+        int usuario_id FK
+        string titulo
+        text descricao
+        enum tipo "ACHADO, PERDIDO"
+        string categoria
+        string local_encontro
+        enum status "ATIVO, RESOLVIDO, ARQUIVADO"
+    }
+    FOTO_ANUNCIO {
+        int id PK
+        int anuncio_id FK
+        string url_imagem
+    }
+    COMENTARIO {
+        int id PK
+        int anuncio_id FK
+        int usuario_id FK
+        text conteudo
+    }
+```
+
+O modelo estrutural representa as quatro entidades centrais do domínio "achados e perdidos": **Usuário** (quem publica e comenta), **Anúncio** (o item achado/perdido), **FotoAnuncio** (evidências visuais do item) e **Comentário** (interação entre usuários sobre um anúncio).
+
+Um usuário pode criar vários anúncios e escrever vários comentários (relação 1:N em ambos os casos). Um anúncio, por sua vez, pode ter várias fotos associadas e receber vários comentários. Essa estrutura sustenta diretamente a RF-04 (vitrine pública, que lista os anúncios com seus dados), a RF-07 (cadastro de novo anúncio) e a RF-08 (upload de fotos).
+
+O campo `tipo` do Anúncio (`ACHADO`/`PERDIDO`) e o `status` (`ATIVO`/`RESOLVIDO`/`ARQUIVADO`) controlam o ciclo de vida do item na vitrine. Já a relação Anúncio → FotoAnuncio é o ponto de atenção da **RN-04**, que exige ocultar dados/fotos sensíveis (como documentos) na exibição pública — atualmente o modelo de dados ainda não tem um campo dedicado para marcar uma foto como sensível, o que fica registrado como refinamento pendente para uma próxima sprint.
+
+**Correspondência com o código:**
+
+| Entidade do diagrama | Migration | Model Sequelize |
+| :--- | :--- | :--- |
+| Usuário | `migrations/20260918000000-create-usuarios.js` | `models/usuario.js` |
+| Anúncio | `migrations/20260918000001-create-anuncios.js` | `models/anuncio.js` |
+| FotoAnuncio | `migrations/20260918000002-create-fotos-anuncio.js` | `models/foto_anuncio.js` |
+| Comentário | `migrations/20260918000003-create-comentarios.js` | `models/comentario.js` |
 ---
 
 ## 3. Matriz de Rastreabilidade
