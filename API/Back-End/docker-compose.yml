@@ -1,11 +1,29 @@
 version: "3.8"
 
 services:
+  db:
+    image: mysql:8.0
+    container_name: mysql_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: radar_ufla
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
   backend:
     build: .
     container_name: api_backend
     ports:
       - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
     env_file:
       - .env
     restart: always
+
+volumes:
+  mysql_data:
