@@ -193,3 +193,78 @@ function initPublishPage() {
 
 initFeed();
 initPublishPage();
+
+const API_URL = "http://localhost:3000/api/auth";
+
+// -- Login --
+const loginForm = document.getElementById("login-form");
+
+if (loginForm) {
+  loginForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const email = document.getElementById("email").value;
+    const senha = document.getElementById("senha").value;
+
+    try {
+      const response = await fetch(`${API_URL}/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, senha }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // -- Salvar TOKEN --
+        localStorage.setItem("token", data.token);
+
+        alert("Login realizado!");
+        window.location.href = "index.html";
+      } else {
+        alert(data.error);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Erro no login");
+    }
+  });
+}
+
+
+// -- Registro --
+const registroForm = document.getElementById("registro-form");
+
+if (registroForm) {
+  registroForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const nome = document.getElementById("nome").value;
+    const email = document.getElementById("email").value;
+    const senha = document.getElementById("senha").value;
+
+    try {
+      const response = await fetch(`${API_URL}/registro`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ nome, email, senha }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert("Usuário criado!");
+        window.location.href = "login.html";
+      } else {
+        alert(data.error);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Erro no registro");
+    }
+  });
+}
