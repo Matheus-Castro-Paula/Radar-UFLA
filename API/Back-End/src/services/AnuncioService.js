@@ -3,8 +3,10 @@ const RegraNegocioError = require("./RegraNegocioError");
 
 const { VALIDACAO, LGPD, NAO_ENCONTRADO, PROIBIDO } = RegraNegocioError.CODIGOS;
 
-// Mesmo valor usado no <select name="categoria"> de publicar.html
+// Mesmos valores do <select name="categoria"> de publicar.html.
+// Lista fechada: sem ela, "documentos" ou "RG" contornariam a RN-04.
 const CATEGORIA_DOCUMENTO = "documento";
+const CATEGORIAS = ["objeto", "eletronico", CATEGORIA_DOCUMENTO, "material", "outro"];
 const TIPOS = ["ACHADO", "PERDIDO"];
 const STATUS = ["ATIVO", "RESOLVIDO", "ARQUIVADO"];
 const CAMPOS_OBRIGATORIOS = [
@@ -41,6 +43,19 @@ function validarTipoEStatus({ tipo, status }) {
   }
   if (status !== undefined && !STATUS.includes(status)) {
     throw new RegraNegocioError(VALIDACAO, `Status deve ser ${STATUS.join(", ")}.`);
+  }
+}
+
+function normalizarCategoria(categoria) {
+  return String(categoria).trim().toLowerCase();
+}
+
+function validarCategoria(categoria) {
+  if (!CATEGORIAS.includes(categoria)) {
+    throw new RegraNegocioError(
+      VALIDACAO,
+      `Categoria inválida. Use uma de: ${CATEGORIAS.join(", ")}.`,
+    );
   }
 }
 
@@ -118,7 +133,9 @@ module.exports = {
     // Ordem do diagrama 2.3: obrigatórios → RN-04 → regras de foto → persistência
     validarCamposObrigatorios(dados);
     validarTipoEStatus(dados);
-    validarRegraLGPD(dados.categoria, fotos);
+    const categoria = normalizarCategoria(dados.categoria);
+    validarCategoria(categoria);
+    validarRegraLGPD(categoria, fotos);
     validarFotos(fotos);
 
     const anuncioId = await sequelize.transaction(async (transaction) => {
@@ -128,7 +145,7 @@ module.exports = {
           titulo: dados.titulo,
           descricao: dados.descricao,
           tipo: dados.tipo,
-          categoria: dados.categoria,
+          categoria,
           local_encontro: dados.local_encontro,
           status: "ATIVO",
         },
@@ -152,9 +169,12 @@ module.exports = {
     const fotosFinais = substituiFotos
       ? dados.fotos
       : anuncio.fotos.map((foto) => foto.url_imagem);
-    const categoriaFinal = dados.categoria ?? anuncio.categoria;
+    const novaCategoria =
+      dados.categoria !== undefined ? normalizarCategoria(dados.categoria) : undefined;
+    const categoriaFinal = novaCategoria ?? anuncio.categoria;
 
     validarTipoEStatus(dados);
+    if (novaCategoria !== undefined) validarCategoria(novaCategoria);
     validarRegraLGPD(categoriaFinal, fotosFinais);
     if (substituiFotos) validarFotos(fotosFinais);
 
@@ -170,6 +190,7 @@ module.exports = {
     for (const campo of camposEditaveis) {
       if (dados[campo] !== undefined) alteracoes[campo] = dados[campo];
     }
+    if (novaCategoria !== undefined) alteracoes.categoria = novaCategoria;
 
     await sequelize.transaction(async (transaction) => {
       await anuncio.update(alteracoes, { transaction });

@@ -4,11 +4,12 @@ const RegraNegocioError = require("../services/RegraNegocioError");
 const { VALIDACAO, LGPD, NAO_ENCONTRADO, PROIBIDO } = RegraNegocioError.CODIGOS;
 
 // Tradução dos erros de negócio do service para status HTTP
+// (RN-04 responde 400, conforme critério de aceitação da Issue #25)
 const STATUS_POR_CODIGO = {
   [VALIDACAO]: 400,
+  [LGPD]: 400,
   [PROIBIDO]: 403,
   [NAO_ENCONTRADO]: 404,
-  [LGPD]: 422,
 };
 
 function responderErro(res, error, mensagemPadrao) {
