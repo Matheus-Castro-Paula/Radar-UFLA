@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const authRoutes = require("./routes/authRoutes");
+const anuncioRoutes = require("./routes/anuncioRoutes");
 
 const app = express();
 
@@ -15,6 +16,7 @@ app.get("/", (req, res) => {
 
 // Agrupamento das Rotas de Autenticação
 app.use("/api/auth", authRoutes);
+app.use("/api/anuncios", anuncioRoutes);
 
 app.listen(3000, () => {
   console.log("Server is running on port 3000");
