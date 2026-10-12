@@ -51,7 +51,7 @@ Os requisitos do sistema **Radar UFLA** foram identificados e estruturados a par
 | `RN-01` | Quarentena Automática por Denúncias | Ao atingir 3 denúncias de usuários distintos, o post deve ter seu status alterado para "EM QUARENTENA" e ser removido do feed público até avaliação do Admin.            | `RF-12`                    |
 | `RN-02` | Restrição de Gestão de Anúncios     | Somente o usuário criador do anúncio ou o Administrador Geral possuem permissão para editar os dados do post ou marcá-lo como "Entregue/Resolvido".                      | `RF-03`, `RF-09`           |
 | `RN-03` | Janela de Expiração de 60 Dias      | Anúncios que completarem 60 dias sem atualização de status devem ser automaticamente alterados para "EXPIRADO" para evitar acúmulo de posts antigos na vitrine.          | `RF-14`                    |
-| `RN-04` | Ocultação de Dados Sensíveis (LGPD) | O sistema não deve exibir publicamente na vitrine dados sensíveis como CPF, telefone pessoal, e-mail do proprietário ou fotos de documentos sem tarjas numeradas.        | `RF-04`, `RF-08`, `RNF-03` |
+| `RN-04` | Ocultação de Dados Sensíveis (LGPD) | O sistema não deve exibir publicamente na vitrine dados sensíveis como CPF, telefone pessoal ou e-mail do proprietário. Anúncios da categoria "Documento" não podem conter foto: a API recusa o envio (HTTP 400), na criação e na edição, e o item é publicado apenas com descrição textual. | `RF-04`, `RF-08`, `RNF-03` |
 | `RN-05` | Cruzamento de Match                 | O algoritmo de correspondência só deve disparar alertas se houver coincidência de Categoria e alta similaridade de Título e Local entre um item "Achado" e um "Perdido". | `RF-13`                    |
 
 ## 6. Histórias de usuário e critérios de aceitação
@@ -66,6 +66,7 @@ Como **Membro da Comunidade UFLA**, quero **cadastrar um anúncio de um pertence
 
 1. **Dado que** o usuário está autenticado e no formulário de cadastro, **quando** preencher todos os campos obrigatórios (Tipo, Título, Categoria, Local do Campus, Data/Hora e Descrição) e clicar em "Publicar Anúncio", **então** o sistema deve salvar o registro com status "ATIVO" e exibi-lo na vitrine pública.
 2. **Dado que** o usuário seleciona arquivos de foto, **quando** enviar até 3 imagens nos formatos JPG, PNG ou WEBP com tamanho de até 5MB, **então** o sistema deve validar os ficheiros, comprimi-los e exibir as orientações visuais de segurança para entrega presencial.
+3. **Dado que** o usuário escolheu a categoria "Documento", **quando** tentar publicar ou editar o anúncio com fotos, **então** o sistema deve recusar a operação com uma mensagem explicando que fotos de documentos não são permitidas (`RN-04`), e o anúncio só pode ser publicado com descrição textual.
 
 **Issue:** `#06`, `#07`, `#10`, `#11`
 
@@ -112,3 +113,4 @@ Como **Administrador Geral**, quero **avaliar denúncias de posts colocados em q
 | Sprint   | Requisito alterado | Alteração                                                 | Motivo                                                          | Issue/commit |
 | -------- | ------------------ | --------------------------------------------------------- | --------------------------------------------------------------- | ------------ |
 | Sprint 2 | Todos              | Criação e estruturação inicial do documento de requisitos | Padronização e detalhamento completo conforme modelo do projeto | `#14`        |
+| Sprint 4 | `RN-04`, `US-01`   | `RN-04` deixa de aceitar "fotos de documentos com tarja" e passa a proibir foto na categoria "Documento", com recusa pela API (HTTP 400); novo critério de aceitação 3 em `US-01` | Decisão ADR-03 de [`decisoes-de-projeto.md`](../projeto/decisoes-de-projeto.md): a tarja exigiria processamento de imagem, fora do escopo | `#25`, commits `0bffa9f` e `593156b` |
