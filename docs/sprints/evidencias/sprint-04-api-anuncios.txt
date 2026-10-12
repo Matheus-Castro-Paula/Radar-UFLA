@@ -1,0 +1,62 @@
+Evidências Sprint 4 — Issues #24 e #25 — API de anúncios (AnuncioService)
+Login com usuário de teste -> token obtido: eyJhbGciOiJIUzI...
+
+### 1. Sem token (esperado 401)
+POST http://localhost:3000/api/anuncios
+body: {"titulo":"RG"}
+{"error":"Token de autenticação não fornecido."}
+-> HTTP 401
+
+### 2. RN-04: documento COM foto (esperado 400)
+POST http://localhost:3000/api/anuncios
+body: {"titulo":"RG encontrado","descricao":"RG achado no RU","tipo":"ACHADO","categoria":"documento","local_encontro":"RU","fotos":["https://img.ufla.br/rg.jpg"]}
+{"error":"Não é permitido enviar foto de documento pessoal (RN-04 / LGPD). Publique apenas a descrição."}
+-> HTTP 400
+
+### 3. RN-04 burla: 'Documentos' COM foto (esperado 400 - categoria inválida)
+POST http://localhost:3000/api/anuncios
+body: {"titulo":"RG","descricao":"RG","tipo":"ACHADO","categoria":"Documentos","local_encontro":"RU","fotos":["https://img.ufla.br/rg.jpg"]}
+{"error":"Categoria inválida. Use uma de: objeto, eletronico, documento, material, outro."}
+-> HTTP 400
+
+### 4. RN-04 burla: ' DOCUMENTO ' COM foto (esperado 400 - LGPD)
+POST http://localhost:3000/api/anuncios
+body: {"titulo":"RG","descricao":"RG","tipo":"ACHADO","categoria":" DOCUMENTO ","local_encontro":"RU","fotos":["https://img.ufla.br/rg.jpg"]}
+{"error":"Não é permitido enviar foto de documento pessoal (RN-04 / LGPD). Publique apenas a descrição."}
+-> HTTP 400
+
+### 5. Documento SEM foto (esperado 201)
+POST http://localhost:3000/api/anuncios
+body: {"titulo":"Carteirinha UFLA","descricao":"Carteirinha achada no PV","tipo":"ACHADO","categoria":"Documento","local_encontro":"PV"}
+{"message":"Anúncio criado com sucesso!","anuncio":{"id":3,"usuario_id":2,"titulo":"Carteirinha UFLA","descricao":"Carteirinha achada no PV","tipo":"ACHADO","categoria":"documento","local_encontro":"PV","status":"ATIVO","criado_em":"2026-10-12T21:39:00.000Z","atualizado_em":"2026-10-12T21:39:00.000Z","fotos":[],"usuario":{"id":2,"nome":"Teste Sprint 4"}}}
+-> HTTP 201
+
+### 6. Eletrônico com foto (esperado 201)
+POST http://localhost:3000/api/anuncios
+body: {"titulo":"Mouse","descricao":"Mouse sem fio","tipo":"PERDIDO","categoria":"eletronico","local_encontro":"DCC","fotos":["https://img.ufla.br/mouse.webp"]}
+{"message":"Anúncio criado com sucesso!","anuncio":{"id":4,"usuario_id":2,"titulo":"Mouse","descricao":"Mouse sem fio","tipo":"PERDIDO","categoria":"eletronico","local_encontro":"DCC","status":"ATIVO","criado_em":"2026-10-12T21:39:01.000Z","atualizado_em":"2026-10-12T21:39:01.000Z","fotos":[{"id":2,"url_imagem":"https://img.ufla.br/mouse.webp"}],"usuario":{"id":2,"nome":"Teste Sprint 4"}}}
+-> HTTP 201
+
+### 7. RN-04 na edição: anúncio 4 com foto vira documento (esperado 400)
+PUT http://localhost:3000/api/anuncios/4
+body: {"categoria":"documento"}
+{"error":"Não é permitido enviar foto de documento pessoal (RN-04 / LGPD). Publique apenas a descrição."}
+-> HTTP 400
+
+### 8. Edição para categoria inexistente (esperado 400)
+PUT http://localhost:3000/api/anuncios/4
+body: {"categoria":"carteira"}
+{"error":"Categoria inválida. Use uma de: objeto, eletronico, documento, material, outro."}
+-> HTTP 400
+
+### 9. Campo obrigatório faltando (esperado 400)
+POST http://localhost:3000/api/anuncios
+body: {"titulo":"x","tipo":"ACHADO","categoria":"outro"}
+{"error":"Campos obrigatórios não informados: descricao, local_encontro."}
+-> HTTP 400
+
+### 10. Vitrine pública sem e-mail/telefone (esperado 200)
+GET http://localhost:3000/api/anuncios?tipo=ACHADO
+[{"id":3,"usuario_id":2,"titulo":"Carteirinha UFLA","descricao":"Carteirinha achada no PV","tipo":"ACHADO","categoria":"documento","local_encontro":"PV","status":"ATIVO","criado_em":"2026-10-12T21:39:00.000Z","atualizado_em":"2026-10-12T21:39:00.000Z","fotos":[],"usuario":{"id":2,"nome":"Teste Sprint 4"}},{"id":1,"usuario_id":1,"titulo":"RG encontrado","descricao":"RG achado no RU, nome Joao","tipo":"ACHADO","categoria":"documento","local_encontro":"RU","status":"ATIVO","criado_em":"2026-10-12T21:29:30.000Z","atualizado_em":"2026-10-12T21:29:30.000Z","fotos":[],"usuario":{"id":1,"nome":"Teste Sprint 4"}}]
+-> HTTP 200
+
