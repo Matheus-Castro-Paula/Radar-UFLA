@@ -49,9 +49,9 @@ flowchart LR
 
 | ADR    | Decisão                                         | Situação                                                                   | Issue                                                               | Commits                                                                                                                                                                                                                       |
 | ------ | ----------------------------------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ADR-01 | Camada de Serviços entre Controllers e Models   | Implementada na Sprint 4                                                   | [#24](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/24) | [`c14a05b`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/c14a05b)                                                                                                                                                |
+| ADR-01 | Camada de Serviços entre Controllers e Models   | Implementada na Sprint 4                                                   | [#24](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/24) | [`0bffa9f`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/0bffa9f)                                                                                                                                                |
 | ADR-02 | Autenticação stateless com JWT + bcrypt         | Implementada na Sprint 3, registrada agora                                 | [#4](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/4)   | [`7ebf6ea`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/7ebf6ea)                                                                                                                                                |
-| ADR-03 | Regra `RN-04` (LGPD) no back-end, no service    | Implementada na Sprint 4                                                   | [#25](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/25) | [`c14a05b`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/c14a05b), [`8ef6025`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/8ef6025)                                                                |
+| ADR-03 | Regra `RN-04` (LGPD) no back-end, no service    | Implementada na Sprint 4                                                   | [#25](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/25) | [`0bffa9f`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/0bffa9f), [`593156b`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/593156b)                                                                |
 
 ### ADR-01 — Criar uma camada de Serviços entre Controllers e Models
 
@@ -130,7 +130,7 @@ A função `registrar` de [`authController.js`](../../API/Back-End/src/controlle
 - **Coesão baixa:** o mesmo módulo mistura protocolo HTTP, regras de negócio, criptografia e persistência.
 - **Acoplamento alto:** o controller depende diretamente de `bcryptjs`, `jsonwebtoken` e do model `Usuario`. A constante `JWT_SECRET` está duplicada no controller e no `authMiddleware.js`, então os dois precisam mudar juntos.
 
-### 3.2 Depois: `anuncioController.js` + `AnuncioService.js` — commits [`c14a05b`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/c14a05b) e [`8ef6025`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/8ef6025)
+### 3.2 Depois: `anuncioController.js` + `AnuncioService.js` — commits [`0bffa9f`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/0bffa9f) e [`593156b`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/593156b)
 
 **Controller: só HTTP** ([`anuncioController.js`](../../API/Back-End/src/controllers/anuncioController.js))
 
