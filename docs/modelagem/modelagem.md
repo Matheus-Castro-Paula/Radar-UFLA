@@ -12,7 +12,8 @@
 | -------------------------------------------------------- | -------------- | ------------------------------------------------------------------------------- | ------------------------------------------- |
 | Diagrama de Casos de Uso (2.1)                           | Comportamental | Quem são os atores e o que cada um pode fazer no sistema?                       | `RF-01` a `RF-14`, `RF-02`                  |
 | Diagrama de Sequência: Cadastro, Login e Perfil (2.2) OK | Comportamental | Como o usuário se cadastra, se autentica e acessa rotas protegidas por JWT?     | `RF-01`, `RF-02`, `RNF-03`                  |
-| Diagrama de Sequência: Publicação de Anúncio (2.3) WAR    | Comportamental | Como um anúncio é publicado e onde a regra de dados sensíveis é aplicada?       | `RF-07`, `RF-08`, `RN-04`, `US-01`          |
+| Diagrama de Sequência: Publicação de Anúncio (2.3) OK     | Comportamental | Como um anúncio é publicado e onde a regra de dados sensíveis é aplicada?       | `RF-07`, `RF-08`, `RN-04`, `US-01`          |
+| Diagrama de Classes: camada de serviços (3.3) OK         | Estrutural     | Como controller, service e erro de negócio de anúncios dependem entre si?       | `RF-07`, `RN-02`, `RN-04`                   |
 | Diagrama de Classes UML (3.1) OK                         | Estrutural     | Quais atributos, tipos e métodos cada classe do modelo tem, e como se associam? | `RF-01`, `RF-04`, `RF-07`, `RF-08`, `RF-10` |
 | Diagrama Entidade-Relacionamento (3.2) OK                | Estrutural     | Como Usuário, Anúncio, Foto e Comentário se relacionam no banco?                | `RF-01`, `RF-04`, `RF-07`, `RF-08`, `RF-10` |
 
@@ -145,61 +146,60 @@ sequenceDiagram
 - **Autenticação sem estado (stateless):** o servidor emite um JWT de 24 horas e não guarda sessão; o Front-End guarda o token em `localStorage` e o envia no cabeçalho `Authorization: Bearer`. O `authMiddleware` valida o token e injeta `req.usuarioId` e `req.usuarioTipo` para as rotas seguintes, o que prepara o controle por papéis (`RF-02`).
 - Esse mesmo middleware será reutilizado nas rotas de anúncios (2.3).
 
-### 2.3 Diagrama de Sequência: Publicação de Anúncio com validação de RN-04 (WAR planejado)
+### 2.3 Diagrama de Sequência: Publicação de Anúncio com validação de RN-04 (OK implementado)
 
-Este é o fluxo-alvo de `US-01` e ainda **não possui rota no back-end** (`server.js` monta apenas `/api/auth`). Ele é modelado agora para orientar a implementação das Issues #6, #7, #10 e #11.
+Fluxo de `US-01` implementado na Sprint 4 (Issues #24 e #25), já com a camada de serviços (ADR-01 e ADR-03 de [`decisoes-de-projeto.md`](../projeto/decisoes-de-projeto.md)). O front-end ainda não envia o formulário para esta rota (Issue #11), e as fotos chegam como URLs, pois o upload de arquivos ainda não existe (Issue #10).
 
 ```mermaid
 sequenceDiagram
     actor M as Membro da Comunidade
     participant F as Front-End (publicar.html)
     participant MW as authMiddleware
-    participant API as anuncioController (planejado)
-    participant ST as Armazenamento de imagens
+    participant C as anuncioController
+    participant S as AnuncioService
     participant DB as MySQL
 
-    M->>F: Preenche tipo, título, categoria, local, data/hora e descrição
+    M->>F: Preenche tipo, título, categoria, local e descrição
     opt anexa fotos
-        M->>F: Seleciona até 3 imagens
+        M->>F: Informa até 3 imagens
     end
     F->>MW: POST /api/anuncios com Bearer token
     alt token inválido ou ausente
         MW-->>F: 401 Não autenticado
     else token válido
-        MW->>API: criar(req) com usuarioId
-        alt campo obrigatório ausente
-            API-->>F: 400 Campos obrigatórios não informados
-        else campos completos
-            alt categoria é Documentos pessoais e há fotos anexadas
-                API-->>F: 422 Não é permitido enviar foto de documento (RN-04)
-            else fotos válidas ou sem fotos
-                API->>API: valida quantidade, formato JPG PNG WEBP e tamanho de 5MB
-                alt foto fora das regras
-                    API-->>F: 400 Foto inválida (RF-08)
-                else fotos aceitas
-                    API->>ST: envia imagens
-                    ST-->>API: url_imagem de cada foto
-                    API->>DB: insert anuncio com status ATIVO
-                    API->>DB: insert foto_anuncio para cada url
-                    API-->>F: 201 Anúncio criado
-                    F-->>M: Exibe confirmação e dicas de segurança para entrega presencial
-                end
-            end
+        MW->>C: criar(req) com req.usuarioId
+        C->>S: criar(req.body, usuarioId)
+        alt campo obrigatório ausente, tipo ou categoria inválidos
+            S-->>C: RegraNegocioError VALIDACAO
+            C-->>F: 400 Campos ou categoria inválidos
+        else categoria é documento e há fotos
+            S-->>C: RegraNegocioError LGPD
+            C-->>F: 400 Não é permitido enviar foto de documento (RN-04)
+        else mais de 3 fotos ou formato fora de JPG PNG WEBP
+            S-->>C: RegraNegocioError VALIDACAO
+            C-->>F: 400 Foto inválida (RF-08)
+        else dados válidos
+            S->>DB: transação: insert anuncio (ATIVO) + foto_anuncio
+            S-->>C: anúncio criado
+            C-->>F: 201 Anúncio criado
+            F-->>M: Exibe confirmação e dicas de segurança para entrega presencial
         end
     end
 
-    Note over F,DB: Leitura pública (GET /api/anuncios)
-    F->>API: Lista anúncios ATIVO por aba Achados ou Perdidos
-    API->>DB: select anuncio com fotos e nome do autor
-    API-->>F: Resposta sem e-mail nem telefone do proprietário (RN-04)
+    Note over F,DB: Leitura pública (GET /api/anuncios), sem token
+    F->>C: listar(tipo)
+    C->>S: listar(tipo)
+    S->>DB: select anuncio ATIVO com fotos e autor (id, nome)
+    C-->>F: 200 sem e-mail nem telefone do autor (RN-04)
 ```
 
 **Descrição e decisões representadas:**
 
-- **Onde a `RN-04` (LGPD) é aplicada:** em dois pontos do fluxo. (1) _Na entrada:_ a API rejeita foto quando a categoria é "Documentos pessoais", alinhado ao item de backlog Issue #9 ("Documentos pessoais sem foto do documento"). (2) _Na saída:_ a listagem pública devolve apenas os campos do anúncio, as fotos e o nome do autor, nunca e-mail, telefone ou outros dados de contato. A combinação evita depender de análise de imagem, que está fora do escopo (`requisitos.md`, seção 7).
-- **Ordem das validações:** autenticação → campos obrigatórios → regra `RN-04` → regras de foto (`RF-08`: até 3 arquivos, JPG/PNG/WEBP, até 5 MB) → persistência. As regras de negócio vêm antes do upload para não enviar arquivos ao armazenamento que serão descartados.
-- **Persistência:** o anúncio nasce com `status = ATIVO` (critério de aceitação 1 de `US-01`) e cada foto vira uma linha de `foto_anuncio` ligada ao anúncio.
-- **Decisão em aberto para o grupo:** o model `FotoAnuncio` traz comentado o campo `contem_dado_sensivel`. A abordagem escolhida acima (proibir foto na categoria de documentos) dispensa o campo. Se o grupo preferir permitir foto com tarja, o campo e uma nova migration passam a ser necessários (ver seção 6).
+- **Onde a `RN-04` (LGPD) é aplicada:** em dois pontos do fluxo, ambos no `AnuncioService`. (1) _Na entrada:_ a função `validarRegraLGPD` rejeita foto quando a categoria é `documento`, na criação e também na edição (`PUT /api/anuncios/:id`), porque olha o estado final do anúncio. (2) _Na saída:_ a listagem pública devolve apenas os campos do anúncio, as fotos e o `id` e `nome` do autor, nunca e-mail ou telefone. A combinação evita depender de análise de imagem, que está fora do escopo (`requisitos.md`, seção 7).
+- **Status HTTP:** a `RN-04` responde **400**, conforme o critério de aceitação da Issue #25. Na Sprint 3 este diagrama previa 422; a mudança ficou restrita ao mapeamento de códigos do controller (commit `8ef6025`).
+- **Ordem das validações:** autenticação → campos obrigatórios → tipo e status → categoria (normalizada e conferida contra `objeto, eletronico, documento, material, outro`) → regra `RN-04` → regras de foto (`RF-08`: até 3, JPG/PNG/WEBP) → persistência. O limite de 5 MB só poderá ser validado quando o upload real existir (Issue #10).
+- **Persistência:** o anúncio nasce com `status = ATIVO` (critério de aceitação 1 de `US-01`). Anúncio e fotos são gravados na mesma transação, então uma falha não deixa anúncio sem as fotos informadas.
+- **Decisão sobre fotos de documentos:** o grupo confirmou a abordagem de **proibir** a foto na categoria `documento` (ADR-03). O campo `contem_dado_sensivel`, comentado no model `FotoAnuncio`, não é necessário.
 
 ## 3. Modelos estruturais: Diagrama de Classes UML e Diagrama Entidade-Relacionamento
 
@@ -307,6 +307,62 @@ erDiagram
 - **Ciclo de vida:** `status` inicia em `ATIVO` e evolui para `RESOLVIDO` (`RF-09`) ou `ARQUIVADO`. Os índices `idx_anuncio_tipo_status` e `idx_anuncio_usuario_id` sustentam a consulta da vitrine e da área "Meus anúncios" (`RF-03`).
 - **Segurança de dados:** `senha_hash` guarda apenas o hash bcrypt (`RNF-03`), e `email` é único (`UK`), condição usada na verificação de duplicidade do cadastro.
 
+### 3.3 Diagrama de Classes: camada de serviços de anúncios
+
+Adicionado na Sprint 4 para representar a decisão ADR-01 de [`decisoes-de-projeto.md`](../projeto/decisoes-de-projeto.md). As setas tracejadas indicam dependência (quem importa quem).
+
+```mermaid
+classDiagram
+    class anuncioRoutes {
+        +GET listar()
+        +GET buscarPorId()
+        +POST criar() com JWT
+        +PUT atualizar() com JWT
+        +DELETE excluir() com JWT
+    }
+    class anuncioController {
+        -STATUS_POR_CODIGO
+        +listar(req, res)
+        +buscarPorId(req, res)
+        +criar(req, res)
+        +atualizar(req, res)
+        +excluir(req, res)
+    }
+    class AnuncioService {
+        +listar(filtros)
+        +buscarPorId(id)
+        +criar(dados, usuarioId)
+        +atualizar(id, dados, usuarioId)
+        +excluir(id, usuarioId)
+        -validarCamposObrigatorios(dados)
+        -validarCategoria(categoria)
+        -validarRegraLGPD(categoria, fotos)
+        -validarFotos(fotos)
+        -buscarAnuncioDoAutor(id, usuarioId)
+    }
+    class RegraNegocioError {
+        +string codigo
+        +VALIDACAO
+        +LGPD
+        +PROIBIDO
+        +NAO_ENCONTRADO
+    }
+    class authMiddleware {
+        +autenticarToken(req, res, next)
+    }
+
+    anuncioRoutes ..> authMiddleware : protege escrita
+    anuncioRoutes ..> anuncioController : delega
+    anuncioController ..> AnuncioService : chama
+    anuncioController ..> RegraNegocioError : traduz em status HTTP
+    AnuncioService ..> RegraNegocioError : lança
+    AnuncioService ..> Anuncio : persiste
+    AnuncioService ..> FotoAnuncio : persiste
+    AnuncioService ..> Usuario : lê id e nome
+```
+
+O controller não depende de nenhum model: só do service e do erro de negócio. O service não depende do Express. Os métodos marcados com `-` são funções internas do módulo, não exportadas. Código: [`anuncioRoutes.js`](../../API/Back-End/src/routes/anuncioRoutes.js), [`anuncioController.js`](../../API/Back-End/src/controllers/anuncioController.js), [`AnuncioService.js`](../../API/Back-End/src/services/AnuncioService.js), [`RegraNegocioError.js`](../../API/Back-End/src/services/RegraNegocioError.js).
+
 ## 4. Relação entre requisitos e modelos
 
 | Requisito  | Descrição Sintética                           | Issue GitHub                    | Diagrama UML Associado        | Artefato / Código-Fonte Correspondente                                                                                                                    |
@@ -314,10 +370,10 @@ erDiagram
 | **RF-01**  | Autenticação Local e Cadastro (JWT / Bcrypt)  | `#4`              | Casos de Uso / Sequência      | `API/Back-End/src/controllers/authController.js`<br>`API/Back-End/src/middlewares/authMiddleware.js`<br>`API/Back-End/src/migrations/*create-usuarios.js` |
 | **RF-02**  | Controle de Acesso Baseado em Papéis (RBAC)   | `#4`                   | Casos de Uso                  | `API/Back-End/src/middlewares/authMiddleware.js`                                                                                                          |
 | **RF-04**  | Vitrine Pública de Achados e Perdidos         | `#5`                  | Casos de Uso / ER             | `API/Front-End/index.html`<br>`API/Front-End/app.js`                                                                                                      |
-| **RF-07**  | Cadastrar Novo Anúncio                        | `#6`, `#7`, `#11` | Casos de Uso / Sequência / ER | `API/Front-End/publicar.html`<br>`API/Back-End/src/models/anuncio.js`<br>`API/Back-End/src/migrations/*create-anuncios.js`                                |
+| **RF-07**  | Cadastrar Novo Anúncio                        | `#6`, `#7`, `#11` | Casos de Uso / Sequência / ER / Classes (3.3) | `API/Front-End/publicar.html`<br>`API/Back-End/src/routes/anuncioRoutes.js`<br>`API/Back-End/src/controllers/anuncioController.js`<br>`API/Back-End/src/services/AnuncioService.js`<br>`API/Back-End/src/models/anuncio.js`<br>`API/Back-End/src/migrations/*create-anuncios.js` |
 | **RF-08**  | Upload de Fotos de Anúncios                   | `#10`               | Diagrama ER                   | `API/Back-End/src/models/foto_anuncio.js`<br>`API/Back-End/src/migrations/*create-fotos-anuncio.js`                                                       |
 | **RF-10**  | Seção de Comentários no Anúncio               | `#11`                  | Casos de Uso / ER             | `API/Back-End/src/models/comentario.js`<br>`API/Back-End/src/migrations/*create-comentarios.js`                                                           |
-| **RN-04**  | Ocultar dados/fotos de "Documentos" (LGPD)    | `#9`                   | Diagrama de Sequência         | `API/Front-End/app.js`<br>`API/Front-End/publicar.html`<br>`API/Back-End/src/models/foto_anuncio.js`                                                      |
+| **RN-04**  | Ocultar dados/fotos de "Documentos" (LGPD)    | `#9`                   | Diagrama de Sequência / Classes (3.3) | `API/Back-End/src/services/AnuncioService.js` (`validarRegraLGPD`)<br>`API/Front-End/app.js`<br>`API/Front-End/publicar.html` |
 | **RNF-01** | Interface Responsiva e Identidade Visual UFLA | `#5`                            | Casos de Uso                  | `API/Front-End/styles.css`                                                                                                                                |
 | **RNF-03** | Segurança e Hash de Senhas (Bcrypt / JWT)     | `#4`              | Diagrama de Sequência         | `API/Back-End/src/controllers/authController.js`                                                                                                          |
 | **RNF-06** | Arquitetura Cliente-Servidor e Docker         | `#2`, `#3`                      | Diagrama ER                   | `API/Back-End/docker-compose.yml`<br>`API/Back-End/Dockerfile`                                                                                            |
@@ -334,8 +390,8 @@ erDiagram
 | Sequência 2.2 (cadastro e login) | [`controllers/authController.js`](../../API/Back-End/src/controllers/authController.js), [`routes/authRoutes.js`](../../API/Back-End/src/routes/authRoutes.js)                                             | Funções `registrar`, `login` e `perfil`                             |
 | Sequência 2.2 (JWT)              | [`middlewares/authMiddleware.js`](../../API/Back-End/src/middlewares/authMiddleware.js)                                                                                                                    | Valida `Bearer`, injeta `req.usuarioId` e `req.usuarioTipo`         |
 | Sequência 2.2 (cliente)          | [`API/Front-End/app.js`](../../API/Front-End/app.js), [`login.html`](../../API/Front-End/login.html), [`registro.html`](../../API/Front-End/registro.html)                                                 | `fetch` para `/api/auth/*` e `localStorage.setItem("token")`        |
-| Ponto de entrada da API          | [`server.js`](../../API/Back-End/src/server.js)                                                                                                                                                            | Monta apenas `/api/auth`; ainda não monta rotas de anúncios         |
-| Sequência 2.3 (publicação)       | [`API/Front-End/publicar.html`](../../API/Front-End/publicar.html)                                                                                                                                         | Somente o formulário; sem controller/rota correspondente (WAR)       |
+| Ponto de entrada da API          | [`server.js`](../../API/Back-End/src/server.js)                                                                                                                                                            | Monta `/api/auth` e, desde a Sprint 4, `/api/anuncios`              |
+| Sequência 2.3 (publicação)       | [`routes/anuncioRoutes.js`](../../API/Back-End/src/routes/anuncioRoutes.js), [`controllers/anuncioController.js`](../../API/Back-End/src/controllers/anuncioController.js), [`services/AnuncioService.js`](../../API/Back-End/src/services/AnuncioService.js), [`API/Front-End/publicar.html`](../../API/Front-End/publicar.html) | Back-end implementado na Sprint 4; formulário ainda não envia para a API (Issue #11) |
 | Casos de uso: vitrine            | [`API/Front-End/index.html`](../../API/Front-End/index.html), [`app.js`](../../API/Front-End/app.js)                                                                                                       | Feed com abas; dados ainda locais                                   |
 
 ## 6. Refinamentos identificados
@@ -345,9 +401,9 @@ A modelagem revelou lacunas entre requisitos, modelos e código. Cada item deve 
 1. **`tipo_usuario` e `telefone` não existem no banco.** O `authController.registrar` lê e devolve esses dois campos, mas a migration e o model de `Usuario` não os possuem; o papel nunca é gravado e o JWT sai com `tipo_usuario` indefinido. Isso bloqueia o `RF-02` (papéis) e a `RN-02`. _Ação:_ nova migration (`tipo_usuario` com valores comum/admin e `telefone` opcional) e atualização do model. O telefone é dado pessoal e, pela `RN-04`, nunca deve aparecer na listagem pública.
 2. **Anúncio sem data/hora e com status incompletos.** O `RF-07` exige "Data/Hora" do achado/perda, mas `ANUNCIO` não tem esse campo; e o `status` só aceita `ATIVO`, `RESOLVIDO`, `ARQUIVADO`, enquanto `RN-01` e `RN-03` exigem `EM_QUARENTENA` e `EXPIRADO`. _Ação:_ migration para `data_ocorrencia` e ampliação do enum.
 3. **Categoria e local são texto livre.** O `RF-11` pede categorias e locais gerenciados pelo administrador e o `RF-05` filtra por eles. _Ação:_ avaliar entidades `Categoria` e `Local` com chave estrangeira em `ANUNCIO`.
-4. **Regra de foto sensível (`RN-04`).** Decisão adotada no diagrama 2.3: proibir foto na categoria "Documentos pessoais". Alternativa (permitir foto com tarja) exigiria o campo `contem_dado_sensivel` e migration. _Ação:_ grupo confirmar a abordagem.
+4. **Regra de foto sensível (`RN-04`).** Decisão adotada no diagrama 2.3: proibir foto na categoria "Documentos pessoais". Alternativa (permitir foto com tarja) exigiria o campo `contem_dado_sensivel` e migration. _Ação:_ grupo confirmar a abordagem. **Resolvido na Sprint 4:** o grupo confirmou a proibição da foto (ADR-03 de `decisoes-de-projeto.md`), implementada no `AnuncioService`.
 5. **Falta a entidade `Denuncia`** (`RF-12`, `RN-01`): usuário denunciante, anúncio e data, com restrição de uma denúncia por usuário por anúncio para a contagem de 3 denúncias distintas.
-6. **Rotas de anúncios inexistentes.** `server.js` só expõe `/api/auth`; `publicar.html` e `index.html` ainda não consomem a API. _Ação:_ implementar o fluxo 2.3 (Issues #6, #7, #10, #11) e ligar a vitrine (Issue #5).
+6. **Rotas de anúncios inexistentes.** `server.js` só expõe `/api/auth`; `publicar.html` e `index.html` ainda não consomem a API. _Ação:_ implementar o fluxo 2.3 (Issues #6, #7, #10, #11) e ligar a vitrine (Issue #5). **Parcialmente resolvido na Sprint 4:** as rotas `/api/anuncios` existem; falta o front-end consumir a API.
 7. **Padronização de nomes de tabela.** `usuarios` está no plural e as demais no singular; registrar como decisão de projeto na Sprint 4 (renomear ou documentar a convenção).
 8. **Correção de identificadores.** A versão anterior deste documento usava `RF-001`/`RN-004`/`RNF-001`, fora do padrão de `requisitos.md`, e associava a criptografia de senha ao `RNF-001`; o correto é `RNF-03`. Também citava Issues que não correspondem ao backlog. Tudo foi corrigido nesta versão.
 
@@ -358,3 +414,6 @@ A modelagem revelou lacunas entre requisitos, modelos e código. Cada item deve 
 | Sprint 3 | ER (3): campos `created_at`/`updated_at`/`criado_em`, cardinalidades e `ON DELETE CASCADE` descritos; alinhado às migrations | Garantir correspondência exata entre modelo e código    | ![Usuarios](../sprints/evidencias/sprint-03-instancias-usuarios.jpg)  |
 | Sprint 3 | Seções 4 e 5: matriz reescrita com IDs de `requisitos.md`, Issues do backlog e arquivos reais                                | IDs e Issues da versão anterior estavam inconsistentes  | ![Requisitos](../sprints/evidencias/sprint-03-requisitos.png)|
 | Sprint 3 | `requisitos.md`: itens de refinamento da seção 6 a registrar (papéis, data/hora, status, `Denuncia`)                         | Modelagem revelou lacunas nos requisitos                |   ![Requisitos6](../sprints/evidencias/sprint-03-requisitos-secao6.png)|
+| Sprint 4 | Sequência 2.3: passa de WAR para OK; inclui `AnuncioService`, códigos de `RegraNegocioError` e a `RN-04` com **400** em vez de 422; categoria `documento` | Decisões ADR-01 e ADR-03 e critério de aceitação da Issue #25 | [`decisoes-de-projeto.md`](../projeto/decisoes-de-projeto.md), commits `c14a05b` e `8ef6025` |
+| Sprint 4 | Novo Diagrama de Classes 3.3 (camada de serviços) | Representar a dependência entre rotas, controller, service e erro de negócio (ADR-01) | [`AnuncioService.js`](../../API/Back-End/src/services/AnuncioService.js) |
+| Sprint 4 | Seções 4, 5 e 6: arquivos do módulo de anúncios na matriz; itens 4 e 6 dos refinamentos atualizados | Rotas de anúncios implementadas e decisão da `RN-04` confirmada | Issues #24 e #25 |
