@@ -1,3 +1,5 @@
+const API_URL = "http://localhost:3000/api/auth";
+
 const ICONS = {
   objeto: "🔑",
   eletronico: "🎧",
@@ -71,6 +73,52 @@ const ITEMS = [
   },
 ];
 
+// --- Utilitários ---
+
+function escapeHTML(texto) {
+  const div = document.createElement("div");
+  div.textContent = texto;
+  return div.innerHTML;
+}
+
+// Mostra mensagem na tela (substitui alert). Usa o <p id="form-message">.
+function mostrarMensagem(texto, tipo = "erro") {
+  const el = document.getElementById("form-message");
+  if (!el) {
+    alert(texto);
+    return;
+  }
+  el.textContent = texto;
+  el.className = `form-message ${tipo}`;
+  el.hidden = false;
+}
+
+function limparMensagem() {
+  const el = document.getElementById("form-message");
+  if (el) el.hidden = true;
+}
+
+// --- Regras LGPD (front-end) ---
+
+const REGEX_CPF = /\b\d{3}\.?\d{3}\.?\d{3}-?\d{2}\b/;
+
+// Remove pontos e hífens para detectar números de documento (RG, matrícula etc.)
+function contemNumeroDeDocumento(texto) {
+  return /\d{7,}/.test(texto.replace(/[.\-]/g, ""));
+}
+
+function validarLGPDPublicacao(categoria, titulo, descricao) {
+  const texto = `${titulo} ${descricao}`;
+
+  if (REGEX_CPF.test(texto)) {
+    return "Por segurança (LGPD), não informe CPF no título ou na descrição.";
+  }
+  if (categoria === "documento" && contemNumeroDeDocumento(texto)) {
+    return "Por segurança (LGPD), não informe números de documento (RG, matrícula, etc.). Descreva apenas o tipo do documento.";
+  }
+  return null;
+}
+
 // --- Página do feed (index.html) ---
 
 function initFeed() {
@@ -115,12 +163,17 @@ function initFeed() {
       const card = document.createElement("article");
       card.className = "card";
       card.dataset.feed = item.feed;
+      const rotulo = item.feed === "achados" ? "Achado" : "Perdido";
+      // escapeHTML evita XSS quando os dados passarem a vir da API
       card.innerHTML = `
-        <div class="card-thumb">${ICONS[item.categoria] || "📦"}</div>
+        <div class="card-thumb">
+          <span class="card-badge">${rotulo}</span>
+          ${ICONS[item.categoria] || "📦"}
+        </div>
         <div class="card-body">
-          <h3 class="card-title">${item.titulo}</h3>
-          <p class="card-desc">${item.descricao}</p>
-          <div class="card-meta">${item.meta}</div>
+          <h3 class="card-title">${escapeHTML(item.titulo)}</h3>
+          <p class="card-desc">${escapeHTML(item.descricao)}</p>
+          <div class="card-meta">${escapeHTML(item.meta)}</div>
         </div>
       `;
       feedEl.appendChild(card);
@@ -156,6 +209,20 @@ function initFeed() {
   render();
 }
 
+// Botão "Entrar" vira "Sair" quando há token salvo
+function initAuthLink() {
+  const btn = document.getElementById("btn-login");
+  if (!btn || !localStorage.getItem("token")) return;
+
+  btn.textContent = "Sair";
+  btn.href = "#";
+  btn.addEventListener("click", (e) => {
+    e.preventDefault();
+    localStorage.removeItem("token");
+    window.location.reload();
+  });
+}
+
 // --- Página de publicação (publicar.html) ---
 
 function initPublishPage() {
@@ -166,6 +233,8 @@ function initPublishPage() {
   const categoriaSelect = document.getElementById("categoria");
   const uploadArea = document.getElementById("upload-area");
   const docNote = document.getElementById("doc-note");
+  const tituloInput = document.getElementById("titulo");
+  const descricaoInput = document.getElementById("descricao");
 
   segmentedOptions.forEach((option) => {
     option.addEventListener("click", () => {
@@ -185,86 +254,123 @@ function initPublishPage() {
 
   form.addEventListener("submit", (event) => {
     event.preventDefault();
-    alert(
-      "Formulário preenchido corretamente! O envio real será integrado na Sprint 2, quando o back-end estiver pronto.",
+    limparMensagem();
+    tituloInput.classList.remove("invalido");
+    descricaoInput.classList.remove("invalido");
+
+    if (!tituloInput.value.trim()) {
+      tituloInput.classList.add("invalido");
+      mostrarMensagem("Informe um título para o item.");
+      return;
+    }
+
+    const erroLGPD = validarLGPDPublicacao(
+      categoriaSelect.value,
+      tituloInput.value,
+      descricaoInput.value,
+    );
+    if (erroLGPD) {
+      descricaoInput.classList.add("invalido");
+      mostrarMensagem(erroLGPD);
+      return;
+    }
+
+    mostrarMensagem(
+      "Formulário válido! O envio real para a API será integrado em uma sprint futura.",
+      "sucesso",
     );
   });
 }
 
-initFeed();
-initPublishPage();
+// --- Login (login.html) ---
 
-const API_URL = "http://localhost:3000/api/auth";
+function initLogin() {
+  const loginForm = document.getElementById("login-form");
+  if (!loginForm) return;
 
-// -- Login --
-const loginForm = document.getElementById("login-form");
-
-if (loginForm) {
   loginForm.addEventListener("submit", async (e) => {
     e.preventDefault();
+    limparMensagem();
 
-    const email = document.getElementById("email").value;
+    const email = document.getElementById("email").value.trim();
     const senha = document.getElementById("senha").value;
+    const botao = loginForm.querySelector("button[type='submit']");
+    botao.disabled = true;
 
     try {
       const response = await fetch(`${API_URL}/login`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, senha }),
       });
-
       const data = await response.json();
 
       if (response.ok) {
-        // -- Salvar TOKEN --
         localStorage.setItem("token", data.token);
-
-        alert("Login realizado!");
-        window.location.href = "index.html";
+        mostrarMensagem("Login realizado! Redirecionando...", "sucesso");
+        setTimeout(() => (window.location.href = "index.html"), 800);
       } else {
-        alert(data.error);
+        mostrarMensagem(data.error || "E-mail ou senha inválidos.");
+        botao.disabled = false;
       }
     } catch (err) {
       console.error(err);
-      alert("Erro no login");
+      mostrarMensagem("Não foi possível conectar ao servidor.");
+      botao.disabled = false;
     }
   });
 }
 
+// --- Registro (registro.html) ---
 
-// -- Registro --
-const registroForm = document.getElementById("registro-form");
+function initRegistro() {
+  const registroForm = document.getElementById("registro-form");
+  if (!registroForm) return;
 
-if (registroForm) {
   registroForm.addEventListener("submit", async (e) => {
     e.preventDefault();
+    limparMensagem();
 
-    const nome = document.getElementById("nome").value;
-    const email = document.getElementById("email").value;
+    const nome = document.getElementById("nome").value.trim();
+    const email = document.getElementById("email").value.trim();
     const senha = document.getElementById("senha").value;
+
+    // Regra LGPD: consentimento obrigatório antes de enviar qualquer dado
+    if (!document.getElementById("consentimento-lgpd").checked) {
+      mostrarMensagem(
+        "É necessário aceitar a Política de Privacidade para criar a conta.",
+      );
+      return;
+    }
+
+    const botao = registroForm.querySelector("button[type='submit']");
+    botao.disabled = true;
 
     try {
       const response = await fetch(`${API_URL}/registro`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ nome, email, senha }),
       });
-
       const data = await response.json();
 
       if (response.ok) {
-        alert("Usuário criado!");
-        window.location.href = "login.html";
+        mostrarMensagem("Conta criada! Redirecionando para o login...", "sucesso");
+        setTimeout(() => (window.location.href = "login.html"), 1000);
       } else {
-        alert(data.error);
+        mostrarMensagem(data.error || "Não foi possível criar a conta.");
+        botao.disabled = false;
       }
     } catch (err) {
       console.error(err);
-      alert("Erro no registro");
+      mostrarMensagem("Não foi possível conectar ao servidor.");
+      botao.disabled = false;
     }
   });
 }
+
+initFeed();
+initAuthLink();
+initPublishPage();
+initLogin();
+initRegistro();
