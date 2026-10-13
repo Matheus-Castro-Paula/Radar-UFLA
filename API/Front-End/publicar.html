@@ -16,7 +16,7 @@
   </header>
 
   <main class="publish-main">
-    <form id="publish-form" class="publish-form">
+    <form id="publish-form" class="publish-form" novalidate>
       <div class="segmented" role="radiogroup" aria-label="Este item é achado ou perdido">
         <label class="segmented-option active">
           <input type="radio" name="tipo" value="achados" checked /> Um achado
@@ -30,7 +30,7 @@
         <div class="form-fields">
           <label class="field">
             <span class="field-label">Título</span>
-            <input type="text" name="titulo" placeholder="Ex: Molho de chaves com chaveiro azul" required />
+            <input type="text" id="titulo" name="titulo" placeholder="Ex: Molho de chaves com chaveiro azul" required />
           </label>
 
           <label class="field">
@@ -46,7 +46,7 @@
 
           <label class="field">
             <span class="field-label">Descrição</span>
-            <textarea name="descricao" rows="4" placeholder="Detalhes que ajudem a identificar o item"></textarea>
+            <textarea id="descricao" name="descricao" rows="4" placeholder="Detalhes que ajudem a identificar o item"></textarea>
           </label>
 
           <div class="field-row">
@@ -64,17 +64,24 @@
         <div class="upload-area" id="upload-area">
           <div class="upload-icon">📷</div>
           <p>Arraste uma foto ou clique para escolher</p>
-          <p class="upload-hint">(upload real será integrado na Sprint 2)</p>
+          <p class="upload-hint">(upload real será integrado em uma sprint futura)</p>
         </div>
       </div>
 
       <p class="field-note" id="doc-note" hidden>
-        Itens da categoria "Documento" não exibem foto, por segurança — apenas a descrição textual será publicada.
+        Itens da categoria "Documento" não exibem foto, por segurança (LGPD) — apenas a descrição textual será publicada.
+        Não informe CPF, RG, matrícula ou outros números de documento.
       </p>
+
+      <p class="form-message" id="form-message" role="alert" hidden></p>
 
       <button type="submit" class="btn-submit">Publicar</button>
     </form>
   </main>
+
+  <footer class="site-footer">
+    <a href="privacidade.html">Política de Privacidade (LGPD)</a>
+  </footer>
 
   <script src="app.js"></script>
 </body>
