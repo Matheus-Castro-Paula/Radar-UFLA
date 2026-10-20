@@ -33,6 +33,18 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING(255),
         allowNull: false,
       },
+      // RF-02: papel do usuário logado (Visitante é quem não tem conta)
+      tipo_usuario: {
+        type: DataTypes.ENUM('comum', 'admin'),
+        allowNull: false,
+        defaultValue: 'comum',
+        validate: { isIn: [['comum', 'admin']] },
+      },
+      // Dado pessoal: nunca exibir na vitrine pública (RN-04)
+      telefone: {
+        type: DataTypes.STRING(20),
+        allowNull: true,
+      },
       reset_password_token: {
         type: DataTypes.STRING(255),
         allowNull: true,
