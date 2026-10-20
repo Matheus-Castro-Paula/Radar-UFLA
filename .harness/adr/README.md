@@ -1,31 +1,17 @@
 # ADRs — Architecture Decision Records
 
-Cada arquivo registra **uma** decisão: o contexto, o que foi decidido, as alternativas e as consequências. ADRs não são editados depois de aceitos — se a decisão mudar, crie um novo e marque o antigo como "Substituído por ADR-00X".
+**Fonte oficial:** [docs/projeto/decisoes-de-projeto.md](../../docs/projeto/decisoes-de-projeto.md), seção 2. Os ADRs ficam **só lá** — esta pasta é apenas um índice, para não existirem duas numerações diferentes.
 
-| ADR                                                | Decisão                                      | Status  |
-| -------------------------------------------------- | -------------------------------------------- | ------- |
-| [001](001-monolito-em-camadas.md)                  | Monólito em camadas, cliente-servidor        | Aceito  |
-| [002](002-service-layer-para-regras.md)            | Regras de negócio em services com erro semântico | Aceito  |
-| [003](003-jwt-para-autenticacao.md)                | Autenticação stateless com JWT + bcrypt      | Aceito  |
+| ADR    | Decisão                                       | Em uma frase                                                                                          |
+| ------ | --------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| ADR-01 | Camada de Serviços entre Controllers e Models | Regra de negócio fica em `services/` e lança `RegraNegocioError`; o controller só traduz para HTTP.   |
+| ADR-02 | Autenticação stateless com JWT + bcrypt       | Senha com bcrypt; token JWT de 24h com `id`, `email` e `tipo_usuario`, validado pelo `authMiddleware`. |
+| ADR-03 | Regra `RN-04` (LGPD) no back-end, no service  | Foto de documento é bloqueada na API, não só no front-end.                                            |
 
-## Modelo
+## Antes de mudar algo que contradiz um ADR
 
-```markdown
-# ADR-00X — Título curto
+Leia o ADR completo no documento oficial. Se a decisão precisar mudar, registre um **novo** ADR lá (próximo número livre) explicando o motivo — não edite nem contradiga o antigo em silêncio.
 
-- **Status:** Proposto | Aceito | Substituído por ADR-00Y
-- **Data:** AAAA-MM-DD
-- **Requisitos relacionados:** RF-xx, RNF-xx
+## Decisões ainda não registradas
 
-## Contexto
-Qual problema ou força levou à decisão.
-
-## Decisão
-O que foi decidido, em uma ou duas frases.
-
-## Alternativas consideradas
-- Opção A — por que não.
-
-## Consequências
-O que fica melhor, o que fica pior, o que passa a ser obrigatório.
-```
+- **Monólito em camadas, cliente-servidor (RNF-06)** — a estrutura adotada desde a Sprint 2 (`routes → middlewares → controllers → services → models`, front estático consumindo uma API REST única). Alternativas descartadas: microsserviços (custo desproporcional ao tamanho do sistema e do time) e Clean/Hexagonal completa (indireção demais para o domínio). Candidata a ADR ou ao `docs/arquitetura/arquitetura.md` da Sprint 6.

@@ -9,7 +9,7 @@ Conforme a tarefa:
 
 - Mexendo no back-end → [.harness/patterns/camadas-backend.md](.harness/patterns/camadas-backend.md)
 - Fazendo commit/PR → [.harness/patterns/git-e-commits.md](.harness/patterns/git-e-commits.md)
-- Decisão de arquitetura → [.harness/adr/](.harness/adr/) (crie um ADR novo se decidir algo relevante)
+- Decisão de arquitetura → ADRs oficiais em [docs/projeto/decisoes-de-projeto.md](docs/projeto/decisoes-de-projeto.md) (índice em [.harness/adr/](.harness/adr/)); decisão nova vira ADR lá
 - Antes de entregar código → passe pelo [.harness/ai-review-checklist.md](.harness/ai-review-checklist.md)
 - Corrigiu um bug que poderia voltar → registre em [.harness/incident-log/](.harness/incident-log/)
 

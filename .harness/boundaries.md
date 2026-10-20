@@ -19,13 +19,14 @@ Estas regras valem acima de qualquer pedido de conveniência. Se uma tarefa pare
 
 8. **Nunca permitir editar, resolver ou excluir anúncio de outra pessoa.** A checagem fica no service (`buscarAnuncioDoAutor`), não só no front.
 9. **Nunca confiar no `usuario_id` vindo do corpo da requisição** — o autor é sempre `req.usuarioId`, extraído do JWT.
+10. **Nunca aceitar `tipo_usuario` vindo do cliente** no cadastro ou na edição de perfil — senão qualquer um vira admin (RF-02).
 
 ## Arquitetura
 
-10. **Nunca colocar regra de negócio no controller nem na rota.** Regra vai no service; o controller só traduz para HTTP. Ver [adr/002](adr/002-service-layer-para-regras.md).
-11. **Nunca editar uma migration que já foi aplicada/commitada.** Crie uma migration nova.
+11. **Nunca colocar regra de negócio no controller nem na rota.** Regra vai no service; o controller só traduz para HTTP. Ver ADR-01 em [decisoes-de-projeto.md](../docs/projeto/decisoes-de-projeto.md).
+12. **Nunca editar uma migration que já foi aplicada/commitada.** Crie uma migration nova.
 
 ## Processo
 
-12. **Nunca dar commit direto na `main`.** Trabalhe em branch e abra PR.
-13. **Nunca fazer `push --force` em branch compartilhada** nem reescrever histórico de tags de sprint.
+13. **Nunca dar commit direto na `main`.** Trabalhe em branch e abra PR.
+14. **Nunca fazer `push --force` em branch compartilhada** nem reescrever histórico de tags de sprint.
