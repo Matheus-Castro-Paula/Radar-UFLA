@@ -7,7 +7,8 @@ const JWT_SECRET = process.env.JWT_SECRET || "chave_secreta_sprint_3";
 module.exports = {
   async registrar(req, res) {
     try {
-      const { nome, email, senha, telefone, tipo_usuario } = req.body;
+      // tipo_usuario NÃO vem do corpo: senão qualquer um se cadastraria como admin
+      const { nome, email, senha, telefone } = req.body;
 
       if (!nome || !email || !senha) {
         return res
@@ -27,7 +28,7 @@ module.exports = {
         email,
         senha_hash,
         telefone,
-        tipo_usuario: tipo_usuario || "comum",
+        tipo_usuario: "comum",
       });
 
       const usuarioResponse = {

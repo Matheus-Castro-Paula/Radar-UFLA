@@ -6,7 +6,7 @@ Conhecimento do projeto escrito para quem vai mexer no código — pessoas novas
 | ---------------------------------------------------- | ------------------------------------------------ |
 | [context.md](context.md)                             | O projeto resumido — lido no início de toda sessão |
 | [boundaries.md](boundaries.md)                       | O que **nunca** pode acontecer                   |
-| [adr/](adr/)                                         | Decisões de arquitetura, com o porquê            |
+| [adr/](adr/)                                         | Índice dos ADRs (oficiais em `docs/projeto/decisoes-de-projeto.md`) |
 | [patterns/](patterns/)                               | O jeito do time fazer                            |
 | [ai-review-checklist.md](ai-review-checklist.md)     | A régua para revisar código (gerado por IA ou não) |
 | [incident-log/](incident-log/)                       | Bugs que viraram aprendizado                     |
@@ -19,6 +19,6 @@ Conhecimento do projeto escrito para quem vai mexer no código — pessoas novas
 
 ## Como manter
 
-- Tomou uma decisão de arquitetura? Crie um ADR novo (não edite o antigo; marque-o como substituído).
+- Tomou uma decisão de arquitetura? Registre um ADR novo em `docs/projeto/decisoes-de-projeto.md` e atualize o índice em `adr/README.md`.
 - Corrigiu um bug que poderia voltar? Registre em `incident-log/` e, se virar regra, leve para `boundaries.md`.
 - Mudou a stack ou a estrutura de pastas? Atualize `context.md` no mesmo PR.

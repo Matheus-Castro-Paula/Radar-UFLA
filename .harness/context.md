@@ -14,7 +14,7 @@ Requisitos completos: [docs/requisitos/requisitos.md](../docs/requisitos/requisi
 | Front-end | HTML, CSS e JavaScript puro (sem framework)                        | `API/Front-End/`     |
 | Infra     | Docker + docker-compose, migrations/seeders via `sequelize-cli`    | `API/Back-End/`      |
 
-## Arquitetura (ver [adr/001](adr/001-monolito-em-camadas.md))
+## Arquitetura (decisões em [docs/projeto/decisoes-de-projeto.md](../docs/projeto/decisoes-de-projeto.md))
 
 Cliente-servidor, back-end em **monólito em camadas**:
 
@@ -45,11 +45,15 @@ Rotas da API: `/api/auth/*` e `/api/anuncios` (GET público; POST/PUT/DELETE com
 
 ## Estado atual e dívidas conhecidas
 
-- `AnuncioService` segue o padrão de camadas. `authController` **ainda não** — validação, bcrypt e banco estão no controller (candidato a `AuthService`).
-- RN-02: a verificação de autoria ainda **não** libera o Administrador Geral.
-- `JWT_SECRET` tem valor padrão fixo no código (`authController`, `authMiddleware`) — deve vir só do `.env`.
+Lista oficial de melhorias: seção 4 de [decisoes-de-projeto.md](../docs/projeto/decisoes-de-projeto.md) (M-01 a M-04) e seção 6 de [modelagem.md](../docs/modelagem/modelagem.md).
+
+- `AnuncioService` segue o padrão de camadas. `authController` **ainda não** — validação, bcrypt e banco estão no controller (M-01, candidato a `AuthService`).
+- Usuário tem `tipo_usuario` (`comum` | `admin`) e `telefone`. O cadastro sempre cria `comum`; admin só via seeder/banco.
+- RN-02: a verificação de autoria ainda **não** libera o Administrador Geral (agora possível com `req.usuarioTipo === "admin"`).
+- `JWT_SECRET` tem valor padrão fixo no código (`authController`, `authMiddleware`) — deve vir só do `.env` (M-02).
 - Erros 500 devolvem `details: error.message` ao cliente — vazar detalhe interno é indesejado.
-- Front-end ainda usa dados fixos (`ITEMS` em `app.js`); não consome a API.
+- Front-end: login e registro já consomem a API; o feed ainda usa dados fixos (`ITEMS` em `app.js`) e `publicar.html` ainda não envia para `/api/anuncios`.
+- Sprint 5: validações de anúncio serão migradas para **Chain of Responsibility** em `services/validations/` (`ValidationHandler` + handlers concretos).
 - Não há testes automatizados ainda (previstos para a Sprint 7).
 
 ## Convenções rápidas

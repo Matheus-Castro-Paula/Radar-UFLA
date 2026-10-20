@@ -13,6 +13,7 @@ module.exports = {
           nome: "Admin Radar",
           email: "admin@ufla.br",
           senha_hash: senhaHash,
+          tipo_usuario: "admin",
           created_at: new Date(),
           updated_at: new Date(),
         },
