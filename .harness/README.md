@@ -13,8 +13,9 @@ Conhecimento do projeto escrito para quem vai mexer no código — pessoas novas
 
 ## Como é carregado
 
-- **Claude Code:** o [CLAUDE.md](../CLAUDE.md) na raiz é lido automaticamente e aponta para cá.
-- **Outras ferramentas:** apontar o arquivo de instruções delas (ex.: `.github/copilot-instructions.md`) para `context.md` e `boundaries.md`.
+- **[AGENTS.md](../AGENTS.md)** na raiz é o ponto de entrada: padrão aberto lido automaticamente por Codex, Cursor, GitHub Copilot, Gemini CLI e outros. Ele aponta para cá.
+- **Claude Code** lê o [CLAUDE.md](../CLAUDE.md), que só contém `@AGENTS.md` (importa o mesmo conteúdo). Edite sempre o `AGENTS.md`, nunca o `CLAUDE.md`.
+- **Qualquer outra IA:** peça para ela ler `AGENTS.md` ou cole `context.md` e `boundaries.md` na conversa.
 
 ## Como manter
 
