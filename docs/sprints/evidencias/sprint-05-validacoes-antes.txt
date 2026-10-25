@@ -1,0 +1,32 @@
+Cenários de validação de anúncios — ANTES da refatoração (código da Sprint 4, AnuncioService procedural)
+Data: 25/10/2026 19:32
+Commit em execução: d16aa0e Merge pull request #36 from Matheus-Castro-Paula/Back-end
+API: http://localhost:3000
+
+1   Criar anúncio sem token                             esperado 401 | obtido 401  OK
+    resposta: {"error":"Token de autenticação não fornecido."}
+2   Documento COM foto (RN-04)                           esperado 400 | obtido 400  OK
+    resposta: {"error":"Não é permitido enviar foto de documento pessoal (RN-04 / LGPD). Publique apenas a descrição."}
+3   Categoria " DOCUMENTO " com foto (normalização)    esperado 400 | obtido 400  OK
+    resposta: {"error":"Não é permitido enviar foto de documento pessoal (RN-04 / LGPD). Publique apenas a descrição."}
+4   Categoria inexistente                                esperado 400 | obtido 400  OK
+    resposta: {"error":"Categoria inválida. Use uma de: objeto, eletronico, documento, material, outro."}
+5   Campo obrigatório faltando (título)                esperado 400 | obtido 400  OK
+    resposta: {"error":"Campos obrigatórios não informados: titulo."}
+6   Mais de 3 fotos (RF-08)                              esperado 400 | obtido 400  OK
+    resposta: {"error":"Envie no máximo 3 fotos."}
+7   Foto com extensão inválida (.gif)                  esperado 400 | obtido 400  OK
+    resposta: {"error":"Fotos devem ser JPG, PNG ou WEBP."}
+8   Documento SEM foto                                   esperado 201 | obtido 201  OK
+    resposta: {"message":"Anúncio criado com sucesso!","anuncio":{"id":3,"usuario_id":1,"titulo":"RG perdido","descricao":"RG azul, sem foto","tipo":"ACHADO","categoria":"documento","local_encontro":"RU","status":"ATIVO","criado_em":
+9   Eletrônico com foto                                 esperado 201 | obtido 201  OK
+    resposta: {"message":"Anúncio criado com sucesso!","anuncio":{"id":4,"usuario_id":1,"titulo":"Fone bluetooth","descricao":"Fone preto","tipo":"PERDIDO","categoria":"eletronico","local_encontro":"Pavilhao 2","status":"ATIVO","cria
+10  Edição: anúncio com foto passa a ser documento    esperado 400 | obtido 400  OK
+    resposta: {"error":"Não é permitido enviar foto de documento pessoal (RN-04 / LGPD). Publique apenas a descrição."}
+11  Edição só do título (sem categoria e sem fotos)  esperado 200 | obtido 200  OK
+    resposta: {"message":"Anúncio atualizado com sucesso!","anuncio":{"id":4,"usuario_id":1,"titulo":"Fone bluetooth preto","descricao":"Fone preto","tipo":"PERDIDO","categoria":"eletronico","local_encontro":"Pavilhao 2","status":"AT
+12  Vitrine pública                                     esperado 200 | obtido 200  OK
+    resposta: [{"id":3,"usuario_id":1,"titulo":"RG perdido","descricao":"RG azul, sem foto","tipo":"ACHADO","categoria":"documento","local_encontro":"RU","status":"ATIVO","criado_em":"2026-10-25T22:32:07.000Z","atualizado_em":"2026-10
+    campos do autor na vitrine: ['id', 'nome'] | sem e-mail/telefone: True
+
+Resumo: 12 de 12 cenários com o resultado esperado.

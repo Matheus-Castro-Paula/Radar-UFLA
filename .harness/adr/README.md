@@ -7,6 +7,7 @@
 | ADR-01 | Camada de Serviços entre Controllers e Models | Regra de negócio fica em `services/` e lança `RegraNegocioError`; o controller só traduz para HTTP.   |
 | ADR-02 | Autenticação stateless com JWT + bcrypt       | Senha com bcrypt; token JWT de 24h com `id`, `email` e `tipo_usuario`, validado pelo `authMiddleware`. |
 | ADR-03 | Regra `RN-04` (LGPD) no back-end, no service  | Foto de documento é bloqueada na API, não só no front-end.                                            |
+| ADR-04 | Chain of Responsibility nas validações de anúncio | Cada regra é um handler em `services/validations/`; `AnuncioValidationChain` monta a ordem por operação. |
 
 ## Antes de mudar algo que contradiz um ADR
 
