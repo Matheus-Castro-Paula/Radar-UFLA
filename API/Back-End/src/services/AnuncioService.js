@@ -1,25 +1,8 @@
 const { sequelize, Anuncio, FotoAnuncio, Usuario } = require("../models");
 const RegraNegocioError = require("./RegraNegocioError");
+const anuncioValidationChain = require("./validations/AnuncioValidationChain");
 
-const { VALIDACAO, LGPD, NAO_ENCONTRADO, PROIBIDO } = RegraNegocioError.CODIGOS;
-
-// Mesmos valores do <select name="categoria"> de publicar.html.
-// Lista fechada: sem ela, "documentos" ou "RG" contornariam a RN-04.
 const CATEGORIA_DOCUMENTO = "documento";
-const CATEGORIAS = ["objeto", "eletronico", CATEGORIA_DOCUMENTO, "material", "outro"];
-const TIPOS = ["ACHADO", "PERDIDO"];
-const STATUS = ["ATIVO", "RESOLVIDO", "ARQUIVADO"];
-const CAMPOS_OBRIGATORIOS = [
-  "titulo",
-  "descricao",
-  "tipo",
-  "categoria",
-  "local_encontro",
-];
-
-// RF-08: até 3 fotos, formatos JPG/PNG/WEBP
-const MAX_FOTOS = 3;
-const EXTENSOES_FOTO = /\.(jpe?g|png|webp)$/i;
 
 // RN-04: a vitrine pública nunca expõe e-mail nem telefone do autor
 const INCLUDE_PUBLICO = [
@@ -27,78 +10,21 @@ const INCLUDE_PUBLICO = [
   { model: Usuario, as: "usuario", attributes: ["id", "nome"] },
 ];
 
-function validarCamposObrigatorios(dados) {
-  const faltando = CAMPOS_OBRIGATORIOS.filter((campo) => !dados[campo]);
-  if (faltando.length) {
-    throw new RegraNegocioError(
-      VALIDACAO,
-      `Campos obrigatórios não informados: ${faltando.join(", ")}.`,
-    );
-  }
-}
-
-function validarTipoEStatus({ tipo, status }) {
-  if (tipo !== undefined && !TIPOS.includes(tipo)) {
-    throw new RegraNegocioError(VALIDACAO, `Tipo deve ser ${TIPOS.join(" ou ")}.`);
-  }
-  if (status !== undefined && !STATUS.includes(status)) {
-    throw new RegraNegocioError(VALIDACAO, `Status deve ser ${STATUS.join(", ")}.`);
-  }
-}
-
-function normalizarCategoria(categoria) {
-  return String(categoria).trim().toLowerCase();
-}
-
-function validarCategoria(categoria) {
-  if (!CATEGORIAS.includes(categoria)) {
-    throw new RegraNegocioError(
-      VALIDACAO,
-      `Categoria inválida. Use uma de: ${CATEGORIAS.join(", ")}.`,
-    );
-  }
-}
-
-// RN-04 (LGPD): anúncio da categoria "documento" não pode ter foto.
-// Recebe o estado FINAL do anúncio (após aplicar a edição), para que a
-// mesma regra sirva tanto na criação quanto na edição.
-function validarRegraLGPD(categoria, fotos) {
-  const ehDocumento =
-    String(categoria).trim().toLowerCase() === CATEGORIA_DOCUMENTO;
-  const temFotos = Array.isArray(fotos) && fotos.length > 0;
-
-  if (ehDocumento && temFotos) {
-    throw new RegraNegocioError(
-      LGPD,
-      "Não é permitido enviar foto de documento pessoal (RN-04 / LGPD). Publique apenas a descrição.",
-    );
-  }
-}
-
-function validarFotos(fotos) {
-  if (!Array.isArray(fotos)) {
-    throw new RegraNegocioError(VALIDACAO, "O campo fotos deve ser uma lista de URLs.");
-  }
-  if (fotos.length > MAX_FOTOS) {
-    throw new RegraNegocioError(VALIDACAO, `Envie no máximo ${MAX_FOTOS} fotos.`);
-  }
-  const invalida = fotos.find(
-    (url) => typeof url !== "string" || !EXTENSOES_FOTO.test(url),
-  );
-  if (invalida !== undefined) {
-    throw new RegraNegocioError(VALIDACAO, "Fotos devem ser JPG, PNG ou WEBP.");
-  }
-}
-
 async function buscarAnuncioDoAutor(id, usuarioId) {
   const anuncio = await Anuncio.findByPk(id, {
     include: [{ model: FotoAnuncio, as: "fotos" }],
   });
   if (!anuncio) {
-    throw new RegraNegocioError(NAO_ENCONTRADO, "Anúncio não encontrado.");
+    throw new RegraNegocioError(
+      RegraNegocioError.CODIGOS.NAO_ENCONTRADO,
+      "Anúncio não encontrado.",
+    );
   }
   if (anuncio.usuario_id !== usuarioId) {
-    throw new RegraNegocioError(PROIBIDO, "Apenas o autor pode alterar este anúncio.");
+    throw new RegraNegocioError(
+      RegraNegocioError.CODIGOS.PROIBIDO,
+      "Apenas o autor pode alterar este anúncio.",
+    );
   }
   return anuncio;
 }
@@ -109,7 +35,8 @@ module.exports = {
   async listar({ tipo } = {}) {
     const where = { status: "ATIVO" };
     if (tipo) {
-      validarTipoEStatus({ tipo });
+      // Executa a corrente para validar o parâmetro de busca
+      await anuncioValidationChain.executar({ tipo }, { acao: "LISTAR" });
       where.tipo = tipo;
     }
     return Anuncio.findAll({
@@ -122,22 +49,22 @@ module.exports = {
   async buscarPorId(id) {
     const anuncio = await Anuncio.findByPk(id, { include: INCLUDE_PUBLICO });
     if (!anuncio) {
-      throw new RegraNegocioError(NAO_ENCONTRADO, "Anúncio não encontrado.");
+      throw new RegraNegocioError(
+        RegraNegocioError.CODIGOS.NAO_ENCONTRADO,
+        "Anúncio não encontrado.",
+      );
     }
     return anuncio;
   },
 
   async criar(dados, usuarioId) {
+    // 1. Delega TODAS as validações para a corrente (Chain of Responsibility)
+    await anuncioValidationChain.executar(dados, { acao: "CRIAR" });
+
     const fotos = dados.fotos || [];
+    const categoria = String(dados.categoria).trim().toLowerCase();
 
-    // Ordem do diagrama 2.3: obrigatórios → RN-04 → regras de foto → persistência
-    validarCamposObrigatorios(dados);
-    validarTipoEStatus(dados);
-    const categoria = normalizarCategoria(dados.categoria);
-    validarCategoria(categoria);
-    validarRegraLGPD(categoria, fotos);
-    validarFotos(fotos);
-
+    // 2. Persistência
     const anuncioId = await sequelize.transaction(async (transaction) => {
       const anuncio = await Anuncio.create(
         {
@@ -151,10 +78,13 @@ module.exports = {
         },
         { transaction },
       );
-      await FotoAnuncio.bulkCreate(
-        fotos.map((url_imagem) => ({ anuncio_id: anuncio.id, url_imagem })),
-        { transaction },
-      );
+
+      if (fotos.length > 0) {
+        await FotoAnuncio.bulkCreate(
+          fotos.map((url_imagem) => ({ anuncio_id: anuncio.id, url_imagem })),
+          { transaction },
+        );
+      }
       return anuncio.id;
     });
 
@@ -164,19 +94,26 @@ module.exports = {
   async atualizar(id, dados, usuarioId) {
     const anuncio = await buscarAnuncioDoAutor(id, usuarioId);
 
-    // Se "fotos" vier no corpo, substitui todas; senão mantém as atuais
     const substituiFotos = dados.fotos !== undefined;
     const fotosFinais = substituiFotos
       ? dados.fotos
       : anuncio.fotos.map((foto) => foto.url_imagem);
     const novaCategoria =
-      dados.categoria !== undefined ? normalizarCategoria(dados.categoria) : undefined;
+      dados.categoria !== undefined
+        ? String(dados.categoria).trim().toLowerCase()
+        : undefined;
     const categoriaFinal = novaCategoria ?? anuncio.categoria;
 
-    validarTipoEStatus(dados);
-    if (novaCategoria !== undefined) validarCategoria(novaCategoria);
-    validarRegraLGPD(categoriaFinal, fotosFinais);
-    if (substituiFotos) validarFotos(fotosFinais);
+    // Monta o estado final consolidado para passar pela corrente de validações
+    const estadoFinal = {
+      ...anuncio.toJSON(),
+      ...dados,
+      categoria: categoriaFinal,
+      fotos: fotosFinais,
+    };
+
+    // Delega a validação do estado final para a corrente
+    await anuncioValidationChain.executar(estadoFinal, { acao: "ATUALIZAR" });
 
     const camposEditaveis = [
       "titulo",
@@ -196,10 +133,15 @@ module.exports = {
       await anuncio.update(alteracoes, { transaction });
       if (substituiFotos) {
         await FotoAnuncio.destroy({ where: { anuncio_id: id }, transaction });
-        await FotoAnuncio.bulkCreate(
-          fotosFinais.map((url_imagem) => ({ anuncio_id: anuncio.id, url_imagem })),
-          { transaction },
-        );
+        if (fotosFinais.length > 0) {
+          await FotoAnuncio.bulkCreate(
+            fotosFinais.map((url_imagem) => ({
+              anuncio_id: anuncio.id,
+              url_imagem,
+            })),
+            { transaction },
+          );
+        }
       }
     });
 
@@ -208,7 +150,7 @@ module.exports = {
 
   async excluir(id, usuarioId) {
     const anuncio = await buscarAnuncioDoAutor(id, usuarioId);
-    // ON DELETE CASCADE remove fotos e comentários
+    // ON DELETE CASCADE remove fotos e comentários associados
     await anuncio.destroy();
   },
 };
