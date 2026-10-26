@@ -1,6 +1,8 @@
 # Decisões de Projeto — Radar UFLA
 
 > Sprint 4 — Issue [#26](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/26) | Responsável: Tech Lead (`@BernarDEVthomaz`)
+>
+> **Atualizado na Sprint 5** — Issue [#32](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/32): ADR-04 (Chain of Responsibility nas validações de anúncio, implementado no PR [#38](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/38)) e melhorias M-05, M-06 e M-07. Detalhamento do padrão em [`padroes-de-projeto.md`](../padroes/padroes-de-projeto.md).
 
 Este documento registra a decomposição do back-end em módulos e camadas, as principais decisões locais de projeto (no formato de ADRs), a análise de coesão e acoplamento do código antes e depois da refatoração da Sprint 4 e as melhorias identificadas.
 
@@ -34,7 +36,7 @@ flowchart LR
 | **Routes**      | [`src/routes/`](../../API/Back-End/src/routes/)              | Mapear verbo + URL para a função do controller e aplicar middlewares (ex.: `autenticarToken` nas rotas de escrita).                                | Conter lógica de negócio ou acessar o banco.                                |
 | **Middlewares** | [`src/middlewares/`](../../API/Back-End/src/middlewares/)    | Tratar preocupações transversais antes do controller, como validar o token JWT e preencher `req.usuarioId`.                                       | Decidir regras de negócio do anúncio ou do usuário.                         |
 | **Controllers** | [`src/controllers/`](../../API/Back-End/src/controllers/)    | Ler os dados da requisição (`req.body`, `req.params`, `req.usuarioId`), chamar o service e traduzir o resultado ou o erro em status HTTP + JSON.    | Validar regras de negócio, gerar hash/token ou consultar models diretamente. |
-| **Services**    | [`src/services/`](../../API/Back-End/src/services/)          | Concentrar as regras de negócio (`RN-04`, só o autor edita, até 3 fotos, categorias válidas). Lançam `RegraNegocioError`; não conhecem `req`/`res`. | Montar respostas HTTP ou depender do Express.                               |
+| **Services**    | [`src/services/`](../../API/Back-End/src/services/)          | Concentrar as regras de negócio (`RN-04`, só o autor edita, até 3 fotos, categorias válidas). Lançam `RegraNegocioError`; não conhecem `req`/`res`. Desde a Sprint 5, as validações de anúncio ficam em [`services/validations/`](../../API/Back-End/src/services/validations/), como uma corrente de handlers (ADR-04). | Montar respostas HTTP ou depender do Express.                               |
 | **Models**      | [`src/models/`](../../API/Back-End/src/models/)              | Mapear as tabelas (`usuarios`, `anuncio`, `foto_anuncio`, `comentario`) e suas associações via Sequelize.                                          | Conter regras de negócio além de restrições de dados.                       |
 
 ### Exemplo de fluxo: publicar um anúncio
@@ -52,6 +54,7 @@ flowchart LR
 | ADR-01 | Camada de Serviços entre Controllers e Models   | Implementada na Sprint 4                                                   | [#24](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/24) | [`0bffa9f`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/0bffa9f)                                                                                                                                                |
 | ADR-02 | Autenticação stateless com JWT + bcrypt         | Implementada na Sprint 3, registrada agora                                 | [#4](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/4)   | [`7ebf6ea`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/7ebf6ea)                                                                                                                                                |
 | ADR-03 | Regra `RN-04` (LGPD) no back-end, no service    | Implementada na Sprint 4                                                   | [#25](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/25) | [`0bffa9f`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/0bffa9f), [`593156b`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/593156b)                                                                |
+| ADR-04 | Chain of Responsibility nas validações de anúncio | Implementada na Sprint 5 (PR [#38](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/38)) | [#30](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/30), [#31](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/31), [#32](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/32) | [`c05a69c`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/c05a69c), [`e26c6aa`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/e26c6aa), [`cc1e2b3`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/cc1e2b3), [`d6b6a3d`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/d6b6a3d) |
 
 ### ADR-01 — Criar uma camada de Serviços entre Controllers e Models
 
@@ -103,6 +106,25 @@ flowchart LR
   - ⚠️ A lista de categorias está duplicada entre o service e o `<select>` de [`publicar.html`](../../API/Front-End/publicar.html); se mudar, os dois precisam ser atualizados (ver melhoria M-03).
   - ⚠️ Documentos pessoais ficam apenas com descrição textual, o que pode dificultar a identificação do item pelo dono.
   - ⚠️ O comportamento observável mudou em relação ao texto original da `RN-04` ("fotos de documentos sem tarjas"), por isso `requisitos.md` e `modelagem.md` foram atualizados nesta sprint.
+
+### ADR-04 — Adotar Chain of Responsibility nas validações de anúncio
+
+- **Status:** Aceita e implementada (Sprint 5), no PR [#38](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/38) (Issues [#30](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/30) e [#31](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/31)).
+- **Contexto:** Depois da Sprint 4, o [`AnuncioService.js`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/blob/593156b/API/Back-End/src/services/AnuncioService.js) concentra cerca de 80 linhas de validação e monta a sequência delas duas vezes: em `criar` (seis chamadas fixas) e em `atualizar` (quatro chamadas, duas delas com `if`). As duas sequências já divergem, e há pelo menos quatro regras novas do mesmo tipo identificadas (CPF no texto, data/hora obrigatória, limite de 5 MB e categorias gerenciadas), cada uma exigindo editar os dois métodos. Detalhes na seção 1 de [`padroes-de-projeto.md`](../padroes/padroes-de-projeto.md).
+- **Alternativas consideradas:**
+  1. Não usar padrão: manter as funções `validar*` e as chamadas dentro de `criar` e `atualizar` (ou um array de funções por operação).
+  2. Strategy: uma estratégia de validação por operação (criação e edição).
+  3. Chain of Responsibility: cada regra vira um handler com a mesma interface, e a corrente é montada em um único lugar.
+- **Decisão:** Alternativa 3. Em `src/services/validations/` ficam a classe base [`ValidationHandler`](../../API/Back-End/src/services/validations/ValidationHandler.js) (`definirProximo`, `validar`), os handlers `CamposObrigatoriosHandler`, `CategoriaEStatusHandler`, `RegraLGPDHandler` e `FotosHandler`, e o montador [`AnuncioValidationChain`](../../API/Back-End/src/services/validations/AnuncioValidationChain.js), que encadeia os quatro uma única vez e expõe `executar(dados, contexto)`. O `AnuncioService` chama a corrente em `criar`, `atualizar` e `listar`, informando a operação em `contexto.acao`; cada handler decide se se aplica a ela. Na edição, os dados enviados à corrente são o estado final do anúncio. Os handlers continuam lançando `RegraNegocioError`.
+- **Justificativa:** A alternativa 1 é a mais simples, mas deixa a composição das regras e as condições da edição espalhadas no service, e regra nova continua exigindo abrir `criar` e `atualizar`. Strategy (2) serve para escolher um entre vários algoritmos; aqui o problema é uma sequência de verificações, e cada estratégia teria que repetir a lista inteira (a `RN-04` estaria nas duas). Chain of Responsibility deixa o `AnuncioService` fechado para modificação quando surgir uma regra nova (OCP), dá a cada regra um único motivo para mudar (SRP) e reúne a ordem das validações em um só arquivo.
+- **Consequências:**
+  - ✅ Regra nova = handler novo + uma linha no `AnuncioValidationChain`; o `AnuncioService` não muda.
+  - ✅ Criação, edição e listagem usam a mesma corrente, então não há mais duas sequências que possam divergir.
+  - ✅ A `RN-04` ganha um arquivo próprio (`RegraLGPDHandler`), mais fácil de revisar e auditar.
+  - ⚠️ Seis arquivos novos e uma indireção a mais para entender uma validação.
+  - ⚠️ Cada handler precisa terminar chamando `super.validar(...)`; se um handler novo esquecer, os seguintes deixam de rodar sem nenhum erro. Item obrigatório do code review até a melhoria M-07.
+  - ⚠️ A corrente para na primeira violação, então o usuário vê um erro por vez.
+  - ⚠️ ADR-01 e ADR-03 continuam valendo: as regras seguem no service, com `RegraNegocioError` e sobre o estado final do anúncio. O ADR-04 só reorganiza onde elas moram.
 
 ## 3. Análise de coesão e acoplamento
 
@@ -181,4 +203,7 @@ function validarRegraLGPD(categoria, fotos) {
 | M-01 | Extrair um `AuthService` do `authController.js` (cadastro, login, hash e emissão do token)                                                       | O módulo de autenticação ainda tem a coesão baixa descrita na seção 3.1                      | Média      |
 | M-02 | Ler `JWT_SECRET` em um único módulo de `src/config/` e torná-la obrigatória via `.env`, sem valor padrão                                         | Hoje a chave tem valor fixo no código e está duplicada em dois arquivos (ADR-02)            | Alta       |
 | M-03 | Expor as categorias válidas por uma rota (ex.: `GET /api/categorias`) e montar o `<select>` de `publicar.html` a partir dela                    | Evitar a lista duplicada entre front-end e service (ADR-03); prepara o `RF-11`               | Baixa      |
-| M-04 | Validar tamanho de arquivo (5 MB, `RF-08`) quando o upload real for implementado                                                                 | Hoje as fotos chegam como URLs, então o limite não é verificado (Issue #10)                  | Média      |
+| M-04 | Validar tamanho de arquivo (5 MB, `RF-08`) quando o upload real for implementado                                                                 | Hoje as fotos chegam como URLs, então o limite não é verificado (Issue #10). Com o ADR-04, entra como um handler novo | Média      |
+| M-05 | Bloquear CPF e números de documento no título e na descrição também na API, como um handler da corrente (ADR-04)                                | Hoje essa checagem da `RN-04` só existe no front-end (`validarLGPDPublicacao` em `app.js`) e pode ser contornada chamando a API — a mesma situação que motivou o ADR-03 | Alta       |
+| M-06 | Parar de devolver `details: error.message` nos erros 500 de `anuncioController.js` e `authController.js`; registrar o erro no servidor e responder com mensagem genérica | Expor detalhes internos ao cliente contraria a regra 6 de [`.harness/boundaries.md`](../../.harness/boundaries.md) | Média      |
+| M-07 | Fixar o repasse da corrente na classe base (Template Method): `ValidationHandler.validar` chama um método `verificar` implementado por cada handler e depois repassa ao próximo | Hoje cada handler precisa lembrar de chamar `super.validar`; se esquecer, a corrente para em silêncio (ADR-04) | Média      |

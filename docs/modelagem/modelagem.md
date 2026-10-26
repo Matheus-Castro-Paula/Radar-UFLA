@@ -13,7 +13,7 @@
 | Diagrama de Casos de Uso (2.1)                           | Comportamental | Quem são os atores e o que cada um pode fazer no sistema?                       | `RF-01` a `RF-14`, `RF-02`                  |
 | Diagrama de Sequência: Cadastro, Login e Perfil (2.2) OK | Comportamental | Como o usuário se cadastra, se autentica e acessa rotas protegidas por JWT?     | `RF-01`, `RF-02`, `RNF-03`                  |
 | Diagrama de Sequência: Publicação de Anúncio (2.3) OK     | Comportamental | Como um anúncio é publicado e onde a regra de dados sensíveis é aplicada?       | `RF-07`, `RF-08`, `RN-04`, `US-01`          |
-| Diagrama de Classes: camada de serviços (3.3) OK         | Estrutural     | Como controller, service e erro de negócio de anúncios dependem entre si?       | `RF-07`, `RN-02`, `RN-04`                   |
+| Diagrama de Classes: camada de serviços (3.3) OK         | Estrutural     | Como controller, service, corrente de validação e erro de negócio de anúncios dependem entre si? | `RF-07`, `RF-08`, `RN-02`, `RN-04`          |
 | Diagrama de Classes UML (3.1) OK                         | Estrutural     | Quais atributos, tipos e métodos cada classe do modelo tem, e como se associam? | `RF-01`, `RF-04`, `RF-07`, `RF-08`, `RF-10` |
 | Diagrama Entidade-Relacionamento (3.2) OK                | Estrutural     | Como Usuário, Anúncio, Foto e Comentário se relacionam no banco?                | `RF-01`, `RF-04`, `RF-07`, `RF-08`, `RF-10` |
 
@@ -195,7 +195,7 @@ sequenceDiagram
 
 **Descrição e decisões representadas:**
 
-- **Onde a `RN-04` (LGPD) é aplicada:** em dois pontos do fluxo, ambos no `AnuncioService`. (1) _Na entrada:_ a função `validarRegraLGPD` rejeita foto quando a categoria é `documento`, na criação e também na edição (`PUT /api/anuncios/:id`), porque olha o estado final do anúncio. (2) _Na saída:_ a listagem pública devolve apenas os campos do anúncio, as fotos e o `id` e `nome` do autor, nunca e-mail ou telefone. A combinação evita depender de análise de imagem, que está fora do escopo (`requisitos.md`, seção 7).
+- **Onde a `RN-04` (LGPD) é aplicada:** em dois pontos do fluxo, ambos no `AnuncioService`. (1) _Na entrada:_ o `RegraLGPDHandler` (até a Sprint 4, a função `validarRegraLGPD`), um dos elos da corrente de validação do ADR-04, rejeita foto quando a categoria é `documento`, na criação e também na edição (`PUT /api/anuncios/:id`), porque olha o estado final do anúncio. (2) _Na saída:_ a listagem pública devolve apenas os campos do anúncio, as fotos e o `id` e `nome` do autor, nunca e-mail ou telefone. A combinação evita depender de análise de imagem, que está fora do escopo (`requisitos.md`, seção 7).
 - **Status HTTP:** a `RN-04` responde **400**, conforme o critério de aceitação da Issue #25. Na Sprint 3 este diagrama previa 422; a mudança ficou restrita ao mapeamento de códigos do controller (commit `593156b`).
 - **Ordem das validações:** autenticação → campos obrigatórios → tipo e status → categoria (normalizada e conferida contra `objeto, eletronico, documento, material, outro`) → regra `RN-04` → regras de foto (`RF-08`: até 3, JPG/PNG/WEBP) → persistência. O limite de 5 MB só poderá ser validado quando o upload real existir (Issue #10).
 - **Persistência:** o anúncio nasce com `status = ATIVO` (critério de aceitação 1 de `US-01`). Anúncio e fotos são gravados na mesma transação, então uma falha não deixa anúncio sem as fotos informadas.
@@ -309,7 +309,7 @@ erDiagram
 
 ### 3.3 Diagrama de Classes: camada de serviços de anúncios
 
-Adicionado na Sprint 4 para representar a decisão ADR-01 de [`decisoes-de-projeto.md`](../projeto/decisoes-de-projeto.md). As setas tracejadas indicam dependência (quem importa quem).
+Adicionado na Sprint 4 para representar a decisão ADR-01 e **atualizado na Sprint 5** com a corrente de validação do ADR-04 (padrão Chain of Responsibility, detalhado em [`padroes-de-projeto.md`](../padroes/padroes-de-projeto.md)). Setas tracejadas indicam dependência (quem usa quem); a seta com triângulo indica herança.
 
 ```mermaid
 classDiagram
@@ -334,11 +334,27 @@ classDiagram
         +criar(dados, usuarioId)
         +atualizar(id, dados, usuarioId)
         +excluir(id, usuarioId)
-        -validarCamposObrigatorios(dados)
-        -validarCategoria(categoria)
-        -validarRegraLGPD(categoria, fotos)
-        -validarFotos(fotos)
         -buscarAnuncioDoAutor(id, usuarioId)
+    }
+    class AnuncioValidationChain {
+        +executar(dados, contexto)
+    }
+    class ValidationHandler {
+        -ValidationHandler proximo
+        +definirProximo(handler) ValidationHandler
+        +validar(dados, contexto)
+    }
+    class CamposObrigatoriosHandler {
+        +validar(dados, contexto)
+    }
+    class CategoriaEStatusHandler {
+        +validar(dados, contexto)
+    }
+    class RegraLGPDHandler {
+        +validar(dados, contexto)
+    }
+    class FotosHandler {
+        +validar(dados, contexto)
     }
     class RegraNegocioError {
         +string codigo
@@ -355,13 +371,25 @@ classDiagram
     anuncioRoutes ..> anuncioController : delega
     anuncioController ..> AnuncioService : chama
     anuncioController ..> RegraNegocioError : traduz em status HTTP
+    AnuncioService ..> AnuncioValidationChain : executar()
+    AnuncioValidationChain ..> ValidationHandler : monta
+    ValidationHandler <|-- CamposObrigatoriosHandler
+    ValidationHandler <|-- CategoriaEStatusHandler
+    ValidationHandler <|-- RegraLGPDHandler
+    ValidationHandler <|-- FotosHandler
+    ValidationHandler o-- ValidationHandler : proximo
+    ValidationHandler ..> RegraNegocioError : lança
     AnuncioService ..> RegraNegocioError : lança
     AnuncioService ..> Anuncio : persiste
     AnuncioService ..> FotoAnuncio : persiste
     AnuncioService ..> Usuario : lê id e nome
 ```
 
-O controller não depende de nenhum model: só do service e do erro de negócio. O service não depende do Express. Os métodos marcados com `-` são funções internas do módulo, não exportadas. Código: [`anuncioRoutes.js`](../../API/Back-End/src/routes/anuncioRoutes.js), [`anuncioController.js`](../../API/Back-End/src/controllers/anuncioController.js), [`AnuncioService.js`](../../API/Back-End/src/services/AnuncioService.js), [`RegraNegocioError.js`](../../API/Back-End/src/services/RegraNegocioError.js).
+- O controller não depende de nenhum model: só do service e do erro de negócio. O service não depende do Express.
+- Na Sprint 4, as validações eram funções internas do `AnuncioService` (`validarCamposObrigatorios`, `validarCategoria`, `validarRegraLGPD`, `validarFotos`). Na Sprint 5 (PR #38) elas passaram a ser handlers em `services/validations/`, encadeados uma única vez pelo `AnuncioValidationChain` na ordem obrigatórios → categoria e status → `RN-04` → fotos. O `AnuncioService` chama `executar(dados, { acao })` em `criar`, `atualizar` e `listar`, e cada handler decide se se aplica à operação (por exemplo, os campos obrigatórios só são cobrados na criação). O `AnuncioService` só continua com a regra de autoria (`buscarAnuncioDoAutor`, `RN-02`), que depende de consultar o banco.
+- A ordem da corrente segue o diagrama de sequência 2.3. Cada handler concreto sobrescreve `validar` e termina chamando `super.validar(...)`, que repassa ao próximo elo.
+
+Código: [`anuncioRoutes.js`](../../API/Back-End/src/routes/anuncioRoutes.js), [`anuncioController.js`](../../API/Back-End/src/controllers/anuncioController.js), [`AnuncioService.js`](../../API/Back-End/src/services/AnuncioService.js), [`services/validations/`](../../API/Back-End/src/services/validations/), [`RegraNegocioError.js`](../../API/Back-End/src/services/RegraNegocioError.js).
 
 ## 4. Relação entre requisitos e modelos
 
@@ -373,7 +401,7 @@ O controller não depende de nenhum model: só do service e do erro de negócio.
 | **RF-07**  | Cadastrar Novo Anúncio                        | `#6`, `#7`, `#11` | Casos de Uso / Sequência / ER / Classes (3.3) | `API/Front-End/publicar.html`<br>`API/Back-End/src/routes/anuncioRoutes.js`<br>`API/Back-End/src/controllers/anuncioController.js`<br>`API/Back-End/src/services/AnuncioService.js`<br>`API/Back-End/src/models/anuncio.js`<br>`API/Back-End/src/migrations/*create-anuncios.js` |
 | **RF-08**  | Upload de Fotos de Anúncios                   | `#10`               | Diagrama ER                   | `API/Back-End/src/models/foto_anuncio.js`<br>`API/Back-End/src/migrations/*create-fotos-anuncio.js`                                                       |
 | **RF-10**  | Seção de Comentários no Anúncio               | `#11`                  | Casos de Uso / ER             | `API/Back-End/src/models/comentario.js`<br>`API/Back-End/src/migrations/*create-comentarios.js`                                                           |
-| **RN-04**  | Ocultar dados/fotos de "Documentos" (LGPD)    | `#9`                   | Diagrama de Sequência / Classes (3.3) | `API/Back-End/src/services/AnuncioService.js` (`validarRegraLGPD`)<br>`API/Front-End/app.js`<br>`API/Front-End/publicar.html` |
+| **RN-04**  | Ocultar dados/fotos de "Documentos" (LGPD)    | `#9`                   | Diagrama de Sequência / Classes (3.3) | `API/Back-End/src/services/validations/RegraLGPDHandler.js` (desde a Sprint 5; antes `validarRegraLGPD` no `AnuncioService.js`)<br>`API/Front-End/app.js`<br>`API/Front-End/publicar.html` |
 | **RNF-01** | Interface Responsiva e Identidade Visual UFLA | `#5`                            | Casos de Uso                  | `API/Front-End/styles.css`                                                                                                                                |
 | **RNF-03** | Segurança e Hash de Senhas (Bcrypt / JWT)     | `#4`              | Diagrama de Sequência         | `API/Back-End/src/controllers/authController.js`                                                                                                          |
 | **RNF-06** | Arquitetura Cliente-Servidor e Docker         | `#2`, `#3`                      | Diagrama ER                   | `API/Back-End/docker-compose.yml`<br>`API/Back-End/Dockerfile`                                                                                            |
@@ -417,3 +445,4 @@ A modelagem revelou lacunas entre requisitos, modelos e código. Cada item deve 
 | Sprint 4 | Sequência 2.3: passa de WAR para OK; inclui `AnuncioService`, códigos de `RegraNegocioError` e a `RN-04` com **400** em vez de 422; categoria `documento` | Decisões ADR-01 e ADR-03 e critério de aceitação da Issue #25 | [`decisoes-de-projeto.md`](../projeto/decisoes-de-projeto.md), commits `0bffa9f` e `593156b` |
 | Sprint 4 | Novo Diagrama de Classes 3.3 (camada de serviços) | Representar a dependência entre rotas, controller, service e erro de negócio (ADR-01) | [`AnuncioService.js`](../../API/Back-End/src/services/AnuncioService.js) |
 | Sprint 4 | Seções 4, 5 e 6: arquivos do módulo de anúncios na matriz; itens 4 e 6 dos refinamentos atualizados | Rotas de anúncios implementadas e decisão da `RN-04` confirmada | Issues #24 e #25 |
+| Sprint 5 | Diagrama de Classes 3.3: validações saem do `AnuncioService` e passam a ser a corrente `ValidationHandler` → handlers concretos, montada por `AnuncioValidationChain` | Decisão ADR-04 (padrão Chain of Responsibility) | [`padroes-de-projeto.md`](../padroes/padroes-de-projeto.md), PR #38 (commits `c05a69c`, `e26c6aa`, `cc1e2b3`, `d6b6a3d`), Issues #30, #31 e #32 |
