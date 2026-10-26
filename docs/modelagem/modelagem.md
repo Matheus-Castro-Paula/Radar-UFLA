@@ -337,27 +337,24 @@ classDiagram
         -buscarAnuncioDoAutor(id, usuarioId)
     }
     class AnuncioValidationChain {
-        +paraCriacao() ValidationHandler
-        +paraEdicao() ValidationHandler
+        +executar(dados, contexto)
     }
     class ValidationHandler {
-        <<abstract>>
         -ValidationHandler proximo
-        +setProximo(handler) ValidationHandler
-        +validar(contexto) void
-        #verificar(contexto)*
+        +definirProximo(handler) ValidationHandler
+        +validar(dados, contexto)
     }
     class CamposObrigatoriosHandler {
-        #verificar(contexto)
+        +validar(dados, contexto)
     }
     class CategoriaEStatusHandler {
-        #verificar(contexto)
+        +validar(dados, contexto)
     }
     class RegraLGPDHandler {
-        #verificar(contexto)
+        +validar(dados, contexto)
     }
     class FotosHandler {
-        #verificar(contexto)
+        +validar(dados, contexto)
     }
     class RegraNegocioError {
         +string codigo
@@ -374,7 +371,7 @@ classDiagram
     anuncioRoutes ..> anuncioController : delega
     anuncioController ..> AnuncioService : chama
     anuncioController ..> RegraNegocioError : traduz em status HTTP
-    AnuncioService ..> AnuncioValidationChain : pede a corrente
+    AnuncioService ..> AnuncioValidationChain : executar()
     AnuncioValidationChain ..> ValidationHandler : monta
     ValidationHandler <|-- CamposObrigatoriosHandler
     ValidationHandler <|-- CategoriaEStatusHandler
@@ -389,8 +386,8 @@ classDiagram
 ```
 
 - O controller não depende de nenhum model: só do service e do erro de negócio. O service não depende do Express.
-- Na Sprint 4, as validações eram funções internas do `AnuncioService` (`validarCamposObrigatorios`, `validarCategoria`, `validarRegraLGPD`, `validarFotos`). Na Sprint 5 elas passaram a ser handlers em `services/validations/`, encadeados pelo `AnuncioValidationChain`: **criação** = obrigatórios → categoria e status → `RN-04` → fotos; **edição** = categoria e status → `RN-04` → fotos. O `AnuncioService` só continua com a regra de autoria (`buscarAnuncioDoAutor`, `RN-02`), que depende de consultar o banco.
-- A ordem da corrente segue o diagrama de sequência 2.3; o `CategoriaEStatusHandler` vem antes do `RegraLGPDHandler` porque normaliza a categoria.
+- Na Sprint 4, as validações eram funções internas do `AnuncioService` (`validarCamposObrigatorios`, `validarCategoria`, `validarRegraLGPD`, `validarFotos`). Na Sprint 5 (PR #38) elas passaram a ser handlers em `services/validations/`, encadeados uma única vez pelo `AnuncioValidationChain` na ordem obrigatórios → categoria e status → `RN-04` → fotos. O `AnuncioService` chama `executar(dados, { acao })` em `criar`, `atualizar` e `listar`, e cada handler decide se se aplica à operação (por exemplo, os campos obrigatórios só são cobrados na criação). O `AnuncioService` só continua com a regra de autoria (`buscarAnuncioDoAutor`, `RN-02`), que depende de consultar o banco.
+- A ordem da corrente segue o diagrama de sequência 2.3. Cada handler concreto sobrescreve `validar` e termina chamando `super.validar(...)`, que repassa ao próximo elo.
 
 Código: [`anuncioRoutes.js`](../../API/Back-End/src/routes/anuncioRoutes.js), [`anuncioController.js`](../../API/Back-End/src/controllers/anuncioController.js), [`AnuncioService.js`](../../API/Back-End/src/services/AnuncioService.js), [`services/validations/`](../../API/Back-End/src/services/validations/), [`RegraNegocioError.js`](../../API/Back-End/src/services/RegraNegocioError.js).
 
@@ -448,4 +445,4 @@ A modelagem revelou lacunas entre requisitos, modelos e código. Cada item deve 
 | Sprint 4 | Sequência 2.3: passa de WAR para OK; inclui `AnuncioService`, códigos de `RegraNegocioError` e a `RN-04` com **400** em vez de 422; categoria `documento` | Decisões ADR-01 e ADR-03 e critério de aceitação da Issue #25 | [`decisoes-de-projeto.md`](../projeto/decisoes-de-projeto.md), commits `0bffa9f` e `593156b` |
 | Sprint 4 | Novo Diagrama de Classes 3.3 (camada de serviços) | Representar a dependência entre rotas, controller, service e erro de negócio (ADR-01) | [`AnuncioService.js`](../../API/Back-End/src/services/AnuncioService.js) |
 | Sprint 4 | Seções 4, 5 e 6: arquivos do módulo de anúncios na matriz; itens 4 e 6 dos refinamentos atualizados | Rotas de anúncios implementadas e decisão da `RN-04` confirmada | Issues #24 e #25 |
-| Sprint 5 | Diagrama de Classes 3.3: validações saem do `AnuncioService` e passam a ser a corrente `ValidationHandler` → handlers concretos, montada por `AnuncioValidationChain` | Decisão ADR-04 (padrão Chain of Responsibility) | [`padroes-de-projeto.md`](../padroes/padroes-de-projeto.md), Issues #30, #31 e #32 |
+| Sprint 5 | Diagrama de Classes 3.3: validações saem do `AnuncioService` e passam a ser a corrente `ValidationHandler` → handlers concretos, montada por `AnuncioValidationChain` | Decisão ADR-04 (padrão Chain of Responsibility) | [`padroes-de-projeto.md`](../padroes/padroes-de-projeto.md), PR #38 (commits `c05a69c`, `e26c6aa`, `cc1e2b3`, `d6b6a3d`), Issues #30, #31 e #32 |
