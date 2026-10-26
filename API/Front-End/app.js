@@ -1,4 +1,5 @@
-const API_URL = "http://localhost:3000/api/auth";
+const API_BASE = "http://localhost:3000/api";
+const API_URL = `${API_BASE}/auth`;
 
 const ICONS = {
   objeto: "🔑",
@@ -8,70 +9,21 @@ const ICONS = {
   outro: "📦",
 };
 
-const ITEMS = [
-  {
-    feed: "achados",
-    categoria: "objeto",
-    titulo: "Molho de chaves com chaveiro do Corinthians",
-    descricao:
-      "Encontrado caído perto da escada do Bloco 3. Tem uma pulseirinha de identificação junto.",
-    local: "Bloco 3",
-    meta: "Bloco 3 · hoje, 14h30 · deixado na portaria",
-  },
-  {
-    feed: "achados",
-    categoria: "eletronico",
-    titulo: "Fone de ouvido azul, sem fio",
-    descricao:
-      "Estava em cima de uma mesa na ala de estudos silenciosos da Biblioteca Central.",
-    local: "Biblioteca Central",
-    meta: "Biblioteca Central · hoje, 09h15 · com o bibliotecário",
-  },
-  {
-    feed: "achados",
-    categoria: "objeto",
-    titulo: "Carteira de couro marrom",
-    descricao:
-      "Encontrada no chão perto do caixa do RU. Tem cartões dentro, sem dinheiro visível.",
-    local: "RU",
-    meta: "RU · ontem, 12h00 · com a coordenação do RU",
-  },
-  {
-    feed: "achados",
-    categoria: "objeto",
-    titulo: "Óculos de grau, armação preta",
-    descricao: "Deixado numa sala do bloco de Humanas depois da aula das 19h.",
-    local: "Bloco de Humanas",
-    meta: "Bloco de Humanas, sala 14 · ontem, 19h50 · retirar na portaria",
-  },
-  {
-    feed: "perdidos",
-    categoria: "eletronico",
-    titulo: "Mochila preta com notebook dentro",
-    descricao:
-      "Perdida ontem à tarde, saindo do RU em direção ao estacionamento.",
-    local: "RU",
-    meta: "RU · ontem, por volta das 13h",
-  },
-  {
-    feed: "perdidos",
-    categoria: "objeto",
-    titulo: "Chaveiro com fita do curso de Sistemas de Informação",
-    descricao:
-      "Perdido essa semana, provavelmente no estacionamento perto do bloco de exatas.",
-    local: "Estacionamento",
-    meta: "Estacionamento, bloco de exatas · essa semana",
-  },
-  {
-    feed: "perdidos",
-    categoria: "documento",
-    titulo: "Carteirinha estudantil",
-    descricao:
-      "Perdida hoje de manhã. Documento — sem foto publicada, apenas esta descrição.",
-    local: "Não informado",
-    meta: "Local não informado · hoje de manhã",
-  },
-];
+// Converte um anúncio da API (GET /api/anuncios) para o formato usado nos cards
+function anuncioParaItem(anuncio) {
+  const data = new Date(anuncio.criado_em);
+  const quando = `${data.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}, ${data.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`;
+  const autor = anuncio.usuario ? `por ${anuncio.usuario.nome}` : "";
+
+  return {
+    feed: anuncio.tipo === "ACHADO" ? "achados" : "perdidos",
+    categoria: anuncio.categoria,
+    titulo: anuncio.titulo,
+    descricao: anuncio.descricao,
+    local: anuncio.local_encontro || "",
+    meta: [anuncio.local_encontro, quando, autor].filter(Boolean).join(" · "),
+  };
+}
 
 // --- Utilitários ---
 
@@ -132,8 +84,10 @@ function initFeed() {
     '.filters input[type="checkbox"]',
   );
   const emptyState = document.getElementById("empty-state");
+  const mensagemVazio = emptyState.textContent;
 
   let activeFeed = "achados";
+  let itens = [];
 
   function categoriasAtivas() {
     return Array.from(categoriaChecks)
@@ -146,7 +100,7 @@ function initFeed() {
     const local = (localInput.value || "").toLowerCase();
     const categorias = categoriasAtivas();
 
-    const filtrados = ITEMS.filter((item) => {
+    const filtrados = itens.filter((item) => {
       if (item.feed !== activeFeed) return false;
       if (categorias.length && !categorias.includes(item.categoria))
         return false;
@@ -164,7 +118,7 @@ function initFeed() {
       card.className = "card";
       card.dataset.feed = item.feed;
       const rotulo = item.feed === "achados" ? "Achado" : "Perdido";
-      // escapeHTML evita XSS quando os dados passarem a vir da API
+      // escapeHTML evita XSS: título, descrição e local são digitados por usuários
       card.innerHTML = `
         <div class="card-thumb">
           <span class="card-badge">${rotulo}</span>
@@ -181,10 +135,10 @@ function initFeed() {
 
     emptyState.hidden = filtrados.length !== 0;
 
-    document.getElementById("count-achados").textContent = ITEMS.filter(
+    document.getElementById("count-achados").textContent = itens.filter(
       (i) => i.feed === "achados",
     ).length;
-    document.getElementById("count-perdidos").textContent = ITEMS.filter(
+    document.getElementById("count-perdidos").textContent = itens.filter(
       (i) => i.feed === "perdidos",
     ).length;
   }
@@ -206,7 +160,27 @@ function initFeed() {
   localInput.addEventListener("input", render);
   categoriaChecks.forEach((c) => c.addEventListener("change", render));
 
-  render();
+  async function carregarAnuncios() {
+    emptyState.textContent = "Carregando anúncios...";
+    emptyState.hidden = false;
+
+    try {
+      const response = await fetch(`${API_BASE}/anuncios`);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const anuncios = await response.json();
+
+      itens = anuncios.map(anuncioParaItem);
+      emptyState.textContent = mensagemVazio;
+      render();
+    } catch (err) {
+      console.error(err);
+      emptyState.textContent =
+        "Não foi possível carregar os anúncios. Verifique se a API está rodando.";
+      emptyState.hidden = false;
+    }
+  }
+
+  carregarAnuncios();
 }
 
 // Botão "Entrar" vira "Sair" quando há token salvo
@@ -252,15 +226,30 @@ function initPublishPage() {
   categoriaSelect.addEventListener("change", atualizarPorCategoria);
   atualizarPorCategoria();
 
-  form.addEventListener("submit", (event) => {
+  form.addEventListener("submit", async (event) => {
     event.preventDefault();
     limparMensagem();
     tituloInput.classList.remove("invalido");
     descricaoInput.classList.remove("invalido");
 
-    if (!tituloInput.value.trim()) {
+    const titulo = tituloInput.value.trim();
+    const local = form.elements.local.value.trim();
+    const horario = form.elements.horario.value.trim();
+
+    if (!titulo) {
       tituloInput.classList.add("invalido");
       mostrarMensagem("Informe um título para o item.");
+      return;
+    }
+
+    if (!descricaoInput.value.trim()) {
+      descricaoInput.classList.add("invalido");
+      mostrarMensagem("Descreva o item para ajudar a identificá-lo.");
+      return;
+    }
+
+    if (!local) {
+      mostrarMensagem("Informe o local onde o item foi achado ou perdido.");
       return;
     }
 
@@ -275,10 +264,60 @@ function initPublishPage() {
       return;
     }
 
-    mostrarMensagem(
-      "Formulário válido! O envio real para a API será integrado em uma sprint futura.",
-      "sucesso",
-    );
+    const token = localStorage.getItem("token");
+    if (!token) {
+      mostrarMensagem("Entre na sua conta para publicar. Redirecionando para o login...");
+      setTimeout(() => (window.location.href = "login.html"), 1500);
+      return;
+    }
+
+    // O banco ainda não tem campo de data/hora (RF-07): o horário vai junto da descrição
+    let descricao = descricaoInput.value.trim();
+    if (horario) descricao += `\n\nHorário: ${horario}`;
+
+    const anuncio = {
+      titulo,
+      descricao,
+      tipo: form.elements.tipo.value === "achados" ? "ACHADO" : "PERDIDO",
+      categoria: categoriaSelect.value,
+      local_encontro: local,
+    };
+
+    const botao = form.querySelector("button[type='submit']");
+    botao.disabled = true;
+
+    try {
+      const response = await fetch(`${API_BASE}/anuncios`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(anuncio),
+      });
+      const data = await response.json().catch(() => ({}));
+
+      if (response.ok) {
+        mostrarMensagem("Item publicado! Redirecionando para o feed...", "sucesso");
+        setTimeout(() => (window.location.href = "index.html"), 1200);
+        return;
+      }
+
+      if (response.status === 401) {
+        localStorage.removeItem("token");
+        mostrarMensagem("Sua sessão expirou. Entre novamente para publicar.");
+        setTimeout(() => (window.location.href = "login.html"), 1500);
+        return;
+      }
+
+      // 400: regra de negócio da API (ex.: RN-04 / LGPD) — mostra a mensagem que ela devolve
+      mostrarMensagem(data.error || "Não foi possível publicar o item.");
+      botao.disabled = false;
+    } catch (err) {
+      console.error(err);
+      mostrarMensagem("Não foi possível conectar ao servidor.");
+      botao.disabled = false;
+    }
   });
 }
 
