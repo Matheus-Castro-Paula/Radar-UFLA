@@ -27,28 +27,32 @@ A priorização considerou três critérios principais:
 
 ## 4. Visão resumida do backlog
 
-| ID    | Link da Issue                                                         | Tipo                            | Descrição curta                                         | Prioridade | Requisito         | Sprint | Estado final |
+| ID | Link da Issue / PR | Tipo | Descrição curta | Prioridade | Requisito | Sprint | Estado final |
 | ----- | --------------------------------------------------------------------- | ------------------------------- | ------------------------------------------------------- | ---------- | ----------------- | ------ | ------------ |
-| T-01  | [#1](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/1)     | Documentação                    | Estruturar repositório e documentação inicial           | Alta       | —                 | 1      | Concluído    |
-| T-02  | [#2](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/2)     | Requisito / Tarefa técnica      | Modelar entidades iniciais do banco de dados            | Alta       | `RNF-06`          | 2      | Concluído    |
-| T-03  | [#3](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/3)     | Tarefa técnica                  | Configurar banco de dados MySQL via Docker              | Alta       | `RNF-06`          | 2      | Concluído    |
-| US-01 | [#4](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/4)     | Funcionalidade                  | Cadastro e login de usuário (autenticação JWT)          | Alta       | `RF-01`, `RF-02`  | 2      | Planejado    |
-| US-02 | [#5](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/5)     | Funcionalidade                  | Estrutura inicial do front-end com layout do feed       | Alta       | `RF-04`, `RNF-01` | 1      | Concluído    |
-| US-03 | [#6](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/6)     | Funcionalidade                  | Publicação de item na aba "Achados"                     | Alta       | `RF-07`           | 2      | Planejado    |
-| US-04 | [#7](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/7)     | Funcionalidade                  | Publicação de item na aba "Perdidos"                    | Alta       | `RF-07`           | 2      | Planejado    |
-| US-05 | [#8](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/8)     | Funcionalidade                  | Busca/pesquisa nos feeds                                | Média      | `RF-05`, `RF-06`  | 2      | Planejado    |
-| US-06 | [#9](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/9)     | Requisito / Funcionalidade      | Categoria "Documentos pessoais" (sem foto do documento) | Média      | `RF-07`, `RN-04`  | 2      | Planejado    |
-| T-04  | [#10](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/10)   | Tarefa técnica                  | Configurar upload de imagens (Cloudinary + Multer)      | Média      | `RF-08`           | 2      | Planejado    |
-| US-07 | [#11](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/11)   | Funcionalidade / Tarefa técnica | Integrar tela/formulário de publicação ao back-end      | Alta       | `RF-03`, `RF-07`  | 2      | Planejado    |
-| T-05  | [#12](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/12)   | Documentação                    | Instruções de instalação e execução do projeto          | Média      | `RNF-06`          | 2      | Concluído    |
-| T-06  | [#14](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/14)   | Documentação / PO               | Atualizar documentação e artefatos da Sprint 2          | Média      | —                 | 2      | Concluído    |
-| T-07  | [#15](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/15)   | Documentação / Gestão           | Finalizar relatório da Sprint 2 e gerar Tag Git         | Média      | —                 | 2      | Concluído    |
-| DT-01 | [#24](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/24)   | Tarefa técnica / Refatoração    | Extração da camada `AnuncioService` do `anuncioController` | Alta    | —                 | 4      | Concluído    |
-| DT-02 | [#25](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/25)   | Requisito / Segurança           | Isolar regra da LGPD (Documentos Pessoais) no AnuncioService | Alta | `RN-04`           | 4      | Concluído    |
-| DT-03 | [#26](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/26)   | Documentação / Arquitetura      | Documento de decisões locais de projeto (ADRs, coesão/acoplamento) | Média | —      | 4      | Concluído    |
-| T-08  | [#27](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/27)   | Documentação / PO               | Atualizar relatório da Sprint 4 e Backlog de Débitos Técnicos | Média | —        | 4      | Em andamento |
-| DT-04 | —                                                                     | Tarefa técnica / Segurança      | Mover `JWT_SECRET` para variáveis de ambiente (`.env`)  | Alta       | `RNF-06`          | 4      | A fazer      |
-| DT-05 | —                                                                     | Tarefa técnica / Refatoração    | Centralizar chave de autenticação JWT duplicada         | Média      | —                 | 4      | A fazer      |
+| T-01 | [#1](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/1) | Documentação | Estruturar repositório e documentação inicial | Alta | — | 1 | Concluído |
+| T-02 | [#2](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/2) | Requisito / Tarefa técnica | Modelar entidades iniciais do banco de dados | Alta | `RNF-06` | 2 | Concluído |
+| T-03 | [#3](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/3) | Tarefa técnica | Configurar banco de dados MySQL via Docker | Alta | `RNF-06` | 2 | Concluído |
+| US-01 | [#4](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/4) | Funcionalidade | Cadastro e login de usuário (autenticação JWT) | Alta | `RF-01`, `RF-02` | 2 | Planejado |
+| US-02 | [#5](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/5) | Funcionalidade | Estrutura inicial do front-end com layout do feed | Alta | `RF-04`, `RNF-01` | 1 | Concluído |
+| US-03 | [#6](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/6) | Funcionalidade | Publicação de item na aba "Achados" | Alta | `RF-07` | 2 | Planejado |
+| US-04 | [#7](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/7) | Funcionalidade | Publicação de item na aba "Perdidos" | Alta | `RF-07` | 2 | Planejado |
+| US-05 | [#8](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/8) | Funcionalidade | Busca/pesquisa nos feeds | Média | `RF-05`, `RF-06` | 2 | Planejado |
+| US-06 | [#9](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/9) | Requisito / Funcionalidade | Categoria "Documentos pessoais" (sem foto do documento) | Média | `RF-07`, `RN-04` | 2 | Planejado |
+| T-04 | [#10](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/10) | Tarefa técnica | Configurar upload de imagens (Cloudinary + Multer) | Média | `RF-08` | 2 | Planejado |
+| US-07 | [#11](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/11) | Funcionalidade / Tarefa técnica | Integrar tela/formulário de publicação ao back-end | Alta | `RF-03`, `RF-07` | 2 | Planejado |
+| T-05 | [#12](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/12) | Documentação | Instruções de instalação e execução do projeto | Média | `RNF-06` | 2 | Concluído |
+| T-06 | [#14](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/14) | Documentação / PO | Atualizar documentação e artefatos da Sprint 2 | Média | — | 2 | Concluído |
+| T-07 | [#15](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/15) | Documentação / Gestão | Finalizar relatório da Sprint 2 e gerar Tag Git | Média | — | 2 | Concluído |
+| DT-01 | [#24](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/24) | Tarefa técnica / Refatoração | Extração da camada `AnuncioService` do `anuncioController` | Alta | — | 4 | Concluído |
+| DT-02 | [#25](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/25) | Requisito / Segurança | Isolar regra da LGPD (Documentos Pessoais) no AnuncioService | Alta | `RN-04` | 4 | Concluído |
+| DT-03 | [#26](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/26) | Documentação / Arquitetura | Documento de decisões locais de projeto (ADRs, coesão/acoplamento) | Média | — | 4 | Concluído |
+| T-08 | [#27](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/27) | Documentação / PO | Atualizar relatório da Sprint 4 e Backlog de Débitos Técnicos | Média | — | 4 | Concluído |
+| DT-04 | — | Tarefa técnica / Segurança | Mover `JWT_SECRET` para variáveis de ambiente (`.env`) | Alta | `RNF-06` | 4 | A fazer |
+| DT-05 | — | Tarefa técnica / Refatoração | Centralizar chave de autenticação JWT duplicada | Média | — | 4 | A fazer |
+| DT-06 | [#29](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/29) / [PR #38](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/38) | Tarefa técnica / Refatoração | Refatoração de validações utilizando o padrão *Chain of Responsibility* | Alta | `RN-04`, `RF-07` | 5 | Concluído |
+| T-09 | [PR #37](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/37) | Documentação / Arquitetura | Documentação da ADR-04, atualização dos diagramas UML e diretrizes em `.harness` | Média | — | 5 | Concluído |
+| T-10 | — | Teste / Evidência | Execução dos relatórios de testes de validação de anúncios (antes/depois) | Média | — | 5 | Concluído |
+| T-11 | — | Documentação / PO | Consolidação do backlog e elaboração do relatório final da Sprint 5 | Média | — | 5 | Concluído |
 
 ## 5. Definition of Ready
 
@@ -73,8 +77,9 @@ Um item está concluído quando:
 
 ## 7. Histórico de refinamento
 
-| Sprint   | Itens criados/divididos/removidos                          | Motivo                                                                                                           | Evidência    |
+| Sprint | Itens criados/divididos/removidos | Motivo | Evidência |
 | -------- | ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ------------ |
-| Sprint 1 | Criação dos 12 itens iniciais do Product Backlog           | Definição do escopo inicial do Radar UFLA                                                                        | `#1`–`#12`   |
-| Sprint 2 | Inclusão dos itens `#14` e `#15` e mapeamento dos RFs/RNFs | Mapeamento detalhado dos requisitos funcionais e gestão de artefatos da Sprint 2                                 | `#14`, `#15` |
+| Sprint 1 | Criação dos 12 itens iniciais do Product Backlog | Definição do escopo inicial do Radar UFLA | `#1`–`#12` |
+| Sprint 2 | Inclusão dos itens `#14` e `#15` e mapeamento dos RFs/RNFs | Mapeamento detalhado dos requisitos funcionais e gestão de artefatos da Sprint 2 | `#14`, `#15` |
 | Sprint 4 | Inclusão dos débitos técnicos `DT-01` a `DT-05` e tarefas `#24` a `#27` | Refatoração da camada de serviços, isolamento de regras LGPD, elaboração de ADRs e correção de débitos de segurança | `#24`–`#27`, `#28` |
+| Sprint 5 | Inclusão do débito técnico `DT-06` (Issue `#29`) e tarefas `T-09` a `T-11` | Implementação do padrão *Chain of Responsibility*, publicação da ADR-04, atualização dos diagramas UML e emissão de evidências de validação (antes/depois) | `#29`, `PR #37`, `PR #38` |
