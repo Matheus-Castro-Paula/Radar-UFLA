@@ -2,7 +2,9 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { Usuario } = require("../models");
 
-const JWT_SECRET = process.env.JWT_SECRET || "chave_secreta_sprint_3";
+const { obterJwtSecret } = require("../config/config");
+
+const JWT_SECRET = obterJwtSecret();
 
 module.exports = {
   async registrar(req, res) {
