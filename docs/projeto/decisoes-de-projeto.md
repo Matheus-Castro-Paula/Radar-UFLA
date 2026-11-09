@@ -3,6 +3,8 @@
 > Sprint 4 — Issue [#26](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/26) | Responsável: Tech Lead (`@BernarDEVthomaz`)
 >
 > **Atualizado na Sprint 5** — Issue [#32](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/32): ADR-04 (Chain of Responsibility nas validações de anúncio, implementado no PR [#38](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/38)) e melhorias M-05, M-06 e M-07. Detalhamento do padrão em [`padroes-de-projeto.md`](../padroes/padroes-de-projeto.md).
+>
+> **Atualizado na Sprint 6** — Issue [#40](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/40): ADR-05 a ADR-08 (decisões de arquitetura global) e melhorias M-08 a M-14, identificadas ao documentar a arquitetura em [`arquitetura.md`](../arquitetura/arquitetura.md).
 
 Este documento registra a decomposição do back-end em módulos e camadas, as principais decisões locais de projeto (no formato de ADRs), a análise de coesão e acoplamento do código antes e depois da refatoração da Sprint 4 e as melhorias identificadas.
 
@@ -55,6 +57,10 @@ flowchart LR
 | ADR-02 | Autenticação stateless com JWT + bcrypt         | Implementada na Sprint 3, registrada agora                                 | [#4](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/4)   | [`7ebf6ea`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/7ebf6ea)                                                                                                                                                |
 | ADR-03 | Regra `RN-04` (LGPD) no back-end, no service    | Implementada na Sprint 4                                                   | [#25](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/25) | [`0bffa9f`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/0bffa9f), [`593156b`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/593156b)                                                                |
 | ADR-04 | Chain of Responsibility nas validações de anúncio | Implementada na Sprint 5 (PR [#38](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/38)) | [#30](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/30), [#31](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/31), [#32](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/32) | [`c05a69c`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/c05a69c), [`e26c6aa`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/e26c6aa), [`cc1e2b3`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/cc1e2b3), [`d6b6a3d`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/d6b6a3d) |
+| ADR-05 | Cliente-servidor com monólito em camadas | Implementada desde a estrutura inicial, registrada na Sprint 6 | [#40](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/40) | [`f7c6b5d`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/f7c6b5d), [`79ac6af`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/79ac6af) |
+| ADR-06 | MySQL com Sequelize e migrations | Implementada desde a estrutura inicial, registrada na Sprint 6 | [#40](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/40) | [`4cb769c`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/4cb769c), [`4fcfdf3`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/4fcfdf3) |
+| ADR-07 | Docker Compose para a API e o banco | Implementada desde a estrutura inicial, registrada na Sprint 6 | [#40](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/40) | [`f7c6b5d`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/f7c6b5d) |
+| ADR-08 | Fotos em volume local, gravadas após a validação | Aceita na Sprint 6, implementação em andamento | [#40](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/40), [#41](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/41), [#42](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/42), [#43](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/43) | — |
 
 ### ADR-01 — Criar uma camada de Serviços entre Controllers e Models
 
@@ -125,6 +131,80 @@ flowchart LR
   - ⚠️ Cada handler precisa terminar chamando `super.validar(...)`; se um handler novo esquecer, os seguintes deixam de rodar sem nenhum erro. Item obrigatório do code review até a melhoria M-07.
   - ⚠️ A corrente para na primeira violação, então o usuário vê um erro por vez.
   - ⚠️ ADR-01 e ADR-03 continuam valendo: as regras seguem no service, com `RegraNegocioError` e sobre o estado final do anúncio. O ADR-04 só reorganiza onde elas moram.
+
+### ADR-05 — Adotar arquitetura cliente-servidor com monólito em camadas
+
+- **Status:** Aceita (implementada desde a estrutura inicial do projeto, registrada na Sprint 6)
+- **Contexto:** O `RNF-06` exige uma arquitetura cliente-servidor modular. O sistema tem um único domínio (usuários, anúncios, fotos e comentários), é desenvolvido por cinco pessoas em um semestre e precisa ser executado facilmente para demonstração. A stack foi definida como restrição em [`visao-geral.md`](../visao-geral.md#5-restrições-e-premissas).
+- **Alternativas consideradas:**
+  1. Microsserviços, com autenticação e anúncios implantados separadamente.
+  2. Clean Architecture ou Arquitetura Hexagonal completa, com portas e adaptadores.
+  3. Monólito com páginas renderizadas no servidor (Express com templates).
+  4. Monólito em camadas, expondo uma API REST consumida por um front-end estático.
+- **Decisão:** Alternativa 4. O back-end é um único processo Node.js, organizado nas camadas routes, middlewares, controllers, services e models. O front-end é composto de páginas estáticas que consomem a API por `fetch`. A organização está nas seções 3 e 4 de [`arquitetura.md`](../arquitetura/arquitetura.md).
+- **Justificativa:** Microsserviços trariam comunicação em rede, implantação separada e consistência distribuída sem ganho para um domínio pequeno e uma única equipe. A arquitetura hexagonal completa acrescentaria indireção desproporcional às regras atuais. A renderização no servidor uniria interface e API, dificultando a divisão de trabalho entre front-end e back-end. O monólito em camadas permite transações locais, uma única implantação e separação clara de responsabilidades.
+- **Consequências:**
+  - ✅ Uma única unidade de implantação para a API, com transações locais entre anúncio e fotos.
+  - ✅ Front-end e back-end evoluem em paralelo, ligados pelo contrato HTTP.
+  - ⚠️ Toda a API escala em conjunto, e uma falha no processo afeta todas as funcionalidades.
+  - ⚠️ Front-end e API têm origens diferentes, o que exige CORS (ver melhoria M-10).
+  - ⚠️ A separação entre camadas depende de convenção e de code review, como já indicado no ADR-01.
+
+### ADR-06 — Persistir os dados em MySQL com Sequelize e migrations
+
+- **Status:** Aceita (implementada desde a estrutura inicial do projeto, registrada na Sprint 6)
+- **Contexto:** Os dados têm relacionamentos claros: um usuário publica vários anúncios, e um anúncio tem várias fotos e comentários. O `RNF-06` exige banco relacional, o `RNF-03` exige proteção contra injeção de SQL e a criação de um anúncio grava mais de uma tabela. Cinco pessoas precisam reproduzir o mesmo esquema em máquinas diferentes.
+- **Alternativas consideradas:**
+  1. Banco de documentos (MongoDB), com fotos e comentários embutidos no anúncio.
+  2. MySQL com SQL escrito manualmente, usando apenas o driver `mysql2`.
+  3. MySQL com Sequelize e migrations versionadas.
+- **Decisão:** Alternativa 3. Os models ficam em [`src/models/`](../../API/Back-End/src/models/), as alterações de esquema em [`src/migrations/`](../../API/Back-End/src/migrations/) e a conexão em [`config.js`](../../API/Back-End/src/config/config.js).
+- **Justificativa:** O banco de documentos contrariaria o `RNF-06` e deixaria a integridade entre usuários e anúncios a cargo da aplicação. O SQL manual exigiria cuidado individual em cada consulta para evitar injeção. O Sequelize oferece consultas parametrizadas, associações e transações, e as migrations tornam o esquema reproduzível em qualquer máquina.
+- **Consequências:**
+  - ✅ Integridade referencial e `ON DELETE CASCADE` garantidos pelo banco.
+  - ✅ Anúncio e fotos gravados em uma única transação.
+  - ✅ Esquema versionado junto com o código.
+  - ⚠️ Os services dependem da API do Sequelize para consultas e transações.
+  - ⚠️ Migrations já aplicadas não podem ser editadas; cada mudança exige uma migration nova (regra 12 de [`boundaries.md`](../../.harness/boundaries.md)).
+  - ⚠️ A listagem de anúncios ainda não é paginada (ver melhoria M-12).
+
+### ADR-07 — Usar Docker Compose para executar a API e o banco
+
+- **Status:** Aceita (implementada desde a estrutura inicial do projeto, registrada na Sprint 6)
+- **Contexto:** O `RNF-06` prevê a verificação do isolamento dos serviços no ambiente Docker. A aplicação depende de versões específicas de Node.js e MySQL, e a execução precisa ser reproduzível para a correção e a demonstração.
+- **Alternativas consideradas:**
+  1. Instalação manual de Node.js e MySQL em cada máquina.
+  2. Docker apenas para o banco, com a API executada diretamente na máquina.
+  3. Docker Compose com a API e o banco, mantendo o front-end fora do Compose.
+  4. Docker Compose com a API, o banco e um servidor web para o front-end.
+- **Decisão:** Alternativa 3. O [`docker-compose.yml`](../../API/Back-End/docker-compose.yml) define os serviços `db` e `backend`, e a API é construída pelo [`Dockerfile`](../../API/Back-End/Dockerfile). O front-end é servido à parte, como arquivos estáticos.
+- **Justificativa:** A instalação manual causa diferenças de versão entre as máquinas, e a alternativa 2 resolve isso apenas para o banco. Em relação à alternativa 4, a opção adotada dispensa a configuração de um servidor web, pois o front-end não tem etapa de build e pode ser servido por qualquer servidor estático.
+- **Consequências:**
+  - ✅ A API e o banco sobem com um único comando e se comunicam pelo nome do serviço (`db`).
+  - ✅ Os dados do banco persistem no volume `mysql_data`.
+  - ⚠️ O front-end exige um comando separado para ser servido.
+  - ⚠️ O arquivo define a senha do MySQL em texto e expõe a porta 3306 (ver melhoria M-11).
+  - ⚠️ A configuração é voltada a desenvolvimento e demonstração: o código é montado por bind mount e não há TLS (ver melhoria M-08).
+
+### ADR-08 — Armazenar as fotos em volume local, gravando após a validação
+
+- **Status:** Aceita na Sprint 6, com implementação nas Issues [#41](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/41), [#42](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/42) e [#43](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/43)
+- **Contexto:** O `RF-08` prevê até 3 fotos de no máximo 5 MB por anúncio, e o `RNF-06` exige armazenamento seguro de mídias. Até a Sprint 5, as fotos chegavam à API como URLs, sem upload real. O item T-04 do backlog e a Issue [#10](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/10) previam Multer com Cloudinary, enquanto as Issues da Sprint 6 preveem armazenamento local. A `RN-04` proíbe foto em anúncio de documento, portanto esse arquivo não pode permanecer no servidor.
+- **Alternativas consideradas:**
+  1. Serviço externo de mídia (Cloudinary).
+  2. Imagens no MySQL, em colunas binárias.
+  3. Disco local, gravando durante o recebimento (`diskStorage` do Multer).
+  4. Disco local, mantendo o arquivo em memória e gravando somente após a validação (`memoryStorage` do Multer).
+- **Decisão:** Alternativa 4. O `uploadMiddleware` mantém os arquivos em memória, a corrente de validação é executada e só então o `AnuncioService` grava em `/uploads`, volume persistente do Docker, e salva o caminho relativo em `foto_anuncio.url_imagem`. O Express serve a pasta por HTTP. O contrato entre as partes está na seção 5.4 de [`arquitetura.md`](../arquitetura/arquitetura.md).
+- **Justificativa:** O Cloudinary oferece plano gratuito e CDN, mas exigiria conta e chaves para executar o projeto e tornaria a demonstração dependente de um serviço externo. Imagens no banco aumentariam o volume do MySQL e o custo das consultas. A gravação durante o recebimento deixaria em disco a foto de um documento recusado pela `RN-04`, mesmo com a requisição rejeitada. Com a alternativa 4, um arquivo recusado nunca chega ao disco.
+- **Consequências:**
+  - ✅ O projeto é executado sem conta ou credenciais de terceiros.
+  - ✅ A `RN-04` continua valendo sem alteração no `RegraLGPDHandler`.
+  - ⚠️ As fotos ficam presas à máquina que executa a aplicação, sem CDN e com backup manual do volume.
+  - ⚠️ Cada requisição pode manter até 15 MB em memória.
+  - ⚠️ Excluir um anúncio remove as linhas do banco, mas não os arquivos (ver melhoria M-13).
+  - ⚠️ O MIME informado pelo cliente pode ser falsificado (ver melhoria M-14).
+  - ⚠️ O README, o item T-04 do backlog e a Issue [#10](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/10) ainda citam o Cloudinary e precisam ser atualizados.
 
 ## 3. Análise de coesão e acoplamento
 
@@ -207,3 +287,10 @@ function validarRegraLGPD(categoria, fotos) {
 | M-05 | Bloquear CPF e números de documento no título e na descrição também na API, como um handler da corrente (ADR-04)                                | Hoje essa checagem da `RN-04` só existe no front-end (`validarLGPDPublicacao` em `app.js`) e pode ser contornada chamando a API — a mesma situação que motivou o ADR-03 | Alta       |
 | M-06 | Parar de devolver `details: error.message` nos erros 500 de `anuncioController.js` e `authController.js`; registrar o erro no servidor e responder com mensagem genérica | Expor detalhes internos ao cliente contraria a regra 6 de [`.harness/boundaries.md`](../../.harness/boundaries.md) | Média      |
 | M-07 | Fixar o repasse da corrente na classe base (Template Method): `ValidationHandler.validar` chama um método `verificar` implementado por cada handler e depois repassa ao próximo | Hoje cada handler precisa lembrar de chamar `super.validar`; se esquecer, a corrente para em silêncio (ADR-04) | Média      |
+| M-08 | Publicar a API atrás de um proxy reverso com HTTPS/TLS | O `RNF-03` exige TLS 1.3, e a API responde apenas em HTTP | Alta       |
+| M-09 | Registrar log de auditoria das operações de alteração e exclusão, com timestamp UTC, usuário e IP | Exigido pelo `RNF-04` e inexistente no código | Média      |
+| M-10 | Restringir o CORS à origem do front-end e usar a variável `PORT` em `server.js` | `cors()` aceita qualquer origem, e a porta 3000 está fixa no código, apesar de `PORT` existir no `.env.example` (ADR-05) | Média      |
+| M-11 | Retirar a senha do MySQL do `docker-compose.yml`, usar um usuário próprio da aplicação e não expor a porta 3306 | A senha em texto contraria a regra 5 de [`.harness/boundaries.md`](../../.harness/boundaries.md) (ADR-07) | Alta       |
+| M-12 | Paginar `GET /api/anuncios` e levar busca e filtros ao servidor | A vitrine carrega todos os anúncios ativos e filtra no navegador, o que limita o `RNF-02` com o crescimento da base (ADR-06) | Média      |
+| M-13 | Remover de `/uploads` os arquivos das fotos ao excluir um anúncio ou substituir suas fotos | A exclusão em cascata apaga as linhas do banco, mas não os arquivos (ADR-08) | Média      |
+| M-14 | Conferir a assinatura real do arquivo, além do MIME informado | O MIME enviado pelo cliente pode ser falsificado (ADR-08) | Baixa      |
