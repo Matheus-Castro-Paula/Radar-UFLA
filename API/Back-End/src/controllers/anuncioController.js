@@ -43,7 +43,11 @@ module.exports = {
 
   async criar(req, res) {
     try {
-      const anuncio = await AnuncioService.criar(req.body, req.usuarioId);
+      const anuncio = await AnuncioService.criar(
+        req.body || {},
+        req.usuarioId,
+        req.files || [],
+      );
       return res
         .status(201)
         .json({ message: "Anúncio criado com sucesso!", anuncio });

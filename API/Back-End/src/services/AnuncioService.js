@@ -57,9 +57,9 @@ module.exports = {
     return anuncio;
   },
 
-  async criar(dados, usuarioId) {
+  async criar(dados, usuarioId, arquivos = []) {
     // 1. Delega TODAS as validações para a corrente (Chain of Responsibility)
-    await anuncioValidationChain.executar(dados, { acao: "CRIAR" });
+    await anuncioValidationChain.executar(dados, { acao: "CRIAR", arquivos });
 
     const fotos = dados.fotos || [];
     const categoria = String(dados.categoria).trim().toLowerCase();
