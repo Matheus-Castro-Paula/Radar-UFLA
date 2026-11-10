@@ -7,8 +7,10 @@ class RegraLGPDHandler extends ValidationHandler {
       .trim()
       .toLowerCase();
     const fotos = dados.fotos || [];
+    const arquivos = contexto.arquivos || [];
     const ehDocumento = categoria === "documento";
-    const temFotos = Array.isArray(fotos) && fotos.length > 0;
+    const temFotos =
+      (Array.isArray(fotos) && fotos.length > 0) || arquivos.length > 0;
 
     if (ehDocumento && temFotos) {
       throw new RegraNegocioError(

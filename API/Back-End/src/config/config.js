@@ -1,6 +1,17 @@
 require('dotenv').config();
 
+function obterJwtSecret() {
+  const segredo = process.env.JWT_SECRET;
+  if (!segredo || !segredo.trim()) {
+    throw new Error(
+      'JWT_SECRET não definido. Preencha a variável no arquivo .env (veja .env.example).',
+    );
+  }
+  return segredo;
+}
+
 module.exports = {
+  obterJwtSecret,
   development: {
     username: process.env.DB_USER || 'root',
     password: process.env.DB_PASSWORD || '',

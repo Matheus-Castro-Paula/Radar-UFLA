@@ -2,7 +2,9 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { Usuario } = require("../models");
 
-const JWT_SECRET = process.env.JWT_SECRET || "chave_secreta_sprint_3";
+const { obterJwtSecret } = require("../config/config");
+
+const JWT_SECRET = obterJwtSecret();
 
 module.exports = {
   async registrar(req, res) {
@@ -44,9 +46,8 @@ module.exports = {
         usuario: usuarioResponse,
       });
     } catch (error) {
-      return res
-        .status(500)
-        .json({ error: "Erro ao registrar usuário.", details: error.message });
+      console.error("[authController.registrar]", error);
+      return res.status(500).json({ error: "Erro ao registrar usuário." });
     }
   },
 
@@ -91,9 +92,8 @@ module.exports = {
         },
       });
     } catch (error) {
-      return res
-        .status(500)
-        .json({ error: "Erro ao realizar login.", details: error.message });
+      console.error("[authController.login]", error);
+      return res.status(500).json({ error: "Erro ao realizar login." });
     }
   },
 
@@ -115,9 +115,8 @@ module.exports = {
 
       return res.status(200).json(usuario);
     } catch (error) {
-      return res
-        .status(500)
-        .json({ error: "Erro ao buscar perfil.", details: error.message });
+      console.error("[authController.perfil]", error);
+      return res.status(500).json({ error: "Erro ao buscar perfil." });
     }
   },
 };
