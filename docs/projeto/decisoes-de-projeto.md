@@ -4,7 +4,7 @@
 >
 > **Atualizado na Sprint 5** — Issue [#32](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/32): ADR-04 (Chain of Responsibility nas validações de anúncio, implementado no PR [#38](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/38)) e melhorias M-05, M-06 e M-07. Detalhamento do padrão em [`padroes-de-projeto.md`](../padroes/padroes-de-projeto.md).
 >
-> **Atualizado na Sprint 6** — Issue [#40](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/40): ADR-05 a ADR-08 (decisões de arquitetura global) e melhorias M-08 a M-14, identificadas ao documentar a arquitetura em [`arquitetura.md`](../arquitetura/arquitetura.md).
+> **Atualizado na Sprint 6** — Issue [#40](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/40): ADR-05 a ADR-08 (decisões de arquitetura global) e melhorias M-08 a M-18, identificadas ao documentar a arquitetura em [`arquitetura.md`](../arquitetura/arquitetura.md). As PRs [#46](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/46), [#47](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/47) e [#48](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/48) implementaram a ADR-08 e resolveram as melhorias M-02, M-04, M-06 e M-14.
 
 Este documento registra a decomposição do back-end em módulos e camadas, as principais decisões locais de projeto (no formato de ADRs), a análise de coesão e acoplamento do código antes e depois da refatoração da Sprint 4 e as melhorias identificadas.
 
@@ -60,7 +60,7 @@ flowchart LR
 | ADR-05 | Cliente-servidor com monólito em camadas | Implementada desde a estrutura inicial, registrada na Sprint 6 | [#40](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/40) | [`f7c6b5d`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/f7c6b5d), [`79ac6af`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/79ac6af) |
 | ADR-06 | MySQL com Sequelize e migrations | Implementada desde a estrutura inicial, registrada na Sprint 6 | [#40](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/40) | [`4cb769c`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/4cb769c), [`4fcfdf3`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/4fcfdf3) |
 | ADR-07 | Docker Compose para a API e o banco | Implementada desde a estrutura inicial, registrada na Sprint 6 | [#40](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/40) | [`f7c6b5d`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/f7c6b5d) |
-| ADR-08 | Fotos em volume local, gravadas após a validação | Aceita na Sprint 6, implementação em andamento | [#40](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/40), [#41](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/41), [#42](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/42), [#43](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/43) | — |
+| ADR-08 | Fotos em volume local, gravadas após a validação | Implementada na Sprint 6 (PRs [#46](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/46), [#47](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/47) e [#48](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/48)) | [#40](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/40), [#41](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/41), [#42](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/42), [#43](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/43) | [`da9f0d2`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/da9f0d2), [`33c4503`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/33c4503), [`b92d989`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/b92d989), [`a6348c2`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/a6348c2), [`1550607`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/1550607) |
 
 ### ADR-01 — Criar uma camada de Serviços entre Controllers e Models
 
@@ -188,14 +188,14 @@ flowchart LR
 
 ### ADR-08 — Armazenar as fotos em volume local, gravando após a validação
 
-- **Status:** Aceita na Sprint 6, com implementação nas Issues [#41](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/41), [#42](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/42) e [#43](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/43)
+- **Status:** Aceita e implementada na Sprint 6, nas PRs [#46](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/46), [#47](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/47) e [#48](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/48) (Issues [#41](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/41), [#42](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/42) e [#43](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/43))
 - **Contexto:** O `RF-08` prevê até 3 fotos de no máximo 5 MB por anúncio, e o `RNF-06` exige armazenamento seguro de mídias. Até a Sprint 5, as fotos chegavam à API como URLs, sem upload real. O item T-04 do backlog e a Issue [#10](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/10) previam Multer com Cloudinary, enquanto as Issues da Sprint 6 preveem armazenamento local. A `RN-04` proíbe foto em anúncio de documento, portanto esse arquivo não pode permanecer no servidor.
 - **Alternativas consideradas:**
   1. Serviço externo de mídia (Cloudinary).
   2. Imagens no MySQL, em colunas binárias.
   3. Disco local, gravando durante o recebimento (`diskStorage` do Multer).
   4. Disco local, mantendo o arquivo em memória e gravando somente após a validação (`memoryStorage` do Multer).
-- **Decisão:** Alternativa 4. O `uploadMiddleware` mantém os arquivos em memória, a corrente de validação é executada e só então o `AnuncioService` grava em `/uploads`, volume persistente do Docker, e salva o caminho relativo em `foto_anuncio.url_imagem`. O Express serve a pasta por HTTP. O contrato entre as partes está na seção 5.4 de [`arquitetura.md`](../arquitetura/arquitetura.md).
+- **Decisão:** Alternativa 4. O [`uploadMiddleware`](../../API/Back-End/src/middlewares/uploadMiddleware.js) mantém os arquivos em memória e o controller os entrega ao service, que executa a corrente de validação com os arquivos em `contexto.arquivos`. Só depois da aprovação o [`MidiaStorage`](../../API/Back-End/src/services/MidiaStorage.js) grava em `/uploads`, no volume persistente `uploads_data`, com nome gerado (UUID), e o caminho relativo vai para `foto_anuncio.url_imagem`. O Express serve a pasta por HTTP. O fluxo implementado está na seção 5.4 de [`arquitetura.md`](../arquitetura/arquitetura.md).
 - **Justificativa:** O Cloudinary oferece plano gratuito e CDN, mas exigiria conta e chaves para executar o projeto e tornaria a demonstração dependente de um serviço externo. Imagens no banco aumentariam o volume do MySQL e o custo das consultas. A gravação durante o recebimento deixaria em disco a foto de um documento recusado pela `RN-04`, mesmo com a requisição rejeitada. Com a alternativa 4, um arquivo recusado nunca chega ao disco.
 - **Consequências:**
   - ✅ O projeto é executado sem conta ou credenciais de terceiros.
@@ -203,7 +203,9 @@ flowchart LR
   - ⚠️ As fotos ficam presas à máquina que executa a aplicação, sem CDN e com backup manual do volume.
   - ⚠️ Cada requisição pode manter até 15 MB em memória.
   - ⚠️ Excluir um anúncio remove as linhas do banco, mas não os arquivos (ver melhoria M-13).
-  - ⚠️ O MIME informado pelo cliente pode ser falsificado (ver melhoria M-14).
+  - ✅ O `FotosHandler` confere os bytes iniciais de cada arquivo, o que barra um arquivo com MIME falsificado (melhoria M-14, resolvida na PR #47).
+  - ⚠️ O cadastro ainda aceita URLs externas como foto quando enviadas em JSON, sem passar por essas validações (ver melhoria M-16).
+  - ⚠️ As colunas `mime_type` e `tamanho_bytes`, criadas para a foto, ainda não são preenchidas (ver melhoria M-18).
   - ⚠️ O README, o item T-04 do backlog e a Issue [#10](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/10) ainda citam o Cloudinary e precisam ser atualizados.
 
 ## 3. Análise de coesão e acoplamento
@@ -294,3 +296,9 @@ function validarRegraLGPD(categoria, fotos) {
 | M-12 | Paginar `GET /api/anuncios` e levar busca e filtros ao servidor | A vitrine carrega todos os anúncios ativos e filtra no navegador, o que limita o `RNF-02` com o crescimento da base (ADR-06) | Média      |
 | M-13 | Remover de `/uploads` os arquivos das fotos ao excluir um anúncio ou substituir suas fotos | A exclusão em cascata apaga as linhas do banco, mas não os arquivos (ADR-08) | Média      |
 | M-14 | Conferir a assinatura real do arquivo, além do MIME informado | O MIME enviado pelo cliente pode ser falsificado (ADR-08) | Baixa      |
+| M-15 | Gravar `data_ocorrencia` no `AnuncioService`, em `criar` e nos campos editáveis de `atualizar` | A coluna existe (PR #46) e o front-end envia o valor (PR #48), mas a API o descarta; o `RF-07` fica incompleto | Alta       |
+| M-16 | Aceitar como foto só arquivos enviados no `POST` e caminhos de `/uploads/` no `PUT` | O cadastro ainda aceita URLs externas em JSON, que não passam pela validação de tipo, tamanho e conteúdo (ADR-08, `RNF-03`) | Alta       |
+| M-17 | Tornar o seeder de demonstração idempotente | Em bancos anteriores à Sprint 6, o seeder tenta recriar o usuário de demonstração, o e-mail único falha e o entrypoint encerra a API (ADR-07) | Média      |
+| M-18 | Gravar `mime_type` e `tamanho_bytes` das fotos | As colunas foram criadas na PR #46, mas o `MidiaStorage` ainda não as preenche (ADR-08) | Baixa      |
+
+Resolvidas na Sprint 6, na PR [#47](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/47): M-02, M-04, M-06 e M-14.
