@@ -14,9 +14,12 @@ const STATUS_POR_CODIGO = {
 
 function responderErro(res, error, mensagemPadrao) {
   if (error instanceof RegraNegocioError) {
-    return res.status(STATUS_POR_CODIGO[error.codigo]).json({ error: error.message });
+    return res
+      .status(STATUS_POR_CODIGO[error.codigo])
+      .json({ error: error.message });
   }
-  return res.status(500).json({ error: mensagemPadrao, details: error.message });
+  console.error(`[anuncioController] ${mensagemPadrao}`, error);
+  return res.status(500).json({ error: mensagemPadrao });
 }
 
 module.exports = {
@@ -41,7 +44,9 @@ module.exports = {
   async criar(req, res) {
     try {
       const anuncio = await AnuncioService.criar(req.body, req.usuarioId);
-      return res.status(201).json({ message: "Anúncio criado com sucesso!", anuncio });
+      return res
+        .status(201)
+        .json({ message: "Anúncio criado com sucesso!", anuncio });
     } catch (error) {
       return responderErro(res, error, "Erro ao criar anúncio.");
     }
@@ -54,7 +59,9 @@ module.exports = {
         req.body,
         req.usuarioId,
       );
-      return res.status(200).json({ message: "Anúncio atualizado com sucesso!", anuncio });
+      return res
+        .status(200)
+        .json({ message: "Anúncio atualizado com sucesso!", anuncio });
     } catch (error) {
       return responderErro(res, error, "Erro ao atualizar anúncio.");
     }
