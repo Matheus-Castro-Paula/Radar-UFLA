@@ -8,6 +8,10 @@
 | ADR-02 | Autenticação stateless com JWT + bcrypt       | Senha com bcrypt; token JWT de 24h com `id`, `email` e `tipo_usuario`, validado pelo `authMiddleware`. |
 | ADR-03 | Regra `RN-04` (LGPD) no back-end, no service  | Foto de documento é bloqueada na API, não só no front-end.                                            |
 | ADR-04 | Chain of Responsibility nas validações de anúncio | Cada regra é um handler em `services/validations/`; `AnuncioValidationChain` monta a corrente e cada handler decide pela `contexto.acao`. |
+| ADR-05 | Cliente-servidor com monólito em camadas      | API REST única em camadas, consumida por um front-end estático; microsserviços e hexagonal completa foram descartados. |
+| ADR-06 | MySQL com Sequelize e migrations              | Dados relacionais acessados pelos models; mudança de esquema sempre por migration nova.               |
+| ADR-07 | Docker Compose para a API e o banco           | Serviços `db` e `backend` sobem pelo Compose; o front-end é servido à parte.                          |
+| ADR-08 | Fotos em volume local, gravadas após a validação | Multer em memória, corrente de validação e só então gravação em `/uploads`; sem serviço externo de mídia. |
 
 ## Antes de mudar algo que contradiz um ADR
 
@@ -15,4 +19,4 @@ Leia o ADR completo no documento oficial. Se a decisão precisar mudar, registre
 
 ## Decisões ainda não registradas
 
-- **Monólito em camadas, cliente-servidor (RNF-06)** — a estrutura adotada desde a Sprint 2 (`routes → middlewares → controllers → services → models`, front estático consumindo uma API REST única). Alternativas descartadas: microsserviços (custo desproporcional ao tamanho do sistema e do time) e Clean/Hexagonal completa (indireção demais para o domínio). Candidata a ADR ou ao `docs/arquitetura/arquitetura.md` da Sprint 6.
+Nenhuma no momento. O monólito em camadas, antes listado aqui, foi registrado como ADR-05 na Sprint 6.
