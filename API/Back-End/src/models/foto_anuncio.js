@@ -18,9 +18,18 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: false,
       },
+      // Caminho relativo da mídia, ex.: /uploads/1731170000-garrafa.jpg (ADR-08)
       url_imagem: {
         type: DataTypes.STRING(255),
         allowNull: false,
+      },
+      mime_type: {
+        type: DataTypes.STRING(50),
+        allowNull: true,
+      },
+      tamanho_bytes: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
       },
       // Sugestão de melhoria (RN-04): permite ocultar fotos de documentos
       // sensíveis na vitrine pública. Requer nova migration para existir de fato.
