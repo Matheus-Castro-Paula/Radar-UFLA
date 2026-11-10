@@ -37,6 +37,7 @@
 - Publicação de itens encontrados (aba "Achados") e perdidos (aba "Perdidos")
 - Filtros combinados e pesquisa por palavra-chave nos feeds
 - Autenticação e gestão de anúncios pelo próprio usuário
+- Upload local de fotos via Multer com armazenamento em volume Docker (ADR-08)
 
 ## 3. Comece por aqui
 
@@ -76,11 +77,12 @@ Cada sprint vale **2,5 pontos**:
 | Funcionalidade                                              | Requisito          | Situação                                                                 |
 | ----------------------------------------------------------- | ------------------ | ------------------------------------------------------------------------ |
 | Vitrine com abas Achados/Perdidos, busca e filtros          | `RF-04` a `RF-06`  | **Implementado** (Sprint 5): feed carregado de `GET /api/anuncios`       |
-| Formulário de publicação de item                            | `RF-07`, `RN-04`   | **Implementado** (Sprint 5): envia para `POST /api/anuncios` com o token; upload de fotos pendente (#10) |
+| Formulário de publicação de item                            | `RF-07`, `RN-04`   | **Implementado** (Sprint 5): envia para `POST /api/anuncios` com o token |
 | Cadastro e login com senha criptografada e token JWT        | `RF-01`, `RNF-03`  | **Implementado** (Sprint 3)                                              |
 | Rota protegida por token (`/api/auth/perfil`)               | `RF-01`            | **Implementado** (Sprint 3)                                              |
 | Modelagem do banco (migrations e Models Sequelize)          | `RNF-06`           | **Implementado** (Sprints 2 e 3)                                         |
-| Controle de acesso por papéis, upload de fotos, comentários | `RF-02`, `RF-08`, `RF-10` | Planejado                                                         |
+| Upload de mídia local (Multer e volume Docker `/uploads`)   | `RF-08`, `RN-04`   | **Em integração** (Sprint 6 - ADR-08): PRs #41, #42 e #43               |
+| Controle de acesso por papéis e comentários                 | `RF-02`, `RF-10`   | Planejado                                                                |
 
 ## 7. Estrutura do repositório
 
@@ -133,7 +135,7 @@ Cada sprint vale **2,5 pontos**:
 - **Back-end:** Node.js 20, Express.js 5
 - **ORM / Banco de dados:** Sequelize, MySQL 8.0
 - **Autenticação:** JWT (`jsonwebtoken`) e bcrypt (`bcryptjs`)
-- **Upload (planejado):** Multer e Cloudinary
+- **Upload e Mídia:** Multer e armazenamento local via volume Docker `uploads_data` (`/uploads`) (ADR-08 — Cloudinary descontinuado)
 - **Containerização:** Docker, Docker Compose
 
 ## 9. Documentação
@@ -215,9 +217,10 @@ Base: `http://localhost:3000`
 | GET    | `/api/auth/perfil`  | Protegido | Retorna os dados do usuário; exige `Authorization: Bearer <token>` |
 | GET    | `/api/anuncios`     | Público   | Lista anúncios ativos (filtro opcional `?tipo=ACHADO` ou `PERDIDO`); autor só com `id` e `nome` |
 | GET    | `/api/anuncios/:id` | Público   | Detalha um anúncio                                               |
-| POST   | `/api/anuncios`     | Protegido | Cria anúncio (`titulo`, `descricao`, `tipo`, `categoria`, `local_encontro`, `fotos` opcional); aplica a `RN-04` |
+| POST   | `/api/anuncios`     | Protegido | Cria anúncio (`titulo`, `descricao`, `tipo`, `categoria`, `local_encontro`, `fotos` opcional via Multer / ADR-08); aplica a `RN-04` |
 | PUT    | `/api/anuncios/:id` | Protegido | Edita anúncio (só o autor); a `RN-04` vale sobre o estado final   |
 | DELETE | `/api/anuncios/:id` | Protegido | Exclui anúncio (só o autor)                                      |
+| GET    | `/uploads/:arquivo` | Público   | Serve a imagem de foto armazenada no volume local                |
 
 Exemplo rápido:
 
@@ -227,13 +230,18 @@ curl -X POST http://localhost:3000/api/auth/login \
   -d '{"email":"admin@ufla.br","senha":"admin321"}'
 ```
 
-## 12. Regra de ouro da rastreabilidade
+## 12. Débitos Técnicos e Arquiteturais
+
+- **Item T-04 / I-04 [Concluído via ADR-08]:** Substituição do Cloudinary por armazenamento local via Multer e volume Docker `uploads_data` (`/uploads`).
+- **Itens M-08 a M-14:** Débitos arquiteturais mapeados na Sprint 6 (HTTPS/TLS, logs de auditoria, CORS parametrizado, credenciais no Compose, paginação e magic bytes). Detalhados em `docs/backlog-produto.md`.
+
+## 13. Regra de ouro da rastreabilidade
 
 Sempre que possível, o fluxo do projeto segue o caminho:
 `Problema → Requisito → Issue → Sprint → Modelo/Decisão → Código → Teste → Evidência`
 
 A tabela central desse vínculo é mantida em `docs/backlog-produto.md`, `docs/requisitos/requisitos.md` e, a partir da Sprint 3, na matriz de rastreabilidade de `docs/modelagem/modelagem.md`.
 
-## 13. Entrega final
+## 14. Entrega final
 
 Até 30/11/2026, o repositório estará consolidado na tag `versao-final` contendo código-fonte completo, instruções de execução, gravações demonstrativas e todos os artefatos de documentação atualizados.
