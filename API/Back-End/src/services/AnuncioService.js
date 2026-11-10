@@ -1,6 +1,7 @@
 const { sequelize, Anuncio, FotoAnuncio, Usuario } = require("../models");
 const RegraNegocioError = require("./RegraNegocioError");
 const anuncioValidationChain = require("./validations/AnuncioValidationChain");
+const MidiaStorage = require("./MidiaStorage");
 
 const CATEGORIA_DOCUMENTO = "documento";
 
@@ -57,36 +58,46 @@ module.exports = {
     return anuncio;
   },
 
-  async criar(dados, usuarioId, arquivos = []) {
-    // 1. Delega TODAS as validações para a corrente (Chain of Responsibility)
+    async criar(dados, usuarioId, arquivos = []) {
+    // 1. Delega TODAS as validações para a corrente (Chain of Responsibility).
+    //    Os arquivos seguem em memória até aqui: nada vai ao disco se alguma regra falhar.
     await anuncioValidationChain.executar(dados, { acao: "CRIAR", arquivos });
 
-    const fotos = dados.fotos || [];
     const categoria = String(dados.categoria).trim().toLowerCase();
 
-    // 2. Persistência
-    const anuncioId = await sequelize.transaction(async (transaction) => {
-      const anuncio = await Anuncio.create(
-        {
-          usuario_id: usuarioId,
-          titulo: dados.titulo,
-          descricao: dados.descricao,
-          tipo: dados.tipo,
-          categoria,
-          local_encontro: dados.local_encontro,
-          status: "ATIVO",
-        },
-        { transaction },
-      );
+    // 2. Grava os arquivos (só depois de validados) e junta com URLs enviadas em JSON
+    const urlsSalvas = await MidiaStorage.salvar(arquivos);
+    const fotos = [...(dados.fotos || []), ...urlsSalvas];
 
-      if (fotos.length > 0) {
-        await FotoAnuncio.bulkCreate(
-          fotos.map((url_imagem) => ({ anuncio_id: anuncio.id, url_imagem })),
+    // 3. Persistência. Se o banco falhar, os arquivos recém-gravados são removidos.
+    let anuncioId;
+    try {
+      anuncioId = await sequelize.transaction(async (transaction) => {
+        const anuncio = await Anuncio.create(
+          {
+            usuario_id: usuarioId,
+            titulo: dados.titulo,
+            descricao: dados.descricao,
+            tipo: dados.tipo,
+            categoria,
+            local_encontro: dados.local_encontro,
+            status: "ATIVO",
+          },
           { transaction },
         );
-      }
-      return anuncio.id;
-    });
+
+        if (fotos.length > 0) {
+          await FotoAnuncio.bulkCreate(
+            fotos.map((url_imagem) => ({ anuncio_id: anuncio.id, url_imagem })),
+            { transaction },
+          );
+        }
+        return anuncio.id;
+      });
+    } catch (erro) {
+      await MidiaStorage.remover(urlsSalvas);
+      throw erro;
+    }
 
     return this.buscarPorId(anuncioId);
   },
