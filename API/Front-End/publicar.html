@@ -55,16 +55,20 @@
               <input type="text" name="local" placeholder="Ex: Bloco 3, sala 12" />
             </label>
             <label class="field">
-              <span class="field-label">Horário</span>
-              <input type="text" name="horario" placeholder="Ex: hoje, 14h30" />
+              <span class="field-label">Data e hora</span>
+              <input type="datetime-local" id="data-ocorrencia" name="data_ocorrencia" required />
             </label>
           </div>
         </div>
 
-        <div class="upload-area" id="upload-area">
-          <div class="upload-icon">📷</div>
-          <p>Arraste uma foto ou clique para escolher</p>
-          <p class="upload-hint">(upload real será integrado em uma sprint futura)</p>
+        <div class="upload-column" id="upload-column">
+          <label class="upload-area" id="upload-area" for="fotos">
+            <input type="file" id="fotos" name="fotos" accept="image/jpeg,image/png,image/webp" multiple />
+            <span class="upload-icon" aria-hidden="true">📷</span>
+            <span>Arraste até 3 fotos ou clique para escolher</span>
+            <span class="upload-hint">JPG, PNG ou WEBP, até 5 MB cada</span>
+          </label>
+          <ul class="foto-previews" id="foto-previews" aria-label="Fotos selecionadas"></ul>
         </div>
       </div>
 

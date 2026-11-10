@@ -1,5 +1,11 @@
 const API_BASE = "http://localhost:3000/api";
+const API_ORIGIN = API_BASE.replace(/\/api$/, ""); // fotos são servidas em <origem>/uploads/...
 const API_URL = `${API_BASE}/auth`;
+
+// Limites de upload (RF-08) — a API valida de novo; aqui é só para avisar cedo
+const MAX_FOTOS = 3;
+const MAX_BYTES = 5 * 1024 * 1024;
+const TIPOS_FOTO = ["image/jpeg", "image/png", "image/webp"];
 
 const ICONS = {
   objeto: "🔑",
@@ -9,11 +15,27 @@ const ICONS = {
   outro: "📦",
 };
 
+// A API devolve url_imagem relativa ("/uploads/<arquivo>"). Só aceita caminhos
+// de /uploads ou URLs http(s): nada de "javascript:" ou "data:" vindo do banco.
+function urlDaFoto(url) {
+  if (typeof url !== "string") return null;
+  if (url.startsWith("/uploads/")) return `${API_ORIGIN}${url}`;
+  if (/^https?:\/\//i.test(url)) return url;
+  return null;
+}
+
 // Converte um anúncio da API (GET /api/anuncios) para o formato usado nos cards
 function anuncioParaItem(anuncio) {
-  const data = new Date(anuncio.criado_em);
+  // Data em que o item foi achado/perdido (RF-07); anúncios antigos usam a data de criação
+  const data = new Date(anuncio.data_ocorrencia || anuncio.criado_em);
   const quando = `${data.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}, ${data.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`;
   const autor = anuncio.usuario ? `por ${anuncio.usuario.nome}` : "";
+
+  // RN-04: documento nunca mostra foto, mesmo que a API devolva alguma
+  const primeiraFoto =
+    anuncio.categoria !== "documento" && Array.isArray(anuncio.fotos)
+      ? urlDaFoto(anuncio.fotos[0]?.url_imagem)
+      : null;
 
   return {
     feed: anuncio.tipo === "ACHADO" ? "achados" : "perdidos",
@@ -21,6 +43,7 @@ function anuncioParaItem(anuncio) {
     titulo: anuncio.titulo,
     descricao: anuncio.descricao,
     local: anuncio.local_encontro || "",
+    imagem: primeiraFoto,
     meta: [anuncio.local_encontro, quando, autor].filter(Boolean).join(" · "),
   };
 }
@@ -122,7 +145,7 @@ function initFeed() {
       card.innerHTML = `
         <div class="card-thumb">
           <span class="card-badge">${rotulo}</span>
-          ${ICONS[item.categoria] || "📦"}
+          <span class="card-placeholder" aria-hidden="true">${ICONS[item.categoria] || "📦"}</span>
         </div>
         <div class="card-body">
           <h3 class="card-title">${escapeHTML(item.titulo)}</h3>
@@ -130,6 +153,18 @@ function initFeed() {
           <div class="card-meta">${escapeHTML(item.meta)}</div>
         </div>
       `;
+
+      // Foto real do item; se não houver (ou falhar ao carregar), fica o placeholder
+      if (item.imagem) {
+        const thumb = card.querySelector(".card-thumb");
+        const img = document.createElement("img");
+        img.className = "card-img";
+        img.alt = `Foto: ${item.titulo}`;
+        img.loading = "lazy";
+        img.addEventListener("error", () => img.remove());
+        img.src = item.imagem; // atribuído como propriedade, nunca interpolado no HTML
+        thumb.appendChild(img);
+      }
       feedEl.appendChild(card);
     });
 
@@ -199,16 +234,45 @@ function initAuthLink() {
 
 // --- Página de publicação (publicar.html) ---
 
+function formatarTamanho(bytes) {
+  return bytes >= 1024 * 1024
+    ? `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+    : `${Math.max(1, Math.round(bytes / 1024))} KB`;
+}
+
+// Valida uma foto no navegador (a API repete a validação: RF-08).
+// Devolve a mensagem de erro ou null se estiver ok.
+function erroDaFoto(arquivo) {
+  if (!TIPOS_FOTO.includes(arquivo.type)) {
+    return `"${arquivo.name}" não é JPG, PNG ou WEBP.`;
+  }
+  if (arquivo.size > MAX_BYTES) {
+    return `"${arquivo.name}" tem ${formatarTamanho(arquivo.size)}. Cada foto deve ter no máximo 5 MB.`;
+  }
+  return null;
+}
+
 function initPublishPage() {
   const form = document.getElementById("publish-form");
   if (!form) return;
 
   const segmentedOptions = document.querySelectorAll(".segmented-option");
   const categoriaSelect = document.getElementById("categoria");
+  const uploadColumn = document.getElementById("upload-column");
   const uploadArea = document.getElementById("upload-area");
+  const fotosInput = document.getElementById("fotos");
+  const previewsEl = document.getElementById("foto-previews");
   const docNote = document.getElementById("doc-note");
   const tituloInput = document.getElementById("titulo");
   const descricaoInput = document.getElementById("descricao");
+  const dataInput = document.getElementById("data-ocorrencia");
+
+  // O item não pode ter sido achado/perdido no futuro
+  const agora = new Date();
+  agora.setMinutes(agora.getMinutes() - agora.getTimezoneOffset());
+  dataInput.max = agora.toISOString().slice(0, 16);
+
+  let fotos = []; // arquivos escolhidos (File)
 
   segmentedOptions.forEach((option) => {
     option.addEventListener("click", () => {
@@ -217,24 +281,113 @@ function initPublishPage() {
     });
   });
 
+  // --- Fotos: seleção, prévia e remoção ---
+
+  function renderPreviews() {
+    previewsEl.innerHTML = "";
+    fotos.forEach((arquivo, indice) => {
+      const li = document.createElement("li");
+      li.className = "foto-preview";
+
+      const img = document.createElement("img");
+      img.alt = `Prévia: ${arquivo.name}`;
+      const urlLocal = URL.createObjectURL(arquivo);
+      img.src = urlLocal;
+      img.addEventListener("load", () => URL.revokeObjectURL(urlLocal));
+
+      const remover = document.createElement("button");
+      remover.type = "button";
+      remover.className = "foto-remover";
+      remover.setAttribute("aria-label", `Remover ${arquivo.name}`);
+      remover.textContent = "×";
+      remover.addEventListener("click", () => {
+        fotos.splice(indice, 1);
+        limparMensagem();
+        renderPreviews();
+      });
+
+      li.append(img, remover);
+      previewsEl.appendChild(li);
+    });
+  }
+
+  function adicionarFotos(lista) {
+    limparMensagem();
+    const recusadas = [];
+
+    for (const arquivo of lista) {
+      if (fotos.length >= MAX_FOTOS) {
+        recusadas.push(`Envie no máximo ${MAX_FOTOS} fotos. As demais foram ignoradas.`);
+        break;
+      }
+      const erro = erroDaFoto(arquivo);
+      if (erro) {
+        recusadas.push(erro);
+        continue;
+      }
+      fotos.push(arquivo);
+    }
+
+    renderPreviews();
+    if (recusadas.length) mostrarMensagem(recusadas.join(" "));
+  }
+
+  fotosInput.addEventListener("change", () => {
+    adicionarFotos(Array.from(fotosInput.files));
+    fotosInput.value = ""; // permite escolher o mesmo arquivo de novo
+  });
+
+  ["dragenter", "dragover"].forEach((nome) =>
+    uploadArea.addEventListener(nome, (e) => {
+      e.preventDefault();
+      uploadArea.classList.add("arrastando");
+    }),
+  );
+  ["dragleave", "drop"].forEach((nome) =>
+    uploadArea.addEventListener(nome, (e) => {
+      e.preventDefault();
+      uploadArea.classList.remove("arrastando");
+    }),
+  );
+  uploadArea.addEventListener("drop", (e) => {
+    adicionarFotos(Array.from(e.dataTransfer.files));
+  });
+
+  // --- Regra LGPD (RN-04): documento não tem foto ---
+
   function atualizarPorCategoria() {
     const isDocumento = categoriaSelect.value === "documento";
-    uploadArea.style.display = isDocumento ? "none" : "flex";
+    const tinhaFotos = fotos.length > 0;
+
+    if (isDocumento) {
+      fotos = [];
+      renderPreviews();
+    }
+    uploadColumn.style.display = isDocumento ? "none" : "flex";
     docNote.hidden = !isDocumento;
+
+    if (isDocumento && tinhaFotos) {
+      mostrarMensagem(
+        "Fotos não são permitidas para documentos (LGPD). As fotos selecionadas foram removidas.",
+      );
+    }
   }
 
   categoriaSelect.addEventListener("change", atualizarPorCategoria);
   atualizarPorCategoria();
 
+  // --- Envio ---
+
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
     limparMensagem();
-    tituloInput.classList.remove("invalido");
-    descricaoInput.classList.remove("invalido");
+    [tituloInput, descricaoInput, dataInput, form.elements.local].forEach((campo) =>
+      campo.classList.remove("invalido"),
+    );
 
     const titulo = tituloInput.value.trim();
+    const descricao = descricaoInput.value.trim();
     const local = form.elements.local.value.trim();
-    const horario = form.elements.horario.value.trim();
 
     if (!titulo) {
       tituloInput.classList.add("invalido");
@@ -242,14 +395,27 @@ function initPublishPage() {
       return;
     }
 
-    if (!descricaoInput.value.trim()) {
+    if (!descricao) {
       descricaoInput.classList.add("invalido");
       mostrarMensagem("Descreva o item para ajudar a identificá-lo.");
       return;
     }
 
     if (!local) {
+      form.elements.local.classList.add("invalido");
       mostrarMensagem("Informe o local onde o item foi achado ou perdido.");
+      return;
+    }
+
+    if (!dataInput.value) {
+      dataInput.classList.add("invalido");
+      mostrarMensagem("Informe a data e a hora em que o item foi achado ou perdido.");
+      return;
+    }
+    const dataOcorrencia = new Date(dataInput.value);
+    if (Number.isNaN(dataOcorrencia.getTime()) || dataOcorrencia > new Date()) {
+      dataInput.classList.add("invalido");
+      mostrarMensagem("A data e a hora não podem estar no futuro.");
       return;
     }
 
@@ -271,29 +437,33 @@ function initPublishPage() {
       return;
     }
 
-    // O banco ainda não tem campo de data/hora (RF-07): o horário vai junto da descrição
-    let descricao = descricaoInput.value.trim();
-    if (horario) descricao += `\n\nHorário: ${horario}`;
-
-    const anuncio = {
-      titulo,
-      descricao,
-      tipo: form.elements.tipo.value === "achados" ? "ACHADO" : "PERDIDO",
-      categoria: categoriaSelect.value,
-      local_encontro: local,
-    };
+    // multipart/form-data: campos de texto + arquivos no campo "fotos" (RF-07, RF-08).
+    // Não definimos Content-Type: o navegador gera o boundary sozinho.
+    const dados = new FormData();
+    dados.append("titulo", titulo);
+    dados.append("descricao", descricao);
+    dados.append("tipo", form.elements.tipo.value === "achados" ? "ACHADO" : "PERDIDO");
+    dados.append("categoria", categoriaSelect.value);
+    dados.append("local_encontro", local);
+    dados.append("data_ocorrencia", dataOcorrencia.toISOString());
+    if (categoriaSelect.value !== "documento") {
+      fotos.forEach((arquivo) => dados.append("fotos", arquivo));
+    }
 
     const botao = form.querySelector("button[type='submit']");
     botao.disabled = true;
+    botao.textContent = fotos.length ? "Enviando fotos..." : "Publicando...";
+
+    function liberarBotao() {
+      botao.disabled = false;
+      botao.textContent = "Publicar";
+    }
 
     try {
       const response = await fetch(`${API_BASE}/anuncios`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(anuncio),
+        headers: { Authorization: `Bearer ${token}` },
+        body: dados,
       });
       const data = await response.json().catch(() => ({}));
 
@@ -310,13 +480,18 @@ function initPublishPage() {
         return;
       }
 
-      // 400: regra de negócio da API (ex.: RN-04 / LGPD) — mostra a mensagem que ela devolve
-      mostrarMensagem(data.error || "Não foi possível publicar o item.");
-      botao.disabled = false;
+      // 400: regra de negócio ou validação da API (RN-04, tamanho/tipo da foto...) —
+      // mostra a mensagem que ela devolve. Outros erros: mensagem genérica.
+      mostrarMensagem(
+        response.status === 400 && data.error
+          ? data.error
+          : "Não foi possível publicar o item agora. Tente novamente em instantes.",
+      );
+      liberarBotao();
     } catch (err) {
       console.error(err);
       mostrarMensagem("Não foi possível conectar ao servidor.");
-      botao.disabled = false;
+      liberarBotao();
     }
   });
 }
