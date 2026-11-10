@@ -4,4 +4,4 @@ yarn-error.log
 yarn-debug.log
 npm-debug.log*
 .vscode/
-API/Back-End/uploads/
+uploads/
