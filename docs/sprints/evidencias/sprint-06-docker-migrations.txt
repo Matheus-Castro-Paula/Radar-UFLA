@@ -1,0 +1,41 @@
+Sprint 6 — Issue #42: migrations, modelos e volume Docker
+Responsável: Arthur Ramos Xisto (@Artxisto) — branch Back-end — 09/11/2026
+
+=== 1. Primeira subida do zero: docker compose down -v && docker compose up --build ===
+mysql_db     | ... ready for connections ... port: 3306
+Container mysql_db Healthy
+api_backend  | >> Aplicando migrations...
+api_backend  | == 20260918000000-create-usuarios: migrated (0.049s)
+api_backend  | == 20260918000001-create-anuncios: migrated (0.083s)
+api_backend  | == 20260918000002-create-fotos-anuncio: migrated (0.065s)
+api_backend  | == 20260918000003-create-comentarios: migrated (0.086s)
+api_backend  | == 20261020000000-add-tipo-usuario-telefone-to-usuarios: migrated (0.121s)
+api_backend  | == 20261109000000-add-data-ocorrencia-to-anuncio: migrated (0.061s)
+api_backend  | == 20261109000001-add-metadados-to-foto-anuncio: migrated (0.109s)
+api_backend  | >> Aplicando seeders...
+api_backend  | == 20260927221826-demo-usuarios: migrated (0.088s)
+api_backend  | >> Subindo a API...
+api_backend  | Server is running on port 3000
+
+Observação: o healthcheck usa "mysqladmin ping -h 127.0.0.1" (TCP). Com "-h localhost"
+o ping passava pelo socket durante o servidor temporário de inicialização (port: 0)
+e a API tentava conectar antes da porta 3306 existir (ECONNREFUSED + reinícios).
+
+=== 2. Esquema após as migrations ===
+DESCRIBE anuncio:
+| data_ocorrencia | datetime     | YES |  | NULL |  |
+DESCRIBE foto_anuncio:
+| url_imagem      | varchar(255) | NO  |  | NULL |  |
+| mime_type       | varchar(50)  | YES |  | NULL |  |
+| tamanho_bytes   | int          | YES |  | NULL |  |
+
+=== 3. Persistência: docker compose down (sem -v) && docker compose up -d ===
+$ docker compose exec backend sh -c "echo teste > uploads/teste.txt"
+$ docker compose down && docker compose up -d
+api_backend  | No migrations were executed, database schema was already up to date.
+api_backend  | No seeders found.
+api_backend  | Server is running on port 3000
+$ docker compose exec backend ls uploads
+teste.txt
+
+Resultado: critérios de aceite da Issue #42 atendidos.
