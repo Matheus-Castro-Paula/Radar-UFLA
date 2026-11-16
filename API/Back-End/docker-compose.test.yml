@@ -1,0 +1,41 @@
+# Ambiente isolado de testes (Sprint 7). Não usa os containers, volumes nem
+# portas do docker-compose.yml de desenvolvimento.
+#
+#   docker compose -f docker-compose.test.yml run --rm --build testes
+#   docker compose -f docker-compose.test.yml down     (ao terminar)
+name: radar-ufla-testes
+
+services:
+  db_test:
+    image: mysql:8.0
+    environment:
+      # Banco descartável, em memória e sem porta exposta: não guarda dado real
+      MYSQL_ROOT_PASSWORD: ${DB_TEST_PASSWORD:-teste}
+    tmpfs:
+      - /var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -p$$MYSQL_ROOT_PASSWORD"]
+      interval: 3s
+      timeout: 5s
+      retries: 30
+
+  testes:
+    build: .
+    depends_on:
+      db_test:
+        condition: service_healthy
+    environment:
+      NODE_ENV: test
+      TZ: America/Sao_Paulo
+      DB_HOST: db_test
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: ${DB_TEST_PASSWORD:-teste}
+      DB_NAME_TEST: radar_ufla_test
+      UPLOADS_DIR: /tmp/uploads-teste
+      EVIDENCIAS_DIR: /evidencias
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - ../../docs/testes/evidencias:/evidencias
+    command: ["sh", "./tests/ambiente/executar-no-docker.sh"]

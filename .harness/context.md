@@ -54,7 +54,7 @@ Lista oficial de melhorias: seção 4 de [decisoes-de-projeto.md](../docs/projet
 - Erros 500 devolvem `details: error.message` ao cliente — vazar detalhe interno é indesejado.
 - Front-end: login e registro já consomem a API; o feed ainda usa dados fixos (`ITEMS` em `app.js`) e `publicar.html` ainda não envia para `/api/anuncios`.
 - Sprint 5: validações de anúncio serão migradas para **Chain of Responsibility** em `services/validations/` (`ValidationHandler` + handlers concretos).
-- Não há testes automatizados ainda (previstos para a Sprint 7).
+- Testes (Sprint 7): o ambiente de teste está em `API/Back-End/tests/ambiente/` (banco `radar_ufla_test` recriado a cada execução, fixtures em `src/seeders/test-fixtures.js` e `tests/fixtures/`, `docker-compose.test.yml` isolado). Evidências vão para `docs/testes/evidencias/`. O `test-fixtures.js` só grava no banco de teste: nunca remova essa trava, porque o `docker-entrypoint.sh` roda todos os seeders no banco de desenvolvimento.
 
 ## Convenções rápidas
 
