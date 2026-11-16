@@ -1,5 +1,6 @@
 const CamposObrigatoriosHandler = require("./CamposObrigatoriosHandler");
 const CategoriaEStatusHandler = require("./CategoriaEStatusHandler");
+const DataOcorrenciaHandler = require("./DataOcorrenciaHandler");
 const RegraLGPDHandler = require("./RegraLGPDHandler");
 const FotosHandler = require("./FotosHandler");
 
@@ -7,18 +8,19 @@ class AnuncioValidationChain {
   constructor() {
     this.camposObrigatorios = new CamposObrigatoriosHandler();
     this.categoriaEStatus = new CategoriaEStatusHandler();
+    this.dataOcorrencia = new DataOcorrenciaHandler();
     this.lgpdHandler = new RegraLGPDHandler();
     this.fotosHandler = new FotosHandler();
 
-    // Encadeamento: Campos Obrigatorios -> Categoria/Status -> LGPD -> Fotos
+    // Campos Obrigatorios -> Categoria/Status -> Data -> LGPD -> Fotos
     this.camposObrigatorios
       .definirProximo(this.categoriaEStatus)
+      .definirProximo(this.dataOcorrencia)
       .definirProximo(this.lgpdHandler)
       .definirProximo(this.fotosHandler);
   }
 
   async executar(dados, contexto = {}) {
-    // Inicia a validação pelo primeiro elo da corrente
     await this.camposObrigatorios.validar(dados, contexto);
   }
 }

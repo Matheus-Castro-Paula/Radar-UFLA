@@ -58,16 +58,14 @@ module.exports = {
     return anuncio;
   },
 
-    async criar(dados, usuarioId, arquivos = []) {
-    // 1. Delega TODAS as validações para a corrente (Chain of Responsibility).
-    //    Os arquivos seguem em memória até aqui: nada vai ao disco se alguma regra falhar.
+  async criar(dados, usuarioId, arquivos = []) {
+    // 1. Corrente de validação. Os arquivos seguem em memória: nada vai ao disco se alguma regra falhar.
     await anuncioValidationChain.executar(dados, { acao: "CRIAR", arquivos });
 
     const categoria = String(dados.categoria).trim().toLowerCase();
 
-    // 2. Grava os arquivos (só depois de validados) e junta com URLs enviadas em JSON
-    const urlsSalvas = await MidiaStorage.salvar(arquivos);
-    const fotos = [...(dados.fotos || []), ...urlsSalvas];
+    // 2. Grava os arquivos (só depois de validados).
+    const fotosSalvas = await MidiaStorage.salvar(arquivos);
 
     // 3. Persistência. Se o banco falhar, os arquivos recém-gravados são removidos.
     let anuncioId;
@@ -81,21 +79,24 @@ module.exports = {
             tipo: dados.tipo,
             categoria,
             local_encontro: dados.local_encontro,
+            data_ocorrencia: dados.data_ocorrencia
+              ? new Date(dados.data_ocorrencia)
+              : null,
             status: "ATIVO",
           },
           { transaction },
         );
 
-        if (fotos.length > 0) {
+        if (fotosSalvas.length > 0) {
           await FotoAnuncio.bulkCreate(
-            fotos.map((url_imagem) => ({ anuncio_id: anuncio.id, url_imagem })),
+            fotosSalvas.map((foto) => ({ anuncio_id: anuncio.id, ...foto })),
             { transaction },
           );
         }
         return anuncio.id;
       });
     } catch (erro) {
-      await MidiaStorage.remover(urlsSalvas);
+      await MidiaStorage.remover(fotosSalvas.map((foto) => foto.url_imagem));
       throw erro;
     }
 
@@ -132,6 +133,7 @@ module.exports = {
       "tipo",
       "categoria",
       "local_encontro",
+      "data_ocorrencia",
       "status",
     ];
     const alteracoes = {};
