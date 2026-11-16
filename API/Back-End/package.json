@@ -9,7 +9,8 @@
     "test:ambiente": "node tests/ambiente/verificar.js",
     "test:evidencias": "node tests/ambiente/gerar-evidencias.js",
     "test:docker": "docker compose -f docker-compose.test.yml run --rm --build testes",
-    "test:volume": "node tests/ambiente/validar-volume-uploads.js"
+    "test:volume": "node tests/ambiente/validar-volume-uploads.js",
+    "test": "jest --runInBand"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
@@ -22,7 +23,19 @@
     "sequelize": "^6.37.8"
   },
   "devDependencies": {
+    "jest": "^30.5.2",
     "nodemon": "^3.1.14",
-    "sequelize-cli": "^6.6.5"
+    "sequelize-cli": "^6.6.5",
+    "supertest": "^7.3.2"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "setupFiles": ["<rootDir>/tests/ambiente/variaveis.js"],
+    "globalSetup": "<rootDir>/tests/ambiente/globalSetup.js",
+    "globalTeardown": "<rootDir>/tests/ambiente/globalTeardown.js",
+    "testPathIgnorePatterns": ["/node_modules/", "/tests/ambiente/", "/tests/fixtures/"],
+    "testTimeout": 20000,
+    "collectCoverageFrom": ["src/**/*.js", "!src/migrations/**", "!src/seeders/**"],
+    "coverageReporters": ["text-summary", "text"]
   }
 }
