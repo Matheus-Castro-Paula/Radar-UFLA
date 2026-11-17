@@ -89,21 +89,21 @@ Este documento define o que será testado no Radar UFLA, em quais níveis, com q
 
 | Requisito | Descrição | Casos | Situação dos casos |
 | --- | --- | --- | --- |
-| `RF-01` | Autenticação e cadastro | CT-01, CT-02 | Especificados |
-| `RF-07` | Cadastro de anúncio | CT-03, CT-04, CT-12 | Especificados; CT-04 depende da Issue [#49](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/49) |
-| `RF-08` | Upload de fotos | CT-03, CT-05, CT-06, CT-08, CT-09, CT-12 | Especificados; CT-05 e CT-06 dependem das Issues [#50](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/50) e [#51](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/51) |
-| `RN-02` | Só o autor altera o anúncio | CT-11 | Especificado |
-| `RN-04` | LGPD: sem dados pessoais e sem foto de documento | CT-07, CT-10, CT-12 | Especificados |
-| `RNF-02` | Desempenho | CT-13 | Especificado |
-| `RNF-03` | Segurança | CT-01, CT-02, CT-05, CT-09 | Especificados |
+| `RF-01` | Autenticação e cadastro | CT-01, CT-02 | CT-01 aprovado; CT-02 parcial |
+| `RF-07` | Cadastro de anúncio | CT-03, CT-04, CT-12 | CT-03 e CT-04 aprovados; CT-12 não executado |
+| `RF-08` | Upload de fotos | CT-03, CT-05, CT-06, CT-08, CT-09, CT-12 | CT-03, CT-06, CT-08 e CT-09 aprovados; CT-05 parcial; CT-12 não executado |
+| `RN-02` | Só o autor altera o anúncio | CT-11 | Aprovado |
+| `RN-04` | LGPD: sem dados pessoais e sem foto de documento | CT-07, CT-10, CT-12 | CT-07 e CT-10 aprovados; CT-12 não executado |
+| `RNF-02` | Desempenho | CT-13 | Não executado |
+| `RNF-03` | Segurança | CT-01, CT-02, CT-05, CT-09 | CT-01 e CT-09 aprovados; CT-02 e CT-05 parciais |
 
 ### 7.2 Defeitos e casos de teste
 
-| Defeito | Issue | Descrição | Casos que comprovam a correção |
-| --- | --- | --- | --- |
-| M-15 | [#49](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/49) | `data_ocorrencia` não é gravada | CT-04, CT-12 |
-| M-16 | [#50](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/50) | URLs externas aceitas como foto em JSON | CT-05 |
-| M-18 | [#51](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/51) | `mime_type` e `tamanho_bytes` não são gravados | CT-06 |
+| Defeito | Issue | Descrição | Casos que comprovam a correção | Resultado |
+| --- | --- | --- | --- | --- |
+| M-15 | [#49](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/49) | `data_ocorrencia` não é gravada | CT-04, CT-12 | Corrigido: CT-04 aprovado |
+| M-16 | [#50](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/50) | URLs externas aceitas como foto em JSON | CT-05 | Corrigido no cadastro; a edição ainda aceita URL (seção 9.1) |
+| M-18 | [#51](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/51) | `mime_type` e `tamanho_bytes` não são gravados | CT-06 | Corrigido: CT-06 aprovado |
 
 ## 8. Critérios de aprovação e reprovação
 
@@ -131,23 +131,40 @@ O CT-13 é uma medição. Se reprovar, vira débito para a Sprint 8, sem bloquea
 
 ## 9. Registro de execução
 
-Preenchido com os resultados da suíte automatizada (Issue [#53](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/53)) e das evidências de interface (Issue [#54](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/54)).
+Execução automatizada em 16/11/2026, com a suíte da Issue [#53](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/53) rodando no banco de teste isolado: 31 testes aprovados de 31 ([suíte](evidencias/2026-11-16_1956_suite-automatizada.md), [log](evidencias/2026-11-16_1956_suite-automatizada.log)). Antes das correções das Issues #49, #50 e #51, a mesma suíte teve 7 reprovações, todas nos testes de M-15, M-16 e M-18 ([antes](evidencias/sprint-07-testes-antes.txt)). O ambiente de teste foi verificado em [`2026-11-16_1526_ambiente-de-teste.md`](evidencias/2026-11-16_1526_ambiente-de-teste.md), e a persistência das fotos no volume, em [`2026-11-16_1524_volume-uploads.md`](evidencias/2026-11-16_1524_volume-uploads.md).
 
-| Caso | Forma de execução | Data | Resultado | Evidência |
-| --- | --- | --- | --- | --- |
-| CT-01 | Automatizada | — | Não executado | — |
-| CT-02 | Automatizada | — | Não executado | — |
-| CT-03 | Automatizada | — | Não executado | — |
-| CT-04 | Automatizada | — | Não executado (defeito M-15 aberto) | — |
-| CT-05 | Automatizada | — | Não executado (defeito M-16 aberto) | — |
-| CT-06 | Automatizada | — | Não executado (defeito M-18 aberto) | — |
-| CT-07 | Automatizada | — | Não executado | — |
-| CT-08 | Automatizada | — | Não executado | — |
-| CT-09 | Automatizada | — | Não executado | — |
-| CT-10 | Automatizada | — | Não executado | — |
-| CT-11 | Automatizada | — | Não executado | — |
-| CT-12 | Manual | — | Não executado | — |
-| CT-13 | Automatizada | — | Não executado | — |
+Os testes automatizados não citam os IDs `CT-xx` no nome. A coluna **Testes** relaciona cada caso aos testes da suíte pelo nome usado no relatório.
+
+| Caso | Forma de execução | Data | Testes | Resultado | Evidência |
+| --- | --- | --- | --- | --- | --- |
+| CT-01 | Automatizada | 16/11/2026 | "login válido devolve token JWT"; "login com senha errada ou e-mail inexistente devolve 401 genérico" | Aprovado | [suíte](evidencias/2026-11-16_1956_suite-automatizada.md) |
+| CT-02 | Automatizada | 16/11/2026 | "GET /perfil rejeita token ausente, malformado, inválido e expirado"; "recusa publicar sem token" | Parcial: passos 1, 2 e 4 aprovados; o passo 3 (token assinado com o segredo antigo) não foi testado | [suíte](evidencias/2026-11-16_1956_suite-automatizada.md) |
+| CT-03 | Automatizada | 16/11/2026 | "cria anúncio com foto em multipart e serve a imagem em /uploads" | Aprovado | [suíte](evidencias/2026-11-16_1956_suite-automatizada.md) |
+| CT-04 | Automatizada | 16/11/2026 | "grava e devolve a data informada na criação"; "permite alterar a data na edição" | Aprovado (reprovado antes da correção da Issue #49) | [suíte](evidencias/2026-11-16_1956_suite-automatizada.md), [antes](evidencias/sprint-07-testes-antes.txt) |
+| CT-05 | Automatizada | 16/11/2026 | "recusa URL externa de foto em JSON"; "recusa URL enviada como campo de texto no multipart" | Parcial: passo 1 aprovado; o passo 2 (edição com URL externa) não foi testado, e o `FotosHandler` só bloqueia URLs no cadastro (seção 9.1) | [suíte](evidencias/2026-11-16_1956_suite-automatizada.md), [antes](evidencias/sprint-07-testes-antes.txt) |
+| CT-06 | Automatizada | 16/11/2026 | "grava mime_type e tamanho_bytes" | Aprovado (reprovado antes da correção da Issue #51) | [suíte](evidencias/2026-11-16_1956_suite-automatizada.md), [antes](evidencias/sprint-07-testes-antes.txt) |
+| CT-07 | Automatizada | 16/11/2026 | "recusa foto em anúncio de documento e não grava nada em disco"; "recusa, na edição, transformar anúncio com foto em documento" | Aprovado | [suíte](evidencias/2026-11-16_1956_suite-automatizada.md) |
+| CT-08 | Automatizada | 16/11/2026 | "recusa mais de 3 fotos"; "recusa foto acima de 5 MB" | Aprovado | [suíte](evidencias/2026-11-16_1956_suite-automatizada.md) |
+| CT-09 | Automatizada (integração, e não unidade como previsto) | 16/11/2026 | "recusa arquivo com MIME falso (conteúdo não é imagem)" | Aprovado | [suíte](evidencias/2026-11-16_1956_suite-automatizada.md) |
+| CT-10 | Automatizada | 16/11/2026 | "a vitrine pública não expõe e-mail, telefone nem senha_hash de nenhum autor" | Aprovado | [suíte](evidencias/2026-11-16_1956_suite-automatizada.md) |
+| CT-11 | Automatizada | 16/11/2026 | "só o autor edita e exclui" | Aprovado | [suíte](evidencias/2026-11-16_1956_suite-automatizada.md) |
+| CT-12 | Manual | — | — | Não executado: depende das evidências de interface da Issue [#54](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/54) | — |
+| CT-13 | Automatizada | — | — | Não executado: a medição de tempo de resposta não foi implementada | — |
+
+### 9.1 Resumo e defeitos encontrados
+
+| Situação | Casos |
+| --- | --- |
+| Aprovados | CT-01, CT-03, CT-04, CT-06, CT-07, CT-08, CT-09, CT-10, CT-11 |
+| Parciais | CT-02, CT-05 |
+| Não executados | CT-12, CT-13 |
+| Reprovados | Nenhum |
+
+A suíte também cobre comportamentos fora dos casos do plano: cadastro sem `senha_hash` na resposta, e-mail duplicado, `tipo_usuario` enviado pelo cliente ignorado, campos obrigatórios, categoria fora da lista, formato GIF recusado, data futura ou inválida e documento sem foto aceito.
+
+**Defeito encontrado na revisão:** a correção da Issue #50 (M-16) bloqueia URLs apenas no cadastro. Na edição (`PUT /api/anuncios/:id`), uma URL externa com extensão de imagem ainda é aceita e gravada como foto ([`FotosHandler.js`](../../API/Back-End/src/services/validations/FotosHandler.js), condição `contexto.acao === "CRIAR"`). Severidade alta (seção 8), por permitir foto sem validação de tipo, tamanho e conteúdo. Deve virar Issue com o rótulo `bug`, citando o CT-05.
+
+**Situação frente aos critérios da seção 8:** os casos de risco alto CT-01, CT-07, CT-08, CT-09, CT-10 e CT-11 estão aprovados, assim como CT-03, CT-04 e CT-06. CT-02 e CT-05 ficaram parciais, e o defeito do CT-05 é de severidade alta. A tag `sprint-07` pode ser criada com essas pendências justificadas aqui, ou depois da correção do PUT e do teste do token com segredo antigo.
 
 ## 10. Defeitos conhecidos fora da suíte
 
