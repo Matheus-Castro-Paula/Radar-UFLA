@@ -1,0 +1,940 @@
+◇ injected env (0) from .env
+PASS tests/anuncios.test.js
+  ● Console
+
+    console.error
+      ◇ injected env (0) from .env
+
+    > 1 | require('dotenv').config();
+        |                   ^
+      2 |
+      3 | function obterJwtSecret() {
+      4 |   const segredo = process.env.JWT_SECRET;
+
+      at se (node_modules/dotenv/dist/index.cjs:7:155)
+      at Object.ce [as configDotenv] (node_modules/dotenv/dist/index.cjs:7:1059)
+      at Object.ae [as config] (node_modules/dotenv/dist/index.cjs:7:1168)
+      at Object.config (src/config/config.js:1:19)
+      at Object.require (src/models/index.js:9:16)
+      at Object.require (tests/anuncios.test.js:2:36)
+
+    console.log
+      Executing (default): DELETE FROM `usuarios` WHERE `email` LIKE '%@jest.ufla.br'
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'autor@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): INSERT INTO `usuarios` (`id`,`nome`,`email`,`senha_hash`,`tipo_usuario`,`telefone`,`created_at`,`updated_at`) VALUES (DEFAULT,?,?,?,?,?,?,?);
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'autor@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): DELETE FROM `usuarios` WHERE `email` LIKE '%@jest.ufla.br'
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'autor@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): INSERT INTO `usuarios` (`id`,`nome`,`email`,`senha_hash`,`tipo_usuario`,`telefone`,`created_at`,`updated_at`) VALUES (DEFAULT,?,?,?,?,?,?,?);
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'autor@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (2aadcd2c-d543-4d3c-a0e8-46741b241150): START TRANSACTION;
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (2aadcd2c-d543-4d3c-a0e8-46741b241150): INSERT INTO `anuncio` (`id`,`usuario_id`,`titulo`,`descricao`,`tipo`,`categoria`,`local_encontro`,`data_ocorrencia`,`status`,`criado_em`,`atualizado_em`) VALUES (DEFAULT,?,?,?,?,?,?,?,?,?,?);
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (2aadcd2c-d543-4d3c-a0e8-46741b241150): INSERT INTO `foto_anuncio` (`id`,`anuncio_id`,`url_imagem`,`mime_type`,`tamanho_bytes`,`criado_em`) VALUES (NULL,51,'/uploads/d91db49c-b80a-4b18-8261-6e56189e3460.jpg','image/jpeg',68,'2026-11-16 22:56:11');
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (2aadcd2c-d543-4d3c-a0e8-46741b241150): COMMIT;
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `Anuncio`.`id`, `Anuncio`.`usuario_id`, `Anuncio`.`titulo`, `Anuncio`.`descricao`, `Anuncio`.`tipo`, `Anuncio`.`categoria`, `Anuncio`.`local_encontro`, `Anuncio`.`data_ocorrencia`, `Anuncio`.`status`, `Anuncio`.`criado_em`, `Anuncio`.`atualizado_em`, `fotos`.`id` AS `fotos.id`, `fotos`.`url_imagem` AS `fotos.url_imagem`, `usuario`.`id` AS `usuario.id`, `usuario`.`nome` AS `usuario.nome` FROM `anuncio` AS `Anuncio` LEFT OUTER JOIN `foto_anuncio` AS `fotos` ON `Anuncio`.`id` = `fotos`.`anuncio_id` LEFT OUTER JOIN `usuarios` AS `usuario` ON `Anuncio`.`usuario_id` = `usuario`.`id` WHERE `Anuncio`.`id` = 51;
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): DELETE FROM `usuarios` WHERE `email` LIKE '%@jest.ufla.br'
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'autor@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): INSERT INTO `usuarios` (`id`,`nome`,`email`,`senha_hash`,`tipo_usuario`,`telefone`,`created_at`,`updated_at`) VALUES (DEFAULT,?,?,?,?,?,?,?);
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'autor@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (2486271d-9890-4e8a-83a3-0489e12590e1): START TRANSACTION;
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (2486271d-9890-4e8a-83a3-0489e12590e1): INSERT INTO `anuncio` (`id`,`usuario_id`,`titulo`,`descricao`,`tipo`,`categoria`,`local_encontro`,`data_ocorrencia`,`status`,`criado_em`,`atualizado_em`) VALUES (DEFAULT,?,?,?,?,?,?,?,?,?,?);
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (2486271d-9890-4e8a-83a3-0489e12590e1): COMMIT;
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `Anuncio`.`id`, `Anuncio`.`usuario_id`, `Anuncio`.`titulo`, `Anuncio`.`descricao`, `Anuncio`.`tipo`, `Anuncio`.`categoria`, `Anuncio`.`local_encontro`, `Anuncio`.`data_ocorrencia`, `Anuncio`.`status`, `Anuncio`.`criado_em`, `Anuncio`.`atualizado_em`, `fotos`.`id` AS `fotos.id`, `fotos`.`url_imagem` AS `fotos.url_imagem`, `usuario`.`id` AS `usuario.id`, `usuario`.`nome` AS `usuario.nome` FROM `anuncio` AS `Anuncio` LEFT OUTER JOIN `foto_anuncio` AS `fotos` ON `Anuncio`.`id` = `fotos`.`anuncio_id` LEFT OUTER JOIN `usuarios` AS `usuario` ON `Anuncio`.`usuario_id` = `usuario`.`id` WHERE `Anuncio`.`id` = 52;
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): DELETE FROM `usuarios` WHERE `email` LIKE '%@jest.ufla.br'
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'autor@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): INSERT INTO `usuarios` (`id`,`nome`,`email`,`senha_hash`,`tipo_usuario`,`telefone`,`created_at`,`updated_at`) VALUES (DEFAULT,?,?,?,?,?,?,?);
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'autor@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): DELETE FROM `usuarios` WHERE `email` LIKE '%@jest.ufla.br'
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'autor@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): INSERT INTO `usuarios` (`id`,`nome`,`email`,`senha_hash`,`tipo_usuario`,`telefone`,`created_at`,`updated_at`) VALUES (DEFAULT,?,?,?,?,?,?,?);
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'autor@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): DELETE FROM `usuarios` WHERE `email` LIKE '%@jest.ufla.br'
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'autor@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): INSERT INTO `usuarios` (`id`,`nome`,`email`,`senha_hash`,`tipo_usuario`,`telefone`,`created_at`,`updated_at`) VALUES (DEFAULT,?,?,?,?,?,?,?);
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'autor@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): DELETE FROM `usuarios` WHERE `email` LIKE '%@jest.ufla.br'
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'autor@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): INSERT INTO `usuarios` (`id`,`nome`,`email`,`senha_hash`,`tipo_usuario`,`telefone`,`created_at`,`updated_at`) VALUES (DEFAULT,?,?,?,?,?,?,?);
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'autor@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): DELETE FROM `usuarios` WHERE `email` LIKE '%@jest.ufla.br'
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'autor@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): INSERT INTO `usuarios` (`id`,`nome`,`email`,`senha_hash`,`tipo_usuario`,`telefone`,`created_at`,`updated_at`) VALUES (DEFAULT,?,?,?,?,?,?,?);
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'autor@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): DELETE FROM `usuarios` WHERE `email` LIKE '%@jest.ufla.br'
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'autor@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): INSERT INTO `usuarios` (`id`,`nome`,`email`,`senha_hash`,`tipo_usuario`,`telefone`,`created_at`,`updated_at`) VALUES (DEFAULT,?,?,?,?,?,?,?);
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'autor@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): DELETE FROM `usuarios` WHERE `email` LIKE '%@jest.ufla.br'
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'autor@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): INSERT INTO `usuarios` (`id`,`nome`,`email`,`senha_hash`,`tipo_usuario`,`telefone`,`created_at`,`updated_at`) VALUES (DEFAULT,?,?,?,?,?,?,?);
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'autor@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): DELETE FROM `usuarios` WHERE `email` LIKE '%@jest.ufla.br'
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'autor@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): INSERT INTO `usuarios` (`id`,`nome`,`email`,`senha_hash`,`tipo_usuario`,`telefone`,`created_at`,`updated_at`) VALUES (DEFAULT,?,?,?,?,?,?,?);
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'autor@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): DELETE FROM `usuarios` WHERE `email` LIKE '%@jest.ufla.br'
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'autor@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): INSERT INTO `usuarios` (`id`,`nome`,`email`,`senha_hash`,`tipo_usuario`,`telefone`,`created_at`,`updated_at`) VALUES (DEFAULT,?,?,?,?,?,?,?);
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'autor@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (dfffa816-c15c-423b-8115-c6148c797802): START TRANSACTION;
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (dfffa816-c15c-423b-8115-c6148c797802): INSERT INTO `anuncio` (`id`,`usuario_id`,`titulo`,`descricao`,`tipo`,`categoria`,`local_encontro`,`data_ocorrencia`,`status`,`criado_em`,`atualizado_em`) VALUES (DEFAULT,?,?,?,?,?,?,?,?,?,?);
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (dfffa816-c15c-423b-8115-c6148c797802): COMMIT;
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `Anuncio`.`id`, `Anuncio`.`usuario_id`, `Anuncio`.`titulo`, `Anuncio`.`descricao`, `Anuncio`.`tipo`, `Anuncio`.`categoria`, `Anuncio`.`local_encontro`, `Anuncio`.`data_ocorrencia`, `Anuncio`.`status`, `Anuncio`.`criado_em`, `Anuncio`.`atualizado_em`, `fotos`.`id` AS `fotos.id`, `fotos`.`url_imagem` AS `fotos.url_imagem`, `usuario`.`id` AS `usuario.id`, `usuario`.`nome` AS `usuario.nome` FROM `anuncio` AS `Anuncio` LEFT OUTER JOIN `foto_anuncio` AS `fotos` ON `Anuncio`.`id` = `fotos`.`anuncio_id` LEFT OUTER JOIN `usuarios` AS `usuario` ON `Anuncio`.`usuario_id` = `usuario`.`id` WHERE `Anuncio`.`id` = 53;
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): DELETE FROM `usuarios` WHERE `email` LIKE '%@jest.ufla.br'
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'autor@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): INSERT INTO `usuarios` (`id`,`nome`,`email`,`senha_hash`,`tipo_usuario`,`telefone`,`created_at`,`updated_at`) VALUES (DEFAULT,?,?,?,?,?,?,?);
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'autor@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (a3bfd208-6850-4375-86e0-21a7be26f923): START TRANSACTION;
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (a3bfd208-6850-4375-86e0-21a7be26f923): INSERT INTO `anuncio` (`id`,`usuario_id`,`titulo`,`descricao`,`tipo`,`categoria`,`local_encontro`,`data_ocorrencia`,`status`,`criado_em`,`atualizado_em`) VALUES (DEFAULT,?,?,?,?,?,?,?,?,?,?);
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (a3bfd208-6850-4375-86e0-21a7be26f923): INSERT INTO `foto_anuncio` (`id`,`anuncio_id`,`url_imagem`,`mime_type`,`tamanho_bytes`,`criado_em`) VALUES (NULL,54,'/uploads/1d388e6f-c4dc-4f13-8a0d-a460e8e02675.png','image/png',72,'2026-11-16 22:56:13');
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (a3bfd208-6850-4375-86e0-21a7be26f923): COMMIT;
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `Anuncio`.`id`, `Anuncio`.`usuario_id`, `Anuncio`.`titulo`, `Anuncio`.`descricao`, `Anuncio`.`tipo`, `Anuncio`.`categoria`, `Anuncio`.`local_encontro`, `Anuncio`.`data_ocorrencia`, `Anuncio`.`status`, `Anuncio`.`criado_em`, `Anuncio`.`atualizado_em`, `fotos`.`id` AS `fotos.id`, `fotos`.`url_imagem` AS `fotos.url_imagem`, `usuario`.`id` AS `usuario.id`, `usuario`.`nome` AS `usuario.nome` FROM `anuncio` AS `Anuncio` LEFT OUTER JOIN `foto_anuncio` AS `fotos` ON `Anuncio`.`id` = `fotos`.`anuncio_id` LEFT OUTER JOIN `usuarios` AS `usuario` ON `Anuncio`.`usuario_id` = `usuario`.`id` WHERE `Anuncio`.`id` = 54;
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `Anuncio`.`id`, `Anuncio`.`usuario_id`, `Anuncio`.`titulo`, `Anuncio`.`descricao`, `Anuncio`.`tipo`, `Anuncio`.`categoria`, `Anuncio`.`local_encontro`, `Anuncio`.`data_ocorrencia`, `Anuncio`.`status`, `Anuncio`.`criado_em`, `Anuncio`.`atualizado_em`, `fotos`.`id` AS `fotos.id`, `fotos`.`anuncio_id` AS `fotos.anuncio_id`, `fotos`.`url_imagem` AS `fotos.url_imagem`, `fotos`.`mime_type` AS `fotos.mime_type`, `fotos`.`tamanho_bytes` AS `fotos.tamanho_bytes`, `fotos`.`criado_em` AS `fotos.criado_em` FROM `anuncio` AS `Anuncio` LEFT OUTER JOIN `foto_anuncio` AS `fotos` ON `Anuncio`.`id` = `fotos`.`anuncio_id` WHERE `Anuncio`.`id` = '54';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): DELETE FROM `usuarios` WHERE `email` LIKE '%@jest.ufla.br'
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'autor@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): INSERT INTO `usuarios` (`id`,`nome`,`email`,`senha_hash`,`tipo_usuario`,`telefone`,`created_at`,`updated_at`) VALUES (DEFAULT,?,?,?,?,?,?,?);
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'autor@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (15fdd068-f9a3-4274-9014-74939768654a): START TRANSACTION;
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (15fdd068-f9a3-4274-9014-74939768654a): INSERT INTO `anuncio` (`id`,`usuario_id`,`titulo`,`descricao`,`tipo`,`categoria`,`local_encontro`,`data_ocorrencia`,`status`,`criado_em`,`atualizado_em`) VALUES (DEFAULT,?,?,?,?,?,?,?,?,?,?);
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (15fdd068-f9a3-4274-9014-74939768654a): COMMIT;
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `Anuncio`.`id`, `Anuncio`.`usuario_id`, `Anuncio`.`titulo`, `Anuncio`.`descricao`, `Anuncio`.`tipo`, `Anuncio`.`categoria`, `Anuncio`.`local_encontro`, `Anuncio`.`data_ocorrencia`, `Anuncio`.`status`, `Anuncio`.`criado_em`, `Anuncio`.`atualizado_em`, `fotos`.`id` AS `fotos.id`, `fotos`.`url_imagem` AS `fotos.url_imagem`, `usuario`.`id` AS `usuario.id`, `usuario`.`nome` AS `usuario.nome` FROM `anuncio` AS `Anuncio` LEFT OUTER JOIN `foto_anuncio` AS `fotos` ON `Anuncio`.`id` = `fotos`.`anuncio_id` LEFT OUTER JOIN `usuarios` AS `usuario` ON `Anuncio`.`usuario_id` = `usuario`.`id` WHERE `Anuncio`.`id` = 55;
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `Anuncio`.`id`, `Anuncio`.`usuario_id`, `Anuncio`.`titulo`, `Anuncio`.`descricao`, `Anuncio`.`tipo`, `Anuncio`.`categoria`, `Anuncio`.`local_encontro`, `Anuncio`.`data_ocorrencia`, `Anuncio`.`status`, `Anuncio`.`criado_em`, `Anuncio`.`atualizado_em`, `fotos`.`id` AS `fotos.id`, `fotos`.`url_imagem` AS `fotos.url_imagem`, `usuario`.`id` AS `usuario.id`, `usuario`.`nome` AS `usuario.nome` FROM `anuncio` AS `Anuncio` LEFT OUTER JOIN `foto_anuncio` AS `fotos` ON `Anuncio`.`id` = `fotos`.`anuncio_id` LEFT OUTER JOIN `usuarios` AS `usuario` ON `Anuncio`.`usuario_id` = `usuario`.`id` WHERE `Anuncio`.`status` = 'ATIVO' ORDER BY `Anuncio`.`criado_em` DESC;
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): DELETE FROM `usuarios` WHERE `email` LIKE '%@jest.ufla.br'
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'autor@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): INSERT INTO `usuarios` (`id`,`nome`,`email`,`senha_hash`,`tipo_usuario`,`telefone`,`created_at`,`updated_at`) VALUES (DEFAULT,?,?,?,?,?,?,?);
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'autor@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'outro@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): INSERT INTO `usuarios` (`id`,`nome`,`email`,`senha_hash`,`tipo_usuario`,`telefone`,`created_at`,`updated_at`) VALUES (DEFAULT,?,?,?,?,?,?,?);
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'outro@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (a781522f-effd-48f4-81b1-0657299da455): START TRANSACTION;
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (a781522f-effd-48f4-81b1-0657299da455): INSERT INTO `anuncio` (`id`,`usuario_id`,`titulo`,`descricao`,`tipo`,`categoria`,`local_encontro`,`data_ocorrencia`,`status`,`criado_em`,`atualizado_em`) VALUES (DEFAULT,?,?,?,?,?,?,?,?,?,?);
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (a781522f-effd-48f4-81b1-0657299da455): COMMIT;
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `Anuncio`.`id`, `Anuncio`.`usuario_id`, `Anuncio`.`titulo`, `Anuncio`.`descricao`, `Anuncio`.`tipo`, `Anuncio`.`categoria`, `Anuncio`.`local_encontro`, `Anuncio`.`data_ocorrencia`, `Anuncio`.`status`, `Anuncio`.`criado_em`, `Anuncio`.`atualizado_em`, `fotos`.`id` AS `fotos.id`, `fotos`.`url_imagem` AS `fotos.url_imagem`, `usuario`.`id` AS `usuario.id`, `usuario`.`nome` AS `usuario.nome` FROM `anuncio` AS `Anuncio` LEFT OUTER JOIN `foto_anuncio` AS `fotos` ON `Anuncio`.`id` = `fotos`.`anuncio_id` LEFT OUTER JOIN `usuarios` AS `usuario` ON `Anuncio`.`usuario_id` = `usuario`.`id` WHERE `Anuncio`.`id` = 56;
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `Anuncio`.`id`, `Anuncio`.`usuario_id`, `Anuncio`.`titulo`, `Anuncio`.`descricao`, `Anuncio`.`tipo`, `Anuncio`.`categoria`, `Anuncio`.`local_encontro`, `Anuncio`.`data_ocorrencia`, `Anuncio`.`status`, `Anuncio`.`criado_em`, `Anuncio`.`atualizado_em`, `fotos`.`id` AS `fotos.id`, `fotos`.`anuncio_id` AS `fotos.anuncio_id`, `fotos`.`url_imagem` AS `fotos.url_imagem`, `fotos`.`mime_type` AS `fotos.mime_type`, `fotos`.`tamanho_bytes` AS `fotos.tamanho_bytes`, `fotos`.`criado_em` AS `fotos.criado_em` FROM `anuncio` AS `Anuncio` LEFT OUTER JOIN `foto_anuncio` AS `fotos` ON `Anuncio`.`id` = `fotos`.`anuncio_id` WHERE `Anuncio`.`id` = '56';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `Anuncio`.`id`, `Anuncio`.`usuario_id`, `Anuncio`.`titulo`, `Anuncio`.`descricao`, `Anuncio`.`tipo`, `Anuncio`.`categoria`, `Anuncio`.`local_encontro`, `Anuncio`.`data_ocorrencia`, `Anuncio`.`status`, `Anuncio`.`criado_em`, `Anuncio`.`atualizado_em`, `fotos`.`id` AS `fotos.id`, `fotos`.`anuncio_id` AS `fotos.anuncio_id`, `fotos`.`url_imagem` AS `fotos.url_imagem`, `fotos`.`mime_type` AS `fotos.mime_type`, `fotos`.`tamanho_bytes` AS `fotos.tamanho_bytes`, `fotos`.`criado_em` AS `fotos.criado_em` FROM `anuncio` AS `Anuncio` LEFT OUTER JOIN `foto_anuncio` AS `fotos` ON `Anuncio`.`id` = `fotos`.`anuncio_id` WHERE `Anuncio`.`id` = '56';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `Anuncio`.`id`, `Anuncio`.`usuario_id`, `Anuncio`.`titulo`, `Anuncio`.`descricao`, `Anuncio`.`tipo`, `Anuncio`.`categoria`, `Anuncio`.`local_encontro`, `Anuncio`.`data_ocorrencia`, `Anuncio`.`status`, `Anuncio`.`criado_em`, `Anuncio`.`atualizado_em`, `fotos`.`id` AS `fotos.id`, `fotos`.`anuncio_id` AS `fotos.anuncio_id`, `fotos`.`url_imagem` AS `fotos.url_imagem`, `fotos`.`mime_type` AS `fotos.mime_type`, `fotos`.`tamanho_bytes` AS `fotos.tamanho_bytes`, `fotos`.`criado_em` AS `fotos.criado_em` FROM `anuncio` AS `Anuncio` LEFT OUTER JOIN `foto_anuncio` AS `fotos` ON `Anuncio`.`id` = `fotos`.`anuncio_id` WHERE `Anuncio`.`id` = '56';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): DELETE FROM `anuncio` WHERE `id` = 56
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `Anuncio`.`id`, `Anuncio`.`usuario_id`, `Anuncio`.`titulo`, `Anuncio`.`descricao`, `Anuncio`.`tipo`, `Anuncio`.`categoria`, `Anuncio`.`local_encontro`, `Anuncio`.`data_ocorrencia`, `Anuncio`.`status`, `Anuncio`.`criado_em`, `Anuncio`.`atualizado_em`, `fotos`.`id` AS `fotos.id`, `fotos`.`url_imagem` AS `fotos.url_imagem`, `usuario`.`id` AS `usuario.id`, `usuario`.`nome` AS `usuario.nome` FROM `anuncio` AS `Anuncio` LEFT OUTER JOIN `foto_anuncio` AS `fotos` ON `Anuncio`.`id` = `fotos`.`anuncio_id` LEFT OUTER JOIN `usuarios` AS `usuario` ON `Anuncio`.`usuario_id` = `usuario`.`id` WHERE `Anuncio`.`id` = '56';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): DELETE FROM `usuarios` WHERE `email` LIKE '%@jest.ufla.br'
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'autor@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): INSERT INTO `usuarios` (`id`,`nome`,`email`,`senha_hash`,`tipo_usuario`,`telefone`,`created_at`,`updated_at`) VALUES (DEFAULT,?,?,?,?,?,?,?);
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'autor@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (437712bf-8595-4c5c-a3cc-98f16f5bd608): START TRANSACTION;
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (437712bf-8595-4c5c-a3cc-98f16f5bd608): INSERT INTO `anuncio` (`id`,`usuario_id`,`titulo`,`descricao`,`tipo`,`categoria`,`local_encontro`,`data_ocorrencia`,`status`,`criado_em`,`atualizado_em`) VALUES (DEFAULT,?,?,?,?,?,?,?,?,?,?);
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (437712bf-8595-4c5c-a3cc-98f16f5bd608): COMMIT;
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `Anuncio`.`id`, `Anuncio`.`usuario_id`, `Anuncio`.`titulo`, `Anuncio`.`descricao`, `Anuncio`.`tipo`, `Anuncio`.`categoria`, `Anuncio`.`local_encontro`, `Anuncio`.`data_ocorrencia`, `Anuncio`.`status`, `Anuncio`.`criado_em`, `Anuncio`.`atualizado_em`, `fotos`.`id` AS `fotos.id`, `fotos`.`url_imagem` AS `fotos.url_imagem`, `usuario`.`id` AS `usuario.id`, `usuario`.`nome` AS `usuario.nome` FROM `anuncio` AS `Anuncio` LEFT OUTER JOIN `foto_anuncio` AS `fotos` ON `Anuncio`.`id` = `fotos`.`anuncio_id` LEFT OUTER JOIN `usuarios` AS `usuario` ON `Anuncio`.`usuario_id` = `usuario`.`id` WHERE `Anuncio`.`id` = 57;
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `Anuncio`.`id`, `Anuncio`.`usuario_id`, `Anuncio`.`titulo`, `Anuncio`.`descricao`, `Anuncio`.`tipo`, `Anuncio`.`categoria`, `Anuncio`.`local_encontro`, `Anuncio`.`data_ocorrencia`, `Anuncio`.`status`, `Anuncio`.`criado_em`, `Anuncio`.`atualizado_em`, `fotos`.`id` AS `fotos.id`, `fotos`.`url_imagem` AS `fotos.url_imagem`, `usuario`.`id` AS `usuario.id`, `usuario`.`nome` AS `usuario.nome` FROM `anuncio` AS `Anuncio` LEFT OUTER JOIN `foto_anuncio` AS `fotos` ON `Anuncio`.`id` = `fotos`.`anuncio_id` LEFT OUTER JOIN `usuarios` AS `usuario` ON `Anuncio`.`usuario_id` = `usuario`.`id` WHERE `Anuncio`.`id` = '57';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): DELETE FROM `usuarios` WHERE `email` LIKE '%@jest.ufla.br'
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'autor@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): INSERT INTO `usuarios` (`id`,`nome`,`email`,`senha_hash`,`tipo_usuario`,`telefone`,`created_at`,`updated_at`) VALUES (DEFAULT,?,?,?,?,?,?,?);
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'autor@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): DELETE FROM `usuarios` WHERE `email` LIKE '%@jest.ufla.br'
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'autor@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): INSERT INTO `usuarios` (`id`,`nome`,`email`,`senha_hash`,`tipo_usuario`,`telefone`,`created_at`,`updated_at`) VALUES (DEFAULT,?,?,?,?,?,?,?);
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'autor@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): DELETE FROM `usuarios` WHERE `email` LIKE '%@jest.ufla.br'
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'autor@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): INSERT INTO `usuarios` (`id`,`nome`,`email`,`senha_hash`,`tipo_usuario`,`telefone`,`created_at`,`updated_at`) VALUES (DEFAULT,?,?,?,?,?,?,?);
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'autor@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (67ee2c31-7ee6-4b3e-a6d8-bb463727657c): START TRANSACTION;
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (67ee2c31-7ee6-4b3e-a6d8-bb463727657c): INSERT INTO `anuncio` (`id`,`usuario_id`,`titulo`,`descricao`,`tipo`,`categoria`,`local_encontro`,`data_ocorrencia`,`status`,`criado_em`,`atualizado_em`) VALUES (DEFAULT,?,?,?,?,?,?,?,?,?,?);
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (67ee2c31-7ee6-4b3e-a6d8-bb463727657c): COMMIT;
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `Anuncio`.`id`, `Anuncio`.`usuario_id`, `Anuncio`.`titulo`, `Anuncio`.`descricao`, `Anuncio`.`tipo`, `Anuncio`.`categoria`, `Anuncio`.`local_encontro`, `Anuncio`.`data_ocorrencia`, `Anuncio`.`status`, `Anuncio`.`criado_em`, `Anuncio`.`atualizado_em`, `fotos`.`id` AS `fotos.id`, `fotos`.`url_imagem` AS `fotos.url_imagem`, `usuario`.`id` AS `usuario.id`, `usuario`.`nome` AS `usuario.nome` FROM `anuncio` AS `Anuncio` LEFT OUTER JOIN `foto_anuncio` AS `fotos` ON `Anuncio`.`id` = `fotos`.`anuncio_id` LEFT OUTER JOIN `usuarios` AS `usuario` ON `Anuncio`.`usuario_id` = `usuario`.`id` WHERE `Anuncio`.`id` = 58;
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `Anuncio`.`id`, `Anuncio`.`usuario_id`, `Anuncio`.`titulo`, `Anuncio`.`descricao`, `Anuncio`.`tipo`, `Anuncio`.`categoria`, `Anuncio`.`local_encontro`, `Anuncio`.`data_ocorrencia`, `Anuncio`.`status`, `Anuncio`.`criado_em`, `Anuncio`.`atualizado_em`, `fotos`.`id` AS `fotos.id`, `fotos`.`anuncio_id` AS `fotos.anuncio_id`, `fotos`.`url_imagem` AS `fotos.url_imagem`, `fotos`.`mime_type` AS `fotos.mime_type`, `fotos`.`tamanho_bytes` AS `fotos.tamanho_bytes`, `fotos`.`criado_em` AS `fotos.criado_em` FROM `anuncio` AS `Anuncio` LEFT OUTER JOIN `foto_anuncio` AS `fotos` ON `Anuncio`.`id` = `fotos`.`anuncio_id` WHERE `Anuncio`.`id` = '58';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (70fe3146-5ee3-4731-b0aa-0d02633da3a6): START TRANSACTION;
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (70fe3146-5ee3-4731-b0aa-0d02633da3a6): UPDATE `anuncio` SET `data_ocorrencia`=?,`atualizado_em`=? WHERE `id` = ?
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (70fe3146-5ee3-4731-b0aa-0d02633da3a6): COMMIT;
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `Anuncio`.`id`, `Anuncio`.`usuario_id`, `Anuncio`.`titulo`, `Anuncio`.`descricao`, `Anuncio`.`tipo`, `Anuncio`.`categoria`, `Anuncio`.`local_encontro`, `Anuncio`.`data_ocorrencia`, `Anuncio`.`status`, `Anuncio`.`criado_em`, `Anuncio`.`atualizado_em`, `fotos`.`id` AS `fotos.id`, `fotos`.`url_imagem` AS `fotos.url_imagem`, `usuario`.`id` AS `usuario.id`, `usuario`.`nome` AS `usuario.nome` FROM `anuncio` AS `Anuncio` LEFT OUTER JOIN `foto_anuncio` AS `fotos` ON `Anuncio`.`id` = `fotos`.`anuncio_id` LEFT OUTER JOIN `usuarios` AS `usuario` ON `Anuncio`.`usuario_id` = `usuario`.`id` WHERE `Anuncio`.`id` = '58';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): DELETE FROM `usuarios` WHERE `email` LIKE '%@jest.ufla.br'
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'autor@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): INSERT INTO `usuarios` (`id`,`nome`,`email`,`senha_hash`,`tipo_usuario`,`telefone`,`created_at`,`updated_at`) VALUES (DEFAULT,?,?,?,?,?,?,?);
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'autor@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): DELETE FROM `usuarios` WHERE `email` LIKE '%@jest.ufla.br'
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'autor@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): INSERT INTO `usuarios` (`id`,`nome`,`email`,`senha_hash`,`tipo_usuario`,`telefone`,`created_at`,`updated_at`) VALUES (DEFAULT,?,?,?,?,?,?,?);
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'autor@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): DELETE FROM `usuarios` WHERE `email` LIKE '%@jest.ufla.br'
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'autor@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): INSERT INTO `usuarios` (`id`,`nome`,`email`,`senha_hash`,`tipo_usuario`,`telefone`,`created_at`,`updated_at`) VALUES (DEFAULT,?,?,?,?,?,?,?);
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'autor@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (d765e92c-ca07-4a40-9d3a-13339783ae2b): START TRANSACTION;
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (d765e92c-ca07-4a40-9d3a-13339783ae2b): INSERT INTO `anuncio` (`id`,`usuario_id`,`titulo`,`descricao`,`tipo`,`categoria`,`local_encontro`,`data_ocorrencia`,`status`,`criado_em`,`atualizado_em`) VALUES (DEFAULT,?,?,?,?,?,?,?,?,?,?);
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (d765e92c-ca07-4a40-9d3a-13339783ae2b): COMMIT;
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `Anuncio`.`id`, `Anuncio`.`usuario_id`, `Anuncio`.`titulo`, `Anuncio`.`descricao`, `Anuncio`.`tipo`, `Anuncio`.`categoria`, `Anuncio`.`local_encontro`, `Anuncio`.`data_ocorrencia`, `Anuncio`.`status`, `Anuncio`.`criado_em`, `Anuncio`.`atualizado_em`, `fotos`.`id` AS `fotos.id`, `fotos`.`url_imagem` AS `fotos.url_imagem`, `usuario`.`id` AS `usuario.id`, `usuario`.`nome` AS `usuario.nome` FROM `anuncio` AS `Anuncio` LEFT OUTER JOIN `foto_anuncio` AS `fotos` ON `Anuncio`.`id` = `fotos`.`anuncio_id` LEFT OUTER JOIN `usuarios` AS `usuario` ON `Anuncio`.`usuario_id` = `usuario`.`id` WHERE `Anuncio`.`id` = 59;
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): DELETE FROM `usuarios` WHERE `email` LIKE '%@jest.ufla.br'
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'autor@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): INSERT INTO `usuarios` (`id`,`nome`,`email`,`senha_hash`,`tipo_usuario`,`telefone`,`created_at`,`updated_at`) VALUES (DEFAULT,?,?,?,?,?,?,?);
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'autor@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (a5df915a-0db9-4b93-8132-d31a33d54fd6): START TRANSACTION;
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (a5df915a-0db9-4b93-8132-d31a33d54fd6): INSERT INTO `anuncio` (`id`,`usuario_id`,`titulo`,`descricao`,`tipo`,`categoria`,`local_encontro`,`data_ocorrencia`,`status`,`criado_em`,`atualizado_em`) VALUES (DEFAULT,?,?,?,?,?,?,?,?,?,?);
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (a5df915a-0db9-4b93-8132-d31a33d54fd6): INSERT INTO `foto_anuncio` (`id`,`anuncio_id`,`url_imagem`,`mime_type`,`tamanho_bytes`,`criado_em`) VALUES (NULL,60,'/uploads/bd1c18b2-9723-4974-8127-db842bf936b3.jpg','image/jpeg',68,'2026-11-16 22:56:14'),(NULL,60,'/uploads/70c70daf-d8a5-4fa6-97b7-9f55745f2a11.png','image/png',72,'2026-11-16 22:56:14');
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (a5df915a-0db9-4b93-8132-d31a33d54fd6): COMMIT;
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `Anuncio`.`id`, `Anuncio`.`usuario_id`, `Anuncio`.`titulo`, `Anuncio`.`descricao`, `Anuncio`.`tipo`, `Anuncio`.`categoria`, `Anuncio`.`local_encontro`, `Anuncio`.`data_ocorrencia`, `Anuncio`.`status`, `Anuncio`.`criado_em`, `Anuncio`.`atualizado_em`, `fotos`.`id` AS `fotos.id`, `fotos`.`url_imagem` AS `fotos.url_imagem`, `usuario`.`id` AS `usuario.id`, `usuario`.`nome` AS `usuario.nome` FROM `anuncio` AS `Anuncio` LEFT OUTER JOIN `foto_anuncio` AS `fotos` ON `Anuncio`.`id` = `fotos`.`anuncio_id` LEFT OUTER JOIN `usuarios` AS `usuario` ON `Anuncio`.`usuario_id` = `usuario`.`id` WHERE `Anuncio`.`id` = 60;
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `anuncio_id`, `url_imagem`, `mime_type`, `tamanho_bytes`, `criado_em` FROM `foto_anuncio` AS `FotoAnuncio` WHERE `FotoAnuncio`.`anuncio_id` = 60 ORDER BY `FotoAnuncio`.`id` ASC;
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+PASS tests/autenticacao.test.js
+  ● Console
+
+    console.error
+      ◇ injected env (0) from .env
+
+    > 1 | require('dotenv').config();
+        |                   ^
+      2 |
+      3 | function obterJwtSecret() {
+      4 |   const segredo = process.env.JWT_SECRET;
+
+      at se (node_modules/dotenv/dist/index.cjs:7:155)
+      at Object.ce [as configDotenv] (node_modules/dotenv/dist/index.cjs:7:1059)
+      at Object.ae [as config] (node_modules/dotenv/dist/index.cjs:7:1168)
+      at Object.config (src/config/config.js:1:19)
+      at Object.require (src/models/index.js:9:16)
+      at Object.require (tests/autenticacao.test.js:3:23)
+
+    console.log
+      Executing (default): DELETE FROM `usuarios` WHERE `email` LIKE '%@jest.ufla.br'
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'ana@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): INSERT INTO `usuarios` (`id`,`nome`,`email`,`senha_hash`,`tipo_usuario`,`created_at`,`updated_at`) VALUES (DEFAULT,?,?,?,?,?,?);
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): DELETE FROM `usuarios` WHERE `email` LIKE '%@jest.ufla.br'
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'ana@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): INSERT INTO `usuarios` (`id`,`nome`,`email`,`senha_hash`,`tipo_usuario`,`created_at`,`updated_at`) VALUES (DEFAULT,?,?,?,?,?,?);
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'ana@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): DELETE FROM `usuarios` WHERE `email` LIKE '%@jest.ufla.br'
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): DELETE FROM `usuarios` WHERE `email` LIKE '%@jest.ufla.br'
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'x@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): INSERT INTO `usuarios` (`id`,`nome`,`email`,`senha_hash`,`tipo_usuario`,`created_at`,`updated_at`) VALUES (DEFAULT,?,?,?,?,?,?);
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): DELETE FROM `usuarios` WHERE `email` LIKE '%@jest.ufla.br'
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'login@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): INSERT INTO `usuarios` (`id`,`nome`,`email`,`senha_hash`,`tipo_usuario`,`telefone`,`created_at`,`updated_at`) VALUES (DEFAULT,?,?,?,?,?,?,?);
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'login@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): DELETE FROM `usuarios` WHERE `email` LIKE '%@jest.ufla.br'
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'login@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): INSERT INTO `usuarios` (`id`,`nome`,`email`,`senha_hash`,`tipo_usuario`,`telefone`,`created_at`,`updated_at`) VALUES (DEFAULT,?,?,?,?,?,?,?);
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'login@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'login@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'naoexiste@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): DELETE FROM `usuarios` WHERE `email` LIKE '%@jest.ufla.br'
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'perfil@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): INSERT INTO `usuarios` (`id`,`nome`,`email`,`senha_hash`,`tipo_usuario`,`telefone`,`created_at`,`updated_at`) VALUES (DEFAULT,?,?,?,?,?,?,?);
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `senha_hash`, `tipo_usuario`, `telefone`, `reset_password_token`, `reset_password_expires`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`email` = 'perfil@jest.ufla.br';
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): SELECT `id`, `nome`, `email`, `tipo_usuario`, `telefone`, `created_at`, `updated_at` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`id` = 33;
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+    console.log
+      Executing (default): DELETE FROM `usuarios` WHERE `email` LIKE '%@jest.ufla.br'
+
+      at Sequelize.log (node_modules/sequelize/src/sequelize.js:1281:15)
+
+
+Test Suites: 2 passed, 2 total
+Tests:       31 passed, 31 total
+Snapshots:   0 total
+Time:        5.117 s
+Ran all test suites.

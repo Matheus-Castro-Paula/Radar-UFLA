@@ -9,17 +9,20 @@ async function salvar(arquivos = []) {
   if (arquivos.length === 0) return [];
 
   await fs.mkdir(UPLOADS_DIR, { recursive: true });
-  const urls = [];
+  const fotos = [];
   try {
     for (const arquivo of arquivos) {
-      // Nome gerado por nós: o nome enviado pelo cliente nunca chega ao disco
       const nome = `${crypto.randomUUID()}.${MIMES_PERMITIDOS[arquivo.mimetype]}`;
       await fs.writeFile(path.join(UPLOADS_DIR, nome), arquivo.buffer);
-      urls.push(`${URL_PUBLICA}/${nome}`);
+      fotos.push({
+        url_imagem: `${URL_PUBLICA}/${nome}`,
+        mime_type: arquivo.mimetype, 
+        tamanho_bytes: arquivo.buffer.length, 
+      });
     }
-    return urls;
+    return fotos;
   } catch (erro) {
-    await remover(urls); // não deixa arquivo órfão se um dos writes falhar
+    await remover(fotos.map((foto) => foto.url_imagem)); // não deixa arquivo órfão
     throw erro;
   }
 }
