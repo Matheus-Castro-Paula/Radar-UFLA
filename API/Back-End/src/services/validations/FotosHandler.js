@@ -27,6 +27,13 @@ class FotosHandler extends ValidationHandler {
     const fotos = dados.fotos;
     const arquivos = contexto.arquivos || [];
 
+    if (contexto.acao === "CRIAR" && fotos !== undefined) {
+      throw new RegraNegocioError(
+        RegraNegocioError.CODIGOS.VALIDACAO,
+        'No cadastro, envie as fotos como arquivos (multipart/form-data, campo "fotos"). URLs não são aceitas.',
+      );
+    }
+
     // 1. Fotos enviadas como URLs (JSON)
     if (fotos !== undefined) {
       if (!Array.isArray(fotos)) {
