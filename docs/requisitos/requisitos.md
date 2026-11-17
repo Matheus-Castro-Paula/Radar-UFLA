@@ -1,6 +1,6 @@
 # Requisitos da aplicação
 
-> **Artefato central da Sprint 2 (Atualizado na Sprint 6).** Não repita apenas o problema; descreva o comportamento e as condições que o sistema deverá atender.
+> **Artefato central da Sprint 2 (Atualizado na Sprint 7).** Não repita apenas o problema; descreva o comportamento e as condições que o sistema deverá atender.
 
 ## 1. Método de levantamento
 
@@ -18,14 +18,14 @@ Os requisitos do sistema **Radar UFLA** foram identificados e estruturados a par
 
 | ID | Nome | Descrição verificável | Prioridade | História/Issue | Situação final |
 | --- | --- | --- | --- | --- | --- |
-| `RF-01` | Autenticação Local e Cadastro de Usuário | O sistema deve permitir o cadastro local e a autenticação de usuários através de e-mail e senha com criptografia bcrypt. | Alta | `#04` | Concluído |
+| `RF-01` | Autenticação Local e Cadastro de Usuário | O sistema deve permitir o cadastro local e a autenticação de usuários através de e-mail e senha com criptografia bcrypt. | Alta | `#04`, `#52` | Concluído |
 | `RF-02` | Controle de Acesso Baseado em Papéis (RBAC) | O sistema deve gerenciar permissões de acordo com o perfil do usuário logado (Visitante, Comunidade UFLA e Administrador). | Alta | `#04` | Concluído |
 | `RF-03` | Painel do Usuário ("Meus Anúncios") | O sistema deve fornecer uma área centralizada para o usuário consultar e gerenciar apenas as suas publicações. | Média | `#05`, `#11` | Concluído |
 | `RF-04` | Vitrine Pública de Achados e Perdidos | O sistema deve exibir os pertences cadastrados em cards responsivos organizados por abas ("Achados" e "Perdidos") com contadores. | Alta | `#05` | Concluído |
 | `RF-05` | Filtros Combinados de Pesquisa | O sistema deve permitir ao usuário filtrar os pertences na vitrine por categoria, local do campus e período de forma combinada. | Média | `#08` | Concluído |
 | `RF-06` | Pesquisa Textual | O sistema deve permitir pesquisas por texto livre no campo de busca principal, de forma insensível a maiúsculas e acentos em Título, Descrição e Local. | Média | `#08` | Concluído |
-| `RF-07` | Cadastrar Novo Anúncio de Pertence | O sistema deve permitir que usuários logados cadastrem novos pertences informando Tipo, Título, Categoria, Local do Campus, Data/Hora e Descrição. | Alta | `#06`, `#07`, `#11` | Concluído |
-| `RF-08` | Upload de Mídia Local (Multer/ADR-08) e Dicas Visuais | O sistema deve permitir upload de até 3 fotos (máx 5MB) salvas em volume local `/uploads` via Multer (ADR-08) e apresentar orientações de segurança. | Média | `#10`, `#41`, `#43` | Em integração |
+| `RF-07` | Cadastrar Novo Anúncio de Pertence | O sistema deve permitir que usuários logados cadastrem novos pertences informando Tipo, Título, Categoria, Local do Campus, Data/Hora e Descrição. | Alta | `#06`, `#07`, `#11`, `#49` | Em validação (correção M-15) |
+| `RF-08` | Upload de Mídia Local (Multer/ADR-08) e Dicas Visuais | O sistema deve permitir upload de até 3 fotos (máx 5MB) salvas em volume local `/uploads` via Multer (ADR-08) e apresentar orientações de segurança. | Média | `#10`, `#41`, `#43`, `#50`, `#51` | Em validação (correções M-16 e M-18) |
 | `RF-09` | Editar e Encerrar Anúncio Próprio | O sistema deve permitir que o criador do anúncio altere informações ou o marque como "Entregue / Resolvido". | Média | `#11` | Concluído |
 | `RF-10` | Seção de Comentários no Anúncio | O sistema deve permitir que usuários logados interajam nos anúncios por meio de comentários públicos para alinhar a devolução. | Média | `#11` | Concluído |
 | `RF-11` | Gestão de Parâmetros | O sistema deve permitir ao Administrador Geral gerenciar (cadastrar/editar) os locais do campus e categorias de objetos. | Baixa | `#09` | Planejado |
@@ -35,14 +35,14 @@ Os requisitos do sistema **Radar UFLA** foram identificados e estruturados a par
 
 ## 4. Requisitos não funcionais
 
-| ID | Categoria | Descrição verificável | Decisões Arquiteturais e Evidências | Situação Atual (Sprint 6) | Issue |
+| ID | Categoria | Descrição verificável | Decisões Arquiteturais e Evidências | Situação Atual (Sprint 7) | Issue |
 | --- | --- | --- | --- | --- | --- |
 | `RNF-01` | Usabilidade | Interface web responsiva com breakpoint em 720px (`styles.css`), integrada diretamente à API REST. | Front-End estático sem frameworks JS; CSS próprio desktop-first. | **Parcial.** Layout responsivo funcional, mas não construído como mobile-first nativo. | `#05`, `#40` |
-| `RNF-02` | Desempenho | Operações de busca/filtro responsivas (< 800ms) e carregamento inicial em até 2s. | Filtros no navegador em `app.js`; índice de banco `idx_anuncio_tipo_status`. | **Não medido.** Aferição em 4G agendada para a Sprint 7. Paginação pendente (M-12). | `#08`, `#40` |
-| `RNF-03` | Segurança | Senhas com bcrypt, JWT sem estado (ADR-02), SQL parametrizado no Sequelize (ADR-06) e LGPD (`RN-04`). | Validação LGPD em `RegraLGPDHandler.js`, `INCLUDE_PUBLICO` em `AnuncioService.js` e `escapeHTML` em `app.js`. | **Parcial.** API responde em HTTP sem TLS (M-08) e CORS aberto (M-10). Ajustes de JWT e erro 500 no PR #41. | `#04`, `#40`, `#41` |
+| `RNF-02` | Desempenho | Operações de busca/filtro responsivas (< 800ms) e carregamento inicial em até 2s. | Filtros no navegador em `app.js`; índice de banco `idx_anuncio_tipo_status`; caso de teste `CT-13`. | **Em medição.** Caso de teste automatizado `CT-13` especificado no Plano de Testes (média < 800ms em 20 requisições). Paginação pendente (M-12). | `#08`, `#40`, `#52` |
+| `RNF-03` | Segurança | Senhas com bcrypt, JWT sem estado (ADR-02), SQL parametrizado no Sequelize (ADR-06) e LGPD (`RN-04`). | Validação LGPD em `RegraLGPDHandler.js`, `INCLUDE_PUBLICO` em `AnuncioService.js`, `escapeHTML` em `app.js` e casos `CT-01`, `CT-02`, `CT-05`, `CT-09`. | **Em validação.** Correção de bypass de upload via JSON (M-16 / Issue `#50`) e testes automatizados de segurança especificados. HTTP sem TLS (M-08) e CORS aberto (M-10) permanecem como débitos. | `#04`, `#40`, `#41`, `#50`, `#52` |
 | `RNF-04` | Auditoria e Confiabilidade | Operações críticas com integridade relacional e reinício automático de serviços. | Transações SQL em `AnuncioService.js` e política `restart: always` no `docker-compose.yml`. | **Não atendido.** Ausência de Audit Log (M-09). Instância única não garante meta de 99,5% de uptime. | `#02`, `#03`, `#40` |
-| `RNF-05` | Acessibilidade | Marcação HTML acessível com suporte a leitores de tela e navegação por teclado. | Atributos `role="tablist"`, `aria-selected` e `aria-live` em `index.html`. | **Parcial.** Conformidade integral WCAG 2.1 AA pendente de testes automatizados (Axe/WAVE). | `#05`, `#40` |
-| `RNF-06` | Arquitetura | Estrutura cliente-servidor modular em camadas (ADR-05), banco MySQL (ADR-06), Docker (ADR-07) e mídias locais (ADR-08). | Divisão Front/Back em contêineres e persistência de mídia via volume local `/uploads`. | **Atendido.** Monólito em camadas e banco MySQL operacionais. Mídias em integração via PRs #41, #42 e #43. | `#02`, `#03`, `#40` |
+| `RNF-05` | Acessibilidade | Marcação HTML acessível com suporte a leitores de tela e navegação por teclado. | Atributos `role="tablist"`, `aria-selected` e `aria-live` em `index.html`. | **Parcial.** Conformidade integral WCAG 2.1 AA pendente de testes automatizados (Axe/WAVE previstos para a Sprint 8). | `#05`, `#40` |
+| `RNF-06` | Arquitetura | Estrutura cliente-servidor modular em camadas (ADR-05), banco MySQL (ADR-06), Docker (ADR-07) e mídias locais (ADR-08). | Divisão Front/Back em contêineres e persistência de mídia via volume local `/uploads`. | **Atendido.** Monólito em camadas e banco MySQL operacionais; suíte de testes isolada com `NODE_ENV=test` estruturada na Sprint 7. | `#02`, `#03`, `#40`, `#52` |
 
 ## 5. Regras de negócio
 
@@ -64,11 +64,11 @@ Como **Membro da Comunidade UFLA**, quero **cadastrar um anúncio de um pertence
 
 **Critérios de aceitação:**
 
-1. **Dado que** o usuário está autenticado e no formulário de cadastro, **quando** preencher todos os campos obrigatórios (Tipo, Título, Categoria, Local do Campus, Data/Hora e Descrição) e clicar em "Publicar Anúncio", **então** o sistema deve salvar o registro com status "ATIVO" e exibi-lo na vitrine pública.
-2. **Dado que** o usuário seleciona arquivos de foto, **quando** enviar até 3 imagens nos formatos JPG, PNG ou WEBP com tamanho de até 5MB, **então** o sistema deve processar o upload via Multer, gravar os arquivos no volume local `/uploads` (ADR-08) e exibir as orientações visuais de segurança para entrega presencial.
+1. **Dado que** o usuário está autenticado e no formulário de cadastro, **quando** preencher todos os campos obrigatórios (Tipo, Título, Categoria, Local do Campus, Data/Hora e Descrição) e clicar em "Publicar Anúncio", **então** o sistema deve salvar o registro com status "ATIVO" (incluindo `data_ocorrencia`) e exibi-lo na vitrine pública.
+2. **Dado que** o usuário seleciona arquivos de foto, **quando** enviar até 3 imagens nos formatos JPG, PNG ou WEBP com tamanho de até 5MB, **então** o sistema deve processar o upload via Multer, gravar os arquivos no volume local `/uploads` (ADR-08) com seus metadados (`mime_type` e `tamanho_bytes`) e exibir as orientações visuais de segurança para entrega presencial.
 3. **Dado que** o usuário escolheu a categoria "Documento", **quando** tentar publicar ou editar o anúncio com fotos, **então** o sistema deve recusar a operação com uma mensagem explicando que fotos de documentos não são permitidas (`RN-04`), e o anúncio só pode ser publicado com descrição textual.
 
-**Issue:** `#06`, `#07`, `#10`, `#11`, `#41`, `#43`
+**Issue:** `#06`, `#07`, `#10`, `#11`, `#41`, `#43`, `#49`, `#50`, `#51`
 
 ---
 
@@ -100,7 +100,31 @@ Como **Administrador Geral**, quero **avaliar denúncias de posts colocados em q
 
 **Issue:** `#14`
 
-## 7. Fora do escopo
+## 7. Matriz de rastreabilidade (Requisitos × Casos de teste)
+
+A rastreabilidade entre os requisitos priorizados na Sprint 7 e os casos de teste definidos em [`plano-de-testes.md`](../testes/plano-de-testes.md) (Issue `#52`) está estruturada abaixo:
+
+### 7.1 Requisitos e regras de negócio
+
+| ID | Requisito / Regra | Casos de teste vinculados | Nível de teste | Situação na Sprint 7 |
+| --- | --- | --- | --- | --- |
+| `RF-01` | Autenticação Local e Cadastro de Usuário | `CT-01`, `CT-02` | Integração | Especificado (Issue `#53`) |
+| `RF-07` | Cadastrar Novo Anúncio de Pertence | `CT-03`, `CT-04`, `CT-12` | Integração / E2E | Especificado; `CT-04` depende da correção de M-15 (`#49`) |
+| `RF-08` | Upload de Mídia Local (Multer/ADR-08) | `CT-03`, `CT-05`, `CT-06`, `CT-08`, `CT-09`, `CT-12` | Unidade / Integração / E2E | Especificado; `CT-05` e `CT-06` dependem de M-16 (`#50`) e M-18 (`#51`) |
+| `RN-02` | Restrição de Gestão de Anúncios (Autoria) | `CT-11` | Integração | Especificado (Issue `#53`) |
+| `RN-04` | Ocultação de Dados Sensíveis (LGPD) | `CT-07`, `CT-10`, `CT-12` | Integração / E2E | Especificado (Issues `#53`, `#54`) |
+| `RNF-02` | Desempenho da Vitrine (< 800ms) | `CT-13` | Carga | Especificado (Medição na Issue `#53`) |
+| `RNF-03` | Segurança da API e Validação de Arquivos | `CT-01`, `CT-02`, `CT-05`, `CT-09` | Unidade / Integração | Especificado; `CT-05` depende de M-16 (`#50`) |
+
+### 7.2 Débitos técnicos rastreados na Sprint 7
+
+| Débito | Issue | Descrição do problema | Requisito afetado | Casos que comprovam a correção |
+| --- | --- | --- | --- | --- |
+| `M-15` | `#49` | Coluna `data_ocorrencia` não era persistida no MySQL ao criar/editar anúncio | `RF-07` | `CT-04`, `CT-12` |
+| `M-16` | `#50` | API aceitava URLs externas de foto via payload JSON contornando o Multer | `RF-08`, `RNF-03` | `CT-05` |
+| `M-18` | `#51` | Colunas `mime_type` e `tamanho_bytes` não eram gravadas na tabela `foto_anuncio` | `RF-08` | `CT-06` |
+
+## 8. Fora do escopo
 
 | Item | Motivo | Possível trabalho futuro |
 | --- | --- | --- |
@@ -109,10 +133,11 @@ Como **Administrador Geral**, quero **avaliar denúncias de posts colocados em q
 | Reconhecimento de Imagens por IA (Computer Vision para Match) | Custo computacional elevado e complexidade fora do foco do incremento mínimo validável. | Módulo experimental de comparação visual automática de fotos de pertences. |
 | Armazenamento Externo de Fotos em Nuvem (Cloudinary / AWS S3) | Substituído por solução local via Multer e volumes Docker para simplificação de infraestrutura e execução offline. | Migração para Bucket S3 ou CDN caso a aplicação entre em ambiente de produção em escala. |
 
-## 8. Histórico de alterações
+## 9. Histórico de alterações
 
 | Sprint | Requisito alterado | Alteração | Motivo | Issue/commit |
 | --- | --- | --- | --- | --- |
 | Sprint 2 | Todos | Criação e estruturação inicial do documento de requisitos | Padronização e detalhamento completo conforme modelo do projeto | `#14` |
 | Sprint 4 | `RN-04`, `US-01` | `RN-04` deixa de aceitar "fotos de documentos com tarja" e passa a proibir foto na categoria "Documento", com recusa pela API (HTTP 400); novo critério de aceitação 3 em `US-01` | Decisão ADR-03 de [`decisoes-de-projeto.md`](../projeto/decisoes-de-projeto.md): a tarja exigiria processamento de imagem, fora do escopo | `#25`, commits `0bffa9f` e `593156b` |
 | Sprint 6 | `RNF-01` a `RNF-06`, `RF-08`, `US-01` | Refinamento e avaliação da situação atual dos RNFs com base na Seção 7 de `arquitetura.md`; atualização da infraestrutura de mídias para armazenamento local com Multer (`/uploads`) conforme ADR-08 | Decisões arquiteturais ADR-05 a ADR-08 e mapeamento do PR #45 pelo Tech Lead | `#40`, `#45` |
+| Sprint 7 | `RF-07`, `RF-08`, `RNF-02`, `RNF-03`, `RN-02`, `RN-04`, `US-01` | Adição da Matriz de Rastreabilidade (Seção 7) conectando requisitos e débitos (`M-15`, `M-16`, `M-18`) aos casos de teste `CT-01` a `CT-13`; atualização do status de validação dos requisitos priorizados | Alinhamento com o Plano de Testes da Sprint 7 ([`plano-de-testes.md`](../testes/plano-de-testes.md)) elaborado pelo Tech Lead | `#49`, `#50`, `#51`, `#52` |
