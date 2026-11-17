@@ -3,6 +3,14 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
+  "scripts": {
+    "test:db:preparar": "node tests/ambiente/banco.js preparar",
+    "test:db:limpar": "node tests/ambiente/banco.js limpar",
+    "test:ambiente": "node tests/ambiente/verificar.js",
+    "test:evidencias": "node tests/ambiente/gerar-evidencias.js",
+    "test:docker": "docker compose -f docker-compose.test.yml run --rm --build testes",
+    "test:volume": "node tests/ambiente/validar-volume-uploads.js"
+  },
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
