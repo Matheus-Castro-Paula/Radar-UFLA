@@ -3,6 +3,7 @@
 # Chamado via "sh": no bind mount do Windows a permissão de execução se perde.
 set -e
 
+node tests/ambiente/validar-seeders.js
 node tests/ambiente/banco.js preparar
 node tests/ambiente/verificar.js --evidencia
 

@@ -32,6 +32,16 @@ module.exports = {
       return;
     }
 
+    // Idempotente (M-17): se já carregou antes, não duplica
+    const [existentes] = await queryInterface.sequelize.query(
+      "SELECT id FROM usuarios WHERE email = ?",
+      { replacements: [FIXTURES.autorVitrine.email] },
+    );
+    if (existentes.length > 0) {
+      console.log("[test-fixtures] Fixtures já carregadas; nada a fazer.");
+      return;
+    }
+
     const agora = new Date();
     const [hashVitrine, hashAdmin] = await Promise.all([
       bcrypt.hash(FIXTURES.autorVitrine.senha, 10),
