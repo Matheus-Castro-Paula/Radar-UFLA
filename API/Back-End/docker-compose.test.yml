@@ -9,8 +9,9 @@ services:
   db_test:
     image: mysql:8.0
     environment:
-      # Banco descartável, em memória e sem porta exposta: não guarda dado real
-      MYSQL_ROOT_PASSWORD: ${DB_TEST_PASSWORD:-teste}
+      # Banco descartável, em memória e sem porta exposta. Mesmo assim a senha
+      # vem do .env (M-11): nenhuma credencial fica escrita no arquivo.
+      MYSQL_ROOT_PASSWORD: ${DB_TEST_PASSWORD:?Defina DB_TEST_PASSWORD no arquivo .env (veja o .env.example)}
     tmpfs:
       - /var/lib/mysql
     healthcheck:
@@ -30,8 +31,8 @@ services:
       DB_HOST: db_test
       DB_PORT: 3306
       DB_USER: root
-      DB_PASSWORD: ${DB_TEST_PASSWORD:-teste}
-      DB_NAME_TEST: radar_ufla_test
+      DB_PASSWORD: ${DB_TEST_PASSWORD:?Defina DB_TEST_PASSWORD no arquivo .env (veja o .env.example)}
+      DB_NAME_TEST: ${DB_NAME_TEST:-radar_ufla_test}
       UPLOADS_DIR: /tmp/uploads-teste
       EVIDENCIAS_DIR: /evidencias
     volumes:
