@@ -36,13 +36,18 @@ describe("Autenticação JWT (RF-01, RNF-03)", () => {
     expect(res.body.usuario.tipo_usuario).toBe("comum");
   });
 
-  it("login válido devolve token JWT", async () => {
+  it("CT-01: login válido devolve token JWT com id, tipo_usuario e validade de 24 h", async () => {
     const { token, usuario } = await criarUsuarioLogado("login");
     expect(token).toEqual(expect.any(String));
     expect(usuario.tipo_usuario).toBe("comum");
+
+    const payload = jwt.decode(token);
+    expect(payload.id).toEqual(expect.any(Number));
+    expect(payload.tipo_usuario).toBe("comum");
+    expect(payload.exp - payload.iat).toBe(24 * 60 * 60);
   });
 
-  it("login com senha errada ou e-mail inexistente devolve 401 genérico", async () => {
+  it("CT-01: login com senha errada ou e-mail inexistente devolve 401 genérico", async () => {
     await criarUsuarioLogado("login");
     const senhaErrada = await request(app)
       .post("/api/auth/login")
@@ -64,7 +69,7 @@ describe("Autenticação JWT (RF-01, RNF-03)", () => {
     expect(res.body.reset_password_token).toBeUndefined();
   });
 
-  it("GET /perfil rejeita token ausente, malformado, inválido e expirado", async () => {
+  it("CT-02: GET /perfil rejeita token ausente, malformado, inválido e expirado", async () => {
     const semToken = await request(app).get("/api/auth/perfil");
     const formato = await request(app).get("/api/auth/perfil").set("Authorization", "Token abc");
     const invalido = await request(app).get("/api/auth/perfil").set("Authorization", "Bearer abc");
@@ -74,5 +79,12 @@ describe("Autenticação JWT (RF-01, RNF-03)", () => {
     );
     const res = await request(app).get("/api/auth/perfil").set("Authorization", `Bearer ${expirado}`);
     for (const r of [semToken, formato, invalido, res]) expect(r.status).toBe(401);
+  });
+
+  it("CT-02: GET /perfil rejeita token assinado com o segredo antigo da Sprint 3", async () => {
+    const { usuario } = await criarUsuarioLogado("segredo");
+    const antigo = jwt.sign({ id: usuario.id }, "chave_secreta_sprint_3", { expiresIn: "24h" });
+    const res = await request(app).get("/api/auth/perfil").set("Authorization", `Bearer ${antigo}`);
+    expect(res.status).toBe(401);
   });
 });

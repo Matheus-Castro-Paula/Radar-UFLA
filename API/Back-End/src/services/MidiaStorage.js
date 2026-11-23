@@ -27,13 +27,24 @@ async function salvar(arquivos = []) {
   }
 }
 
+// M-16: só é "local" a URL que o próprio MidiaStorage gera: /uploads/<uuid>.<ext>
+const EXTENSOES = Object.values(MIMES_PERMITIDOS).join("|");
+const REGEX_URL_LOCAL = new RegExp(`^${URL_PUBLICA}/[0-9a-f-]{36}\\.(${EXTENSOES})$`);
+
+function ehUrlLocal(url) {
+  return typeof url === "string" && REGEX_URL_LOCAL.test(url);
+}
+
+// M-13: apaga do volume os arquivos que deixaram de ser usados (anúncio excluído
+// ou foto removida na edição). Só mexe em caminhos gerados por este serviço;
+// arquivo que já não existe é ignorado.
 async function remover(urls = []) {
   await Promise.all(
-    urls.map((url) =>
+    urls.filter(ehUrlLocal).map((url) =>
       // basename impede que uma URL malformada aponte para fora de UPLOADS_DIR
       fs.unlink(path.join(UPLOADS_DIR, path.basename(url))).catch(() => {}),
     ),
   );
 }
 
-module.exports = { salvar, remover };
+module.exports = { salvar, remover, ehUrlLocal };

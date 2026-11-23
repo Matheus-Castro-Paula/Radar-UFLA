@@ -19,7 +19,8 @@ const JEST = process.env.JEST_BIN || require.resolve("jest/bin/jest", { paths: [
 // Roda o Jest mostrando a saída na tela e guardando uma cópia para o .log
 function rodarJest(arquivoJson, extras) {
   return new Promise((resolve) => {
-    const args = [JEST, "--ci", "--runInBand", "--json", `--outputFile=${arquivoJson}`, ...extras];
+    // Cobertura ligada por padrão (Sprint 8); "--coverage=false" nos extras desliga
+    const args = [JEST, "--ci", "--runInBand", "--coverage", "--json", `--outputFile=${arquivoJson}`, ...extras];
     const filho = spawn(process.execPath, args, { cwd: RAIZ, env: process.env });
     let saida = "";
     const copiar = (destino) => (pedaco) => {
@@ -49,7 +50,27 @@ function resumirFalha(texto) {
     .slice(0, 2000);
 }
 
-function montarRelatorio(resultado, { inicio, nomeLog, codigo }) {
+// Recorta da saída do Jest o resumo ("Coverage summary") e a tabela por arquivo
+// dos reporters text-summary e text. Devolve null se a cobertura não rodou.
+function extrairCobertura(log) {
+  const linhas = log.split(/\r?\n/);
+  const inicioResumo = linhas.findIndex((l) => /=+ Coverage summary =+/.test(l));
+  const resumo =
+    inicioResumo === -1
+      ? []
+      : linhas.slice(inicioResumo + 1).filter((l, i, arr) => i < arr.findIndex((x) => /^=+$/.test(x.trim())));
+
+  const cabecalho = linhas.findIndex((l) => /^\s*File\s+\|\s+% Stmts/.test(l));
+  let tabelaArquivos = [];
+  if (cabecalho > 0) {
+    const fim = linhas.findIndex((l, i) => i > cabecalho + 1 && /^-+\|/.test(l));
+    tabelaArquivos = linhas.slice(cabecalho - 1, fim === -1 ? undefined : fim + 1);
+  }
+  if (!resumo.length && !tabelaArquivos.length) return null;
+  return { resumo: resumo.map((l) => l.trim()).filter(Boolean), tabelaArquivos };
+}
+
+function montarRelatorio(resultado, { inicio, nomeLog, codigo, cobertura }) {
   const testes = resultado.testResults.flatMap((arquivo) =>
     arquivo.assertionResults.map((t) => ({
       arquivo: path.relative(RAIZ, arquivo.name).split(path.sep).join("/"),
@@ -94,6 +115,22 @@ function montarRelatorio(resultado, { inicio, nomeLog, codigo }) {
     `- **Duração:** ${duracaoTotal} s`,
     `- **Ambiente:** \`NODE_ENV=test\`, banco \`${config.database}\` em \`${config.host}:${config.port}\`, Node ${process.version}, ${os.platform()}`,
     `- **Log completo:** [\`${nomeLog}\`](${nomeLog})`,
+    "",
+    "## Cobertura de código",
+    "",
+    ...(cobertura
+      ? [
+          ...cobertura.resumo.map((l) => `- ${l}`),
+          "",
+          "<details><summary>Cobertura por arquivo</summary>",
+          "",
+          "```",
+          ...cobertura.tabelaArquivos,
+          "```",
+          "",
+          "</details>",
+        ]
+      : ["_A suíte rodou sem `--coverage`._"]),
     "",
     "## Resultado por caso de teste",
     "",
@@ -143,7 +180,8 @@ async function main() {
   }
   await fs.rm(arquivoJson, { force: true });
 
-  const destino = await gravar(`${base}.md`, montarRelatorio(resultado, { inicio, nomeLog, codigo }));
+  const cobertura = extrairCobertura(log);
+  const destino = await gravar(`${base}.md`, montarRelatorio(resultado, { inicio, nomeLog, codigo, cobertura }));
   console.log(`>> Evidências: ${destino} e ${nomeLog}`);
   process.exit(codigo);
 }
