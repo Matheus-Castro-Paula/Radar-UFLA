@@ -25,7 +25,7 @@ Os requisitos do sistema **Radar UFLA** foram identificados e estruturados a par
 | `RF-05` | Filtros Combinados de Pesquisa | O sistema deve permitir ao usuário filtrar os pertences na vitrine por categoria, local do campus e período de forma combinada. | Média | `#08` | Parcial: categoria e local; sem filtro por período |
 | `RF-06` | Pesquisa Textual | O sistema deve permitir pesquisas por texto livre no campo de busca principal, de forma insensível a maiúsculas e acentos em Título, Descrição e Local. | Média | `#08` | Parcial: não ignora acentos |
 | `RF-07` | Cadastrar Novo Anúncio de Pertence | O sistema deve permitir que usuários logados cadastrem novos pertences informando Tipo, Título, Categoria, Local do Campus, Data/Hora e Descrição. | Alta | `#06`, `#07`, `#11`, `#49` | Concluído (CT-03, CT-04, CT-12) |
-| `RF-08` | Upload de Mídia Local (Multer/ADR-08) e Dicas Visuais | O sistema deve permitir upload de até 3 fotos (máx 5MB) salvas em volume local `/uploads` via Multer (ADR-08) e apresentar orientações de segurança. | Média | `#10`, `#41`, `#43`, `#50`, `#51` | Concluído (CT-03, CT-06, CT-08, CT-09, CT-12); edição com URL externa em correção (M-16) |
+| `RF-08` | Upload de Mídia Local (Multer/ADR-08) e Dicas Visuais | O sistema deve permitir upload de até 3 fotos (máx 5MB) salvas em volume local `/uploads` via Multer (ADR-08) e apresentar orientações de segurança. | Média | `#10`, `#41`, `#43`, `#50`, `#51` | Concluído (CT-03, CT-05, CT-06, CT-08, CT-09, CT-12) |
 | `RF-09` | Editar e Encerrar Anúncio Próprio | O sistema deve permitir que o criador do anúncio altere informações ou o marque como "Entregue / Resolvido". | Média | `#11` | Parcial: API pronta (CT-11); botões na interface na Sprint 8 |
 | `RF-10` | Seção de Comentários no Anúncio | O sistema deve permitir que usuários logados interajam nos anúncios por meio de comentários públicos para alinhar a devolução. | Média | `#11` | Não implementado: só tabela e model (trabalho futuro) |
 | `RF-11` | Gestão de Parâmetros | O sistema deve permitir ao Administrador Geral gerenciar (cadastrar/editar) os locais do campus e categorias de objetos. | Baixa | `#09` | Não implementado (trabalho futuro) |
@@ -38,8 +38,8 @@ Os requisitos do sistema **Radar UFLA** foram identificados e estruturados a par
 | ID | Categoria | Descrição verificável | Decisões Arquiteturais e Evidências | Situação final (Sprint 8) | Issue |
 | --- | --- | --- | --- | --- | --- |
 | `RNF-01` | Usabilidade | Interface web responsiva com breakpoint em 720px (`styles.css`), integrada diretamente à API REST. | Front-End estático sem frameworks JS; CSS próprio desktop-first. | **Parcial.** Layout responsivo funcional, mas não construído como mobile-first nativo. | `#05`, `#40` |
-| `RNF-02` | Desempenho | Operações de busca/filtro responsivas (< 800ms) e carregamento inicial em até 2s. | Filtros no navegador em `app.js`; índice de banco `idx_anuncio_tipo_status`; caso de teste `CT-13`. | **Parcial.** `CT-13` não foi executado; listagem sem paginação (M-12). | `#08`, `#40`, `#52` |
-| `RNF-03` | Segurança | Senhas com bcrypt, JWT sem estado (ADR-02), SQL parametrizado no Sequelize (ADR-06) e LGPD (`RN-04`). | Validação LGPD em `RegraLGPDHandler.js`, `INCLUDE_PUBLICO` em `AnuncioService.js`, `escapeHTML` em `app.js` e casos `CT-01`, `CT-02`, `CT-05`, `CT-09`. | **Parcial.** CT-01, CT-07, CT-09 e CT-10 aprovados; senhas fora do Compose (M-11). Pendentes: HTTPS (M-08), CORS restrito (M-10) e URL externa na edição (resto do M-16). | `#04`, `#40`, `#41`, `#50`, `#52` |
+| `RNF-02` | Desempenho | Operações de busca/filtro responsivas (< 800ms) e carregamento inicial em até 2s. | Filtros no navegador em `app.js`; índice de banco `idx_anuncio_tipo_status`; caso de teste `CT-13`. | **Atendido na escala testada.** `CT-13`: média de 8,5 ms com 50 anúncios. Sem paginação (M-12), o tempo cresce com a base. | `#08`, `#40`, `#52` |
+| `RNF-03` | Segurança | Senhas com bcrypt, JWT sem estado (ADR-02), SQL parametrizado no Sequelize (ADR-06) e LGPD (`RN-04`). | Validação LGPD em `RegraLGPDHandler.js`, `INCLUDE_PUBLICO` em `AnuncioService.js`, `escapeHTML` em `app.js` e casos `CT-01`, `CT-02`, `CT-05`, `CT-09`. | **Parcial.** CORS restrito (M-10), senhas fora do Compose (M-11), URL externa recusada no cadastro e na edição (M-16) e CPF bloqueado na API (M-05). Pendentes: HTTPS (M-08) e usuário próprio da aplicação no banco. | `#04`, `#40`, `#41`, `#50`, `#52` |
 | `RNF-04` | Auditoria e Confiabilidade | Operações críticas com integridade relacional e reinício automático de serviços. | Transações SQL em `AnuncioService.js` e política `restart: always` no `docker-compose.yml`. | **Não atendido.** Ausência de Audit Log (M-09). Instância única não garante meta de 99,5% de uptime. | `#02`, `#03`, `#40` |
 | `RNF-05` | Acessibilidade | Marcação HTML acessível com suporte a leitores de tela e navegação por teclado. | Atributos `role="tablist"`, `aria-selected` e `aria-live` em `index.html`. | **Parcial.** Auditoria com Axe/WAVE em execução na Sprint 8; resultado registrado em [`evidencias-testes.md`](../testes/evidencias-testes.md). | `#05`, `#40` |
 | `RNF-06` | Arquitetura | Estrutura cliente-servidor modular em camadas (ADR-05), banco MySQL (ADR-06), Docker (ADR-07) e mídias locais (ADR-08). | Divisão Front/Back em contêineres e persistência de mídia via volume local `/uploads`. | **Atendido.** Monólito em camadas, MySQL e volume de fotos validados no ambiente de teste isolado (evidências de 22/11/2026). | `#02`, `#03`, `#40`, `#52` |
@@ -108,13 +108,13 @@ A rastreabilidade entre os requisitos priorizados na Sprint 7 e os casos de test
 
 | ID | Requisito / Regra | Casos de teste vinculados | Nível de teste | Situação final (Sprint 8) |
 | --- | --- | --- | --- | --- |
-| `RF-01` | Autenticação Local e Cadastro de Usuário | `CT-01`, `CT-02` | Integração | CT-01 aprovado; CT-02 parcial |
+| `RF-01` | Autenticação Local e Cadastro de Usuário | `CT-01`, `CT-02` | Integração | Aprovados |
 | `RF-07` | Cadastrar Novo Anúncio de Pertence | `CT-03`, `CT-04`, `CT-12` | Integração / E2E | Aprovados |
-| `RF-08` | Upload de Mídia Local (Multer/ADR-08) | `CT-03`, `CT-05`, `CT-06`, `CT-08`, `CT-09`, `CT-12` | Unidade / Integração / E2E | Aprovados, exceto `CT-05` parcial |
+| `RF-08` | Upload de Mídia Local (Multer/ADR-08) | `CT-03`, `CT-05`, `CT-06`, `CT-08`, `CT-09`, `CT-12` | Unidade / Integração / E2E | Aprovados |
 | `RN-02` | Restrição de Gestão de Anúncios (Autoria) | `CT-11` | Integração | Aprovado |
 | `RN-04` | Ocultação de Dados Sensíveis (LGPD) | `CT-07`, `CT-10`, `CT-12` | Integração / E2E | Aprovados |
-| `RNF-02` | Desempenho da Vitrine (< 800ms) | `CT-13` | Carga | Não executado |
-| `RNF-03` | Segurança da API e Validação de Arquivos | `CT-01`, `CT-02`, `CT-05`, `CT-09` | Unidade / Integração | CT-01 e CT-09 aprovados; CT-02 e CT-05 parciais |
+| `RNF-02` | Desempenho da Vitrine (< 800ms) | `CT-13` | Carga | Aprovado (média de 8,5 ms) |
+| `RNF-03` | Segurança da API e Validação de Arquivos | `CT-01`, `CT-02`, `CT-05`, `CT-09` | Unidade / Integração | Aprovados |
 
 ### 7.2 Débitos técnicos rastreados na Sprint 7
 

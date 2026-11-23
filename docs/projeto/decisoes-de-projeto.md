@@ -6,7 +6,7 @@
 >
 > **Atualizado na Sprint 6** — Issue [#40](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/40): ADR-05 a ADR-08 (decisões de arquitetura global) e melhorias M-08 a M-18, identificadas ao documentar a arquitetura em [`arquitetura.md`](../arquitetura/arquitetura.md). As PRs [#46](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/46), [#47](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/47) e [#48](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/48) implementaram a ADR-08 e resolveram as melhorias M-02, M-04, M-06 e M-14.
 >
-> **Atualizado na Sprint 8:** situação final das melhorias (seção 4) e consequências dos ADR-07 e ADR-08 alinhadas ao código após as PRs [#58](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/58) e [#66](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/66).
+> **Atualizado na Sprint 8:** situação final das melhorias (seção 4) e consequências dos ADR-07 e ADR-08 alinhadas ao código após as PRs [#58](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/58), [#66](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/66) e [#68](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/68).
 
 Este documento registra a decomposição do back-end em módulos e camadas, as principais decisões locais de projeto (no formato de ADRs), a análise de coesão e acoplamento do código antes e depois da refatoração da Sprint 4 e as melhorias identificadas.
 
@@ -149,7 +149,7 @@ flowchart LR
   - ✅ Uma única unidade de implantação para a API, com transações locais entre anúncio e fotos.
   - ✅ Front-end e back-end evoluem em paralelo, ligados pelo contrato HTTP.
   - ⚠️ Toda a API escala em conjunto, e uma falha no processo afeta todas as funcionalidades.
-  - ⚠️ Front-end e API têm origens diferentes, o que exige CORS (ver melhoria M-10).
+  - ✅ Front-end e API têm origens diferentes, o que exige CORS. Desde a Sprint 8, só as origens de `CORS_ORIGINS` são liberadas (M-10, PR #68).
   - ⚠️ A separação entre camadas depende de convenção e de code review, como já indicado no ADR-01.
 
 ### ADR-06 — Persistir os dados em MySQL com Sequelize e migrations
@@ -204,9 +204,9 @@ flowchart LR
   - ✅ A `RN-04` continua valendo sem alteração no `RegraLGPDHandler`.
   - ⚠️ As fotos ficam presas à máquina que executa a aplicação, sem CDN e com backup manual do volume.
   - ⚠️ Cada requisição pode manter até 15 MB em memória.
-  - ⚠️ Excluir um anúncio remove as linhas do banco, mas não os arquivos (ver melhoria M-13, em correção na Sprint 8).
+  - ✅ Excluir um anúncio ou remover fotos na edição apaga os arquivos do volume, depois da confirmação do banco (M-13, PR #68).
   - ✅ O `FotosHandler` confere os bytes iniciais de cada arquivo, o que barra um arquivo com MIME falsificado (melhoria M-14, resolvida na PR #47).
-  - ✅ O cadastro recusa URLs externas como foto enviadas em JSON (M-16, PR #58). A edição ainda as aceita; a correção está na Sprint 8.
+  - ✅ O cadastro recusa URLs externas como foto (PR #58), e a edição aceita só caminhos de `/uploads/` já publicados no próprio anúncio (PR #68). Juntas, fecham o M-16.
   - ✅ As colunas `mime_type` e `tamanho_bytes` são preenchidas a cada upload (M-18, PR #58).
   - ⚠️ O README, o item T-04 do backlog e a Issue [#10](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/10) ainda citam o Cloudinary e precisam ser atualizados.
 
@@ -307,4 +307,4 @@ Resolvidas na Sprint 6, na PR [#47](https://github.com/Matheus-Castro-Paula/Rada
 
 Resolvidas na Sprint 7, na PR [#58](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/58): M-15, M-18 e M-16 no cadastro.
 
-Sprint 8: M-17 resolvida e M-11 resolvida em parte na PR [#66](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/66); M-05, M-10, M-13 e M-16 na edição em correção no PR de back-end da sprint. Ficam como trabalho futuro M-01, M-03, M-07, M-08, M-09 e M-12, justificadas em [`evidencias-testes.md`](../testes/evidencias-testes.md#5-limitações-conhecidas-e-trabalhos-futuros).
+Sprint 8: M-17 resolvida e M-11 resolvida em parte na PR [#66](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/66); M-05, M-10, M-13 e M-16 na edição resolvidas na PR [#68](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/68). Ficam como trabalho futuro M-01, M-03, M-07, M-08, M-09 e M-12, justificadas em [`evidencias-testes.md`](../testes/evidencias-testes.md#5-limitações-conhecidas-e-trabalhos-futuros).

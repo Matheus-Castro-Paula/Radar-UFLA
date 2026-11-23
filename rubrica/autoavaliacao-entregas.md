@@ -14,7 +14,7 @@ Avaliação do próprio grupo sobre cada sprint, segundo as quatro dimensões da
 | 4 | [`sprint-04`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/tree/sprint-04) | Atendido: ADR-01 a ADR-03, análise de coesão e acoplamento | Atendido: `AnuncioService` com antes e depois | Atendido | Atendido | `AuthService` (M-01) identificado e nunca feito |
 | 5 | [`sprint-05`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/tree/sprint-05) | Atendido: Chain of Responsibility com alternativas e custos | Atendido: refatoração com 12 cenários iguais antes e depois | Atendido | Parcial: commits do PR #38 citam a Issue errada | Sem testes automatizados dos handlers nesta sprint |
 | 6 | [`sprint-06`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/tree/sprint-06) | Atendido: contexto, contêineres, componentes, RNF × decisões | Atendido: Docker, volume e upload com Multer | Atendido | Atendido | Débitos M-15, M-16 e M-18 entraram junto com o upload |
-| 7 | [`sprint-07`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/tree/sprint-07) | Atendido: plano com 13 casos, riscos e critérios | Atendido: 31 testes automatizados e roteiro manual | Atendido | Atendido | Testes sem o prefixo `CT-xx` no nome; CT-13 não executado |
+| 7 | [`sprint-07`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/tree/sprint-07) | Atendido: plano com 13 casos, riscos e critérios | Atendido: 31 testes automatizados e roteiro manual | Atendido | Atendido | Testes sem o prefixo `CT-xx` no nome e CT-13 não executado (corrigidos na Sprint 8) |
 | 8 | `sprint-08` | Atendido: [`evidencias-testes.md`](../docs/testes/evidencias-testes.md) e [`uso-de-ia.md`](../docs/uso-de-ia.md) | Ver seção 2 | Ver seção 2 | Ver seção 2 | Concentração de merges no fim da sprint |
 
 ## 2. Sprint 8 em detalhe
@@ -31,8 +31,8 @@ Avaliação do próprio grupo sobre cada sprint, segundo as quatro dimensões da
 | Plano de testes e matriz atualizados | [`plano-de-testes.md`](../docs/testes/plano-de-testes.md) | Atendido |
 | Backlog com a situação final de cada item | [`backlog-produto.md`](../docs/backlog-produto.md) | Responsável: PO |
 | README final com imagens e instruções | [`README.md`](../README.md) | Responsável: Front-end |
-| Correção dos defeitos críticos | PR [#66](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/66) (M-11, M-17) e PR de back-end (M-05, M-10, M-13, M-16) | M-11 e M-17 corrigidos; demais em revisão |
-| Suíte de testes executável | `npm run test:docker` em `API/Back-End` | Atendido: 31 de 31 |
+| Correção dos defeitos críticos | PRs [#66](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/66) (M-11, M-17) e [#68](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/68) (M-05, M-10, M-13, M-16) | Corrigidos; M-11 em parte (aplicação ainda usa `root`) |
+| Suíte de testes executável | `npm run test:docker` em `API/Back-End` | Atendido: 50 de 50 testes, 13 de 13 casos, 92,03% das linhas |
 | Issues encerradas ou justificadas | GitHub Project | Responsável: PO |
 | Tag `sprint-08` e preparação da `versao-final` | Repositório | Criada pelo Tech Lead após o merge dos PRs |
 

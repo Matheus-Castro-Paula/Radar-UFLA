@@ -12,69 +12,75 @@ Relatório final de verificação e validação. Consolida as execuções das Sp
 | 16/11/2026 | Suíte automatizada, depois das correções | Banco `radar_ufla_test` isolado | 31 de 31 aprovados | [`2026-11-16_1956_suite-automatizada.md`](evidencias/2026-11-16_1956_suite-automatizada.md) |
 | 16/11/2026 | Roteiro manual de interface (CT-12) | Firefox, API em Docker | 9 de 9 passos aprovados | [`2026-11-16_front-ct12-interface.md`](evidencias/2026-11-16_front-ct12-interface.md) |
 | 16/11/2026 | Persistência das fotos no volume `uploads_data` | Docker Compose de desenvolvimento | Aprovado | [`2026-11-16_1524_volume-uploads.md`](evidencias/2026-11-16_1524_volume-uploads.md) |
-| 22/11/2026 | Suíte automatizada com cobertura, após M-11 e M-17 | Container de teste (`npm run test:docker`) | 31 de 31 aprovados; 88,88% das linhas e 69,58% dos ramos | [`2026-11-22_0957_suite-automatizada.md`](evidencias/2026-11-22_0957_suite-automatizada.md) |
+| 22/11/2026 | Suíte automatizada com cobertura, após M-11 e M-17 (PR #66) | Container de teste (`npm run test:docker`) | 31 de 31 aprovados; 88,88% das linhas | [`2026-11-22_0957_suite-automatizada.md`](evidencias/2026-11-22_0957_suite-automatizada.md) |
 | 22/11/2026 | Idempotência dos seeders (M-17) | Container de teste | Três execuções sem erro e sem duplicação | [`2026-11-22_0956_seeders-idempotentes.md`](evidencias/2026-11-22_0956_seeders-idempotentes.md) |
 | 22/11/2026 | Ambiente de teste com senha vinda do `.env` (M-11) e volume de fotos | Container de teste e Compose novo | Aprovado | [`2026-11-22_0957_ambiente-de-teste.md`](evidencias/2026-11-22_0957_ambiente-de-teste.md), [`2026-11-22_0957_volume-uploads.md`](evidencias/2026-11-22_0957_volume-uploads.md) |
+| 22/11/2026 | Suíte final com prefixos `CT-xx`, após M-05, M-10, M-13 e M-16 (PR #68) | Container de teste (`npm run test:docker`) | **50 de 50 aprovados; 92,03% das linhas** | [`2026-11-22_2252_suite-automatizada.md`](evidencias/2026-11-22_2252_suite-automatizada.md) |
 
-Para reproduzir: na pasta `API/Back-End`, copie o `.env.example` para `.env`, preencha `DB_PASSWORD`, `DB_TEST_PASSWORD` e `JWT_SECRET` e rode `npm run test:docker`. O relatório e o log saem em `docs/testes/evidencias/`.
+Para reproduzir: na pasta `API/Back-End`, copie o `.env.example` para `.env`, preencha `DB_PASSWORD`, `DB_TEST_PASSWORD` e `JWT_SECRET` e rode `npm run test:docker`. O relatório e o log saem em `docs/testes/evidencias/`, já agrupados por caso `CT-xx`.
 
 ## 2. Resumo dos casos de teste
 
 | Situação | Quantidade | Casos |
 | --- | --- | --- |
-| Aprovados | 10 | CT-01, CT-03, CT-04, CT-06, CT-07, CT-08, CT-09, CT-10, CT-11, CT-12 |
-| Parciais | 2 | CT-02, CT-05 |
+| Aprovados | 13 | CT-01 a CT-13 |
+| Parciais | 0 | — |
 | Reprovados | 0 | — |
-| Não executados | 1 | CT-13 |
+| Não executados | 0 | — |
 | **Total** | **13** | |
 
-Na suíte automatizada, os 31 testes passaram nas duas execuções finais (16/11 e 22/11). Além dos casos do plano, a suíte cobre cadastro sem `senha_hash` na resposta, e-mail duplicado, `tipo_usuario` enviado pelo cliente ignorado, campos obrigatórios, categoria fora da lista, GIF recusado, data futura ou inválida e documento sem foto aceito.
+A execução final tem 50 testes automatizados, todos aprovados. Os 25 que citam um `CT-xx` cobrem 12 casos; o CT-12 é o roteiro manual. Dos outros 25, 14 comprovam as correções da Sprint 8 (6 de M-05, 4 de M-10 e 4 de M-13) e 11 verificam comportamentos fora dos casos do plano: cadastro sem `senha_hash` na resposta, e-mail duplicado, `tipo_usuario` enviado pelo cliente ignorado, campos obrigatórios, categoria fora da lista e data futura ou inválida.
 
 ### 2.1 Resultado por caso
 
-| Caso | Requisito | Forma | Resultado | Observação |
-| --- | --- | --- | --- | --- |
-| CT-01 | `RF-01`, `RNF-03` | Automatizada | Aprovado | Login válido devolve JWT; senha errada devolve 401 genérico |
-| CT-02 | `RF-01`, `RNF-03` | Automatizada | Parcial | Token ausente, malformado, inválido e expirado recusados; o passo 3 (token assinado com o segredo antigo) não tem teste próprio |
-| CT-03 | `RF-07`, `RF-08` | Automatizada | Aprovado | Foto gravada em `/uploads/<uuid>.png` e servida com `nosniff` |
-| CT-04 | `RF-07`, M-15 | Automatizada | Aprovado | Reprovado antes da correção da Issue #49 |
-| CT-05 | `RF-08`, `RNF-03`, M-16 | Automatizada | Parcial | Cadastro com URL externa recusado; a edição (`PUT`) ainda aceita URL externa (defeito D-04, seção 3) |
-| CT-06 | `RF-08`, M-18 | Automatizada | Aprovado | Reprovado antes da correção da Issue #51 |
-| CT-07 | `RN-04` | Automatizada | Aprovado | Documento com foto recusado na criação e na edição, sem arquivo gravado |
-| CT-08 | `RF-08` | Automatizada | Aprovado | 4 fotos e foto de 6 MB recusadas |
-| CT-09 | `RF-08`, `RNF-03` | Automatizada (integração) | Aprovado | Arquivo com MIME falso recusado pelos bytes iniciais |
-| CT-10 | `RN-04` | Automatizada | Aprovado | Vitrine pública devolve só `id` e `nome` do autor |
-| CT-11 | `RN-02` | Automatizada | Aprovado | Usuário B recebe 403 ao editar e excluir anúncio de A |
-| CT-12 | `RF-07`, `RF-08`, `RN-04` | Manual | Aprovado | 9 de 9 passos, com capturas de tela |
-| CT-13 | `RNF-02` | Automatizada | Não executado | A medição de tempo da vitrine ainda não foi implementada na suíte |
+| Caso | Requisito | Forma | Testes | Resultado | Observação |
+| --- | --- | --- | --- | --- | --- |
+| CT-01 | `RF-01`, `RNF-03` | Automatizada | 2 | Aprovado | Login válido devolve JWT; senha errada devolve 401 genérico |
+| CT-02 | `RF-01`, `RNF-03` | Automatizada | 3 | Aprovado | Inclui o passo 3 (token assinado com o segredo antigo), que era parcial na Sprint 7 |
+| CT-03 | `RF-07`, `RF-08` | Automatizada | 1 | Aprovado | Foto gravada em `/uploads/<uuid>.png` e servida com `nosniff` |
+| CT-04 | `RF-07`, M-15 | Automatizada | 2 | Aprovado | Reprovado antes da correção da Issue #49 |
+| CT-05 | `RF-08`, `RNF-03`, M-16 | Automatizada | 5 | Aprovado | URL externa recusada no cadastro e na edição; na edição também `../` e foto de outro anúncio |
+| CT-06 | `RF-08`, M-18 | Automatizada | 1 | Aprovado | Reprovado antes da correção da Issue #51 |
+| CT-07 | `RN-04` | Automatizada | 4 | Aprovado | Documento com foto recusado na criação e na edição, sem arquivo gravado |
+| CT-08 | `RF-08` | Automatizada | 3 | Aprovado | 4 fotos, foto de 6 MB e GIF recusados |
+| CT-09 | `RF-08`, `RNF-03` | Automatizada (integração) | 1 | Aprovado | Arquivo com MIME falso recusado pelos bytes iniciais |
+| CT-10 | `RN-04` | Automatizada | 1 | Aprovado | Vitrine pública devolve só `id` e `nome` do autor |
+| CT-11 | `RN-02` | Automatizada | 1 | Aprovado | Usuário B recebe 403 ao editar e excluir anúncio de A |
+| CT-12 | `RF-07`, `RF-08`, `RN-04` | Manual | 9 passos | Aprovado | Capturas de tela de cada passo |
+| CT-13 | `RNF-02` | Automatizada | 1 | Aprovado | Média de 8,5 ms em 20 requisições com 50 anúncios ativos (meta: 800 ms) |
 
-### 2.2 Cobertura de código (22/11/2026)
+### 2.2 Cobertura de código (execução final)
 
-| Métrica | Cobertura |
-| --- | --- |
-| Linhas | 88,88% (328/369) |
-| Instruções | 88,06% (332/377) |
-| Funções | 84,48% (49/58) |
-| Ramos | 69,58% (135/194) |
+| Métrica | Sprint 7 (22/11, PR #66) | Final (22/11, PR #68) |
+| --- | --- | --- |
+| Linhas | 88,88% | 92,03% (370/402) |
+| Instruções | 88,06% | 90,93% (381/419) |
+| Funções | 84,48% | 94,11% (64/68) |
+| Ramos | 69,58% | 74,55% (167/224) |
 
-Os trechos menos cobertos são `MidiaStorage.js` (77,8% das linhas: a remoção de arquivos não é exercitada) e `FotosHandler.js` (76,3%: os ramos de assinatura de JPEG e WEBP e o caminho da edição). Os dois coincidem com os defeitos D-04 e D-07.
+O arquivo menos coberto é o `FotosHandler.js` (81,1% das linhas): os ramos de assinatura de JPEG e WEBP não são exercitados, porque os testes usam PNG. O `MidiaStorage.js` subiu de 77,8% para 90,5% com os testes de remoção de arquivos (M-13).
+
+### 2.3 Testes adicionados depois da execução final
+
+A revisão do PR #68 encontrou dois problemas na regra do M-05, corrigidos antes do merge (commit `56d7c00`): telefone de contato ao lado de "CNH" era recusado, e anúncios antigos com número de documento no texto não podiam mais ser resolvidos. Os dois testes que cobrem a correção ("aceita telefone de contato junto da palavra CNH" e "permite resolver anúncio antigo que já tinha documento no texto") foram verificados chamando o handler diretamente, mas **ainda não rodaram na suíte completa**. A próxima execução de `npm run test:docker` deve ter 52 testes.
 
 ## 3. Defeitos encontrados e correções
 
 | ID | Defeito | Severidade | Como foi encontrado | Correção | Situação | Comprovação |
 | --- | --- | --- | --- | --- | --- | --- |
-| D-01 | Categoria em texto livre contornava a `RN-04` (`" Documento "`, `"RG"`) | Alta | Revisão de código (Sprint 4) | Lista fechada e normalização da categoria, commit `593156b` | Corrigido | Teste "recusa categoria ' DOCUMENTO ' com foto"; [incidente](../../.harness/incident-log/2026-10-categoria-contornava-rn04.md) |
+| D-01 | Categoria em texto livre contornava a `RN-04` (`" Documento "`, `"RG"`) | Alta | Revisão de código (Sprint 4) | Lista fechada e normalização da categoria, commit `593156b` | Corrigido | CT-07; [incidente](../../.harness/incident-log/2026-10-categoria-contornava-rn04.md) |
 | D-02 | `data_ocorrencia` não era gravada (M-15) | Alta | Suíte automatizada (CT-04) | Issue [#49](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/49), commit `6fb6ee9` | Corrigido | CT-04 e CT-12.6 |
-| D-03 | Cadastro aceitava URL externa como foto em JSON (M-16) | Alta | Suíte automatizada (CT-05) | Issue [#50](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/50), commit `6fb6ee9` | Corrigido no cadastro | CT-05, passo 1 |
-| D-04 | Edição (`PUT`) ainda aceita URL externa como foto (resto do M-16) | Alta | Revisão do PR #58 | Restringir o `FotosHandler` a caminhos `/uploads/` também na edição | Em correção na Sprint 8 (`@Matheus-Castro-Paula`) | CT-05, passo 2 |
+| D-03 | Cadastro aceitava URL externa como foto em JSON (M-16) | Alta | Suíte automatizada (CT-05) | Issue [#50](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/50), commit `6fb6ee9` | Corrigido | CT-05 |
+| D-04 | Edição (`PUT`) aceitava URL externa como foto (resto do M-16) | Alta | Revisão do PR #58 | Só caminhos `/uploads/` já publicados no próprio anúncio, PR [#68](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/68) | Corrigido | CT-05 (5 testes) |
 | D-05 | `mime_type` e `tamanho_bytes` não eram gravados (M-18) | Baixa | Suíte automatizada (CT-06) | Issue [#51](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/51), commit `6fb6ee9` | Corrigido | CT-06 |
 | D-06 | Seeder recriava o admin e derrubava a API em bancos anteriores à Sprint 6 (M-17) | Média | Uso do ambiente de desenvolvimento | Seeders idempotentes, PR [#66](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/66) | Corrigido | [`seeders-idempotentes`](evidencias/2026-11-22_0956_seeders-idempotentes.md) |
-| D-07 | Arquivos de fotos ficam órfãos em `/uploads` ao excluir anúncio ou trocar fotos (M-13) | Média | Revisão da arquitetura (Sprint 6) | Remover os arquivos no `AnuncioService` via `MidiaStorage.remover` | Em correção na Sprint 8 (`@Matheus-Castro-Paula`) | Teste de arquivos órfãos previsto |
+| D-07 | Arquivos de fotos ficavam órfãos em `/uploads` (M-13) | Média | Revisão da arquitetura (Sprint 6) | Arquivos removidos depois da confirmação do banco, PR [#68](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/68) | Corrigido | 4 testes de M-13 |
 | D-08 | Senha do MySQL escrita no Compose (M-11) | Alta | Revisão da arquitetura (Sprint 6) | Senhas lidas do `.env`, porta do MySQL só em `127.0.0.1`, PR [#66](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/66) | Corrigido em parte: a aplicação ainda usa o usuário `root` | [`ambiente-de-teste`](evidencias/2026-11-22_0957_ambiente-de-teste.md) |
-| D-09 | CORS aceita qualquer origem e a porta 3000 é fixa (M-10) | Média | Revisão da arquitetura (Sprint 6) | Restringir origens e ler `PORT` em `server.js` | Em correção na Sprint 8 (`@Matheus-Castro-Paula`) | Teste de CORS previsto |
-| D-10 | CPF e número de documento só eram bloqueados no front-end (M-05) | Alta | Revisão de código (Sprint 5) | Validação no `RegraLGPDHandler` | Em correção na Sprint 8 (`@Matheus-Castro-Paula`) | Teste previsto |
+| D-09 | CORS aceitava qualquer origem e a porta 3000 era fixa (M-10) | Média | Revisão da arquitetura (Sprint 6) | Origens em `CORS_ORIGINS` e porta em `PORT`, PR [#68](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/68) | Corrigido | 4 testes de M-10 |
+| D-10 | CPF e número de documento só eram bloqueados no front-end (M-05) | Alta | Revisão de código (Sprint 5) | Validação no `RegraLGPDHandler`, PR [#68](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/68) | Corrigido | 6 testes de M-05 |
+| D-11 | A regra do M-05 recusava telefone ao lado de "CNH" e travava a edição de anúncios antigos | Média | Revisão do PR #68 | Telefone desconsiderado e checagem só do texto alterado, commit `56d7c00` | Corrigido; testes ainda não executados na suíte (seção 2.3) | Verificação direta do handler |
 
-**Análise.** Os três defeitos revelados pela primeira execução da suíte (D-02, D-03 e D-05) tinham a mesma origem: colunas e regras criadas na Sprint 6 sem teste que as exercitasse. Desde que a suíte passou a rodar em cada PR, nenhuma regressão voltou a aparecer nesses pontos. Os defeitos de severidade alta restantes (D-04 e D-10) e os débitos de configuração (D-07 e D-09) estão no PR de back-end da Sprint 8. Os de segurança que dependem de infraestrutura (HTTPS, M-08) ficaram como trabalho futuro (seção 5).
+**Análise.** Os três defeitos revelados pela primeira execução da suíte (D-02, D-03 e D-05) tinham a mesma origem: colunas e regras criadas na Sprint 6 sem teste que as exercitasse. Na Sprint 8, os débitos de segurança e de arquivos (D-04, D-07, D-09 e D-10) foram corrigidos junto com os testes que os comprovam, e o D-11 mostra que a revisão de código continua encontrando o que os testes não cobrem. Resta aberto só o que depende de infraestrutura: HTTPS (M-08) e o usuário próprio do banco (resto do M-11), descritos na seção 5.
 
 ## 4. Requisitos atendidos, parcialmente atendidos e não atendidos
 
@@ -82,11 +88,12 @@ Os trechos menos cobertos são `MidiaStorage.js` (77,8% das linhas: a remoção 
 
 | Requisito | Comprovação |
 | --- | --- |
-| `RF-01` Autenticação e cadastro | CT-01, testes de cadastro da suíte |
+| `RF-01` Autenticação e cadastro | CT-01, CT-02, testes de cadastro da suíte |
 | `RF-04` Vitrine pública | CT-10, CT-12.6 e CT-12.7 |
 | `RF-07` Cadastro de anúncio | CT-03, CT-04, CT-12 |
-| `RF-08` Upload de até 3 fotos | CT-03, CT-06, CT-08, CT-09, CT-12 |
-| `RN-04` LGPD: sem dados pessoais e sem foto de documento | CT-07, CT-10, CT-12.4 e CT-12.7 |
+| `RF-08` Upload de até 3 fotos | CT-03, CT-05, CT-06, CT-08, CT-09, CT-12 |
+| `RN-04` LGPD: sem dados pessoais, sem foto de documento, sem CPF no texto | CT-07, CT-10, CT-12, testes de M-05 |
+| `RNF-02` Desempenho | CT-13: média de 8,5 ms com 50 anúncios (meta de 800 ms) |
 | `RNF-06` Arquitetura em camadas com Docker | Ambiente de teste e volume validados nas evidências de 22/11 |
 
 ### 4.2 Parcialmente atendidos
@@ -99,15 +106,16 @@ Os trechos menos cobertos são `MidiaStorage.js` (77,8% das linhas: a remoção 
 | `RF-09` Editar e encerrar anúncio | API `PUT` e `DELETE` com checagem de autoria (CT-11) | Botões na interface, em desenvolvimento na Sprint 8 (`@rodrigopenha13`) |
 | `RN-02` Gestão só pelo autor ou admin | Autor verificado na API (CT-11) | O administrador não tem a exceção prevista |
 | `RNF-01` Usabilidade | Layout responsivo com breakpoint em 720 px | Não foi construído como mobile-first |
-| `RNF-02` Desempenho | Índice `idx_anuncio_tipo_status`; filtros no navegador | CT-13 não executado; listagem sem paginação (M-12) |
-| `RNF-03` Segurança | bcrypt, JWT, SQL parametrizado, LGPD e validação de fotos (CT-01, CT-07, CT-09, CT-10) | HTTPS (M-08), CORS restrito (M-10) e resto do M-16 |
+| `RNF-03` Segurança | bcrypt, JWT, SQL parametrizado, LGPD, validação de fotos, CORS restrito e senhas fora do Compose | HTTPS (M-08) e usuário próprio do banco (resto do M-11) |
 | `RNF-05` Acessibilidade | Atributos ARIA em `index.html` | Auditoria com Axe ou WAVE, em execução na Sprint 8 (`@rodrigopenha13`) |
+
+O `RNF-02` conta como atendido para a escala testada (50 anúncios). Com o crescimento da base, a falta de paginação (M-12) volta a ser um risco.
 
 ### 4.3 Não atendidos
 
 | Requisito | Motivo |
 | --- | --- |
-| `RF-03` Painel "Meus anúncios" | Priorizado abaixo da publicação e da vitrine; a API já filtra por autor na autorização, mas não há rota nem tela |
+| `RF-03` Painel "Meus anúncios" | Priorizado abaixo da publicação e da vitrine; não há rota nem tela |
 | `RF-10` Comentários | Só a tabela e o model existem; faltam rotas e interface |
 | `RF-11` Gestão de categorias e locais | Categorias são lista fixa no código (ADR-03) |
 | `RF-12` e `RN-01` Denúncias e quarentena | Falta a entidade `Denuncia` e o status `EM_QUARENTENA` |
@@ -122,7 +130,8 @@ Os trechos menos cobertos são `MidiaStorage.js` (77,8% das linhas: a remoção 
 - **Escala da vitrine:** a listagem carrega todos os anúncios ativos e filtra no navegador. Paginar e levar busca e filtros ao servidor (M-12).
 - **Autenticação:** o `authController` ainda concentra validação, hash e acesso ao banco (M-01, extrair um `AuthService`).
 - **Corrente de validação:** cada handler precisa chamar `super.validar` para a corrente seguir (M-07, Template Method).
-- **Testes:** os handlers não têm testes de unidade isolados; tudo é coberto por integração. A interface é verificada só por roteiro manual.
+- **Regra do M-05:** é baseada em padrões de texto. Um número de documento escrito de forma incomum pode passar, e um número de 11 dígitos que por acaso forme um CPF válido é recusado.
+- **Testes:** os handlers não têm testes de unidade isolados, só de integração. A interface é verificada só por roteiro manual.
 - **Funcionalidades não implementadas:** `RF-03`, `RF-10` a `RF-14`, listadas na seção 4.3 e justificadas no [backlog](../backlog-produto.md).
 
 ## 6. Evolução ao longo das oito sprints
@@ -136,4 +145,4 @@ Os trechos menos cobertos são `MidiaStorage.js` (77,8% das linhas: a remoção 
 | 5 | Padrões de projeto | Chain of Responsibility nas validações (ADR-04) | 12 cenários iguais antes e depois da refatoração |
 | 6 | Arquitetura | Arquitetura C4, Docker, upload com Multer em volume local (ADR-05 a ADR-08) | Débitos M-08 a M-18 levantados; base para os riscos do plano |
 | 7 | Estratégia de testes | Plano de testes, suíte Jest/Supertest em banco isolado, roteiro CT-12 | 31 testes; D-02, D-03 e D-05 encontrados e corrigidos |
-| 8 | Validação final | Correção de débitos (M-05, M-10, M-11, M-13, M-16, M-17), `RF-09` na interface, acessibilidade, este relatório | 31 testes com cobertura de 88,88%; D-06 e D-08 corrigidos |
+| 8 | Validação final | Correção de M-05, M-10, M-11, M-13, M-16 e M-17, `RF-09` na interface, acessibilidade e este relatório | 50 testes, 13 de 13 casos aprovados e 92,03% das linhas cobertas |
