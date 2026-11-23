@@ -124,7 +124,10 @@ module.exports = {
     };
 
     // Delega a validação do estado final para a corrente
-    await anuncioValidationChain.executar(estadoFinal, { acao: "ATUALIZAR" });
+    await anuncioValidationChain.executar(estadoFinal, {
+      acao: "ATUALIZAR",
+      camposAlterados: Object.keys(dados),
+    });
 
     // M-16 / M-13: a edição não recebe arquivos, então a lista de fotos só pode
     // manter ou remover as que já são deste anúncio. Isso impede apontar para a

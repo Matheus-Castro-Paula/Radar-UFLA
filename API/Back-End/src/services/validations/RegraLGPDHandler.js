@@ -10,6 +10,8 @@ const RG_FORMATADO = /(?<![\d.])\d{1,2}\.\d{3}\.\d{3}-?[\dxX](?!\d)/;
 // Palavra de documento seguida de um número (ex.: "RG MG-12.345.678", "CNH: 12345678900")
 const DOCUMENTO_COM_PALAVRA =
   /\b(cpf|rg|cnh|identidade|passaporte|titulo de eleitor)\b[^\d\n]{0,20}\d[\d.\-/ ]{5,}\d/;
+// Telefone com traço, com ou sem DDD (ex.: "(35) 99876-5432", "3822-1234")
+const TELEFONE = /(?<![\d.])(?:\(?\d{2}\)?\s?)?9?\d{4}-\d{4}(?!\d)/g;
 
 function semAcento(texto) {
   return String(texto || "")
@@ -39,7 +41,11 @@ function contemDocumentoPessoal(texto) {
       return true;
     }
   }
-  return RG_FORMATADO.test(limpo) || DOCUMENTO_COM_PALAVRA.test(limpo);
+  // O telefone de contato não conta como número do documento ("Achei uma CNH, chama no 35 99876-5432")
+  return (
+    RG_FORMATADO.test(limpo) ||
+    DOCUMENTO_COM_PALAVRA.test(limpo.replace(TELEFONE, " "))
+  );
 }
 
 class RegraLGPDHandler extends ValidationHandler {
@@ -60,8 +66,13 @@ class RegraLGPDHandler extends ValidationHandler {
       );
     }
 
-    // M-05: vale na criação e na edição (na edição, dados é o estado final)
-    if (contemDocumentoPessoal(dados.titulo) || contemDocumentoPessoal(dados.descricao)) {
+    // M-05: na edição, só confere o texto que foi alterado. Assim um anúncio
+    // anterior ao M-05 ainda pode ser resolvido ou ter a data corrigida.
+    const alterados = contexto.camposAlterados;
+    const conferir = (campo) =>
+      (!alterados || alterados.includes(campo)) && contemDocumentoPessoal(dados[campo]);
+
+    if (conferir("titulo") || conferir("descricao")) {
       throw new RegraNegocioError(
         RegraNegocioError.CODIGOS.LGPD,
         "Não informe CPF nem número de documento pessoal no título ou na descrição (RN-04 / LGPD).",

@@ -1,6 +1,6 @@
 const path = require("path");
 const request = require("supertest");
-const { sequelize, FotoAnuncio } = require("../src/models");
+const { sequelize, Anuncio, FotoAnuncio } = require("../src/models");
 const {
   app, TELEFONE, JPEG, PNG, ANUNCIO_BASE,
   limparBanco, limparUploads, listarUploads, criarUsuarioLogado, publicar, horasAtras,
@@ -395,6 +395,27 @@ describe("Anúncios", () => {
 
       const depois = await request(app).get(`/api/anuncios/${id}`);
       expect(depois.body.descricao).toBe(ANUNCIO_BASE.descricao);
+    });
+
+    it("aceita telefone de contato junto da palavra CNH", async () => {
+      const res = await publicar(autor.token, {
+        campos: { categoria: "documento", descricao: "Achei uma CNH, me chama no 35 99876-5432" },
+      });
+      expect(res.status).toBe(201);
+    });
+
+    it("permite resolver anúncio antigo que já tinha documento no texto", async () => {
+      const criado = await publicar(autor.token);
+      const id = criado.body.anuncio.id;
+      // Simula anúncio gravado antes do M-05, direto no banco
+      await Anuncio.update({ descricao: "CPF 123.456.789-09" }, { where: { id } });
+
+      const res = await request(app)
+        .put(`/api/anuncios/${id}`)
+        .set("Authorization", `Bearer ${autor.token}`)
+        .send({ status: "RESOLVIDO" });
+      expect(res.status).toBe(200);
+      expect(res.body.anuncio.status).toBe("RESOLVIDO");
     });
   });
 
