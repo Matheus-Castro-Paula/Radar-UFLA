@@ -107,9 +107,8 @@ module.exports = {
     const anuncio = await buscarAnuncioDoAutor(id, usuarioId);
 
     const substituiFotos = dados.fotos !== undefined;
-    const fotosFinais = substituiFotos
-      ? dados.fotos
-      : anuncio.fotos.map((foto) => foto.url_imagem);
+    const urlsAtuais = anuncio.fotos.map((foto) => foto.url_imagem);
+    const fotosFinais = substituiFotos ? dados.fotos : urlsAtuais;
     const novaCategoria =
       dados.categoria !== undefined
         ? String(dados.categoria).trim().toLowerCase()
@@ -125,7 +124,20 @@ module.exports = {
     };
 
     // Delega a validação do estado final para a corrente
-    await anuncioValidationChain.executar(estadoFinal, { acao: "ATUALIZAR" });
+    await anuncioValidationChain.executar(estadoFinal, {
+      acao: "ATUALIZAR",
+      camposAlterados: Object.keys(dados),
+    });
+
+    // M-16 / M-13: a edição não recebe arquivos, então a lista de fotos só pode
+    // manter ou remover as que já são deste anúncio. Isso impede apontar para a
+    // foto de outro anúncio (e, depois, apagar o arquivo dele).
+    if (substituiFotos && fotosFinais.some((url) => !urlsAtuais.includes(url))) {
+      throw new RegraNegocioError(
+        RegraNegocioError.CODIGOS.VALIDACAO,
+        "Na edição só é possível manter ou remover as fotos já publicadas neste anúncio.",
+      );
+    }
 
     const camposEditaveis = [
       "titulo",
@@ -142,28 +154,34 @@ module.exports = {
     }
     if (novaCategoria !== undefined) alteracoes.categoria = novaCategoria;
 
+    // M-13: fotos que saem do anúncio perdem a linha e o arquivo. As que ficam
+    // não são recriadas, então mime_type e tamanho_bytes continuam gravados.
+    const fotosRemovidas = substituiFotos
+      ? anuncio.fotos.filter((foto) => !fotosFinais.includes(foto.url_imagem))
+      : [];
+
     await sequelize.transaction(async (transaction) => {
       await anuncio.update(alteracoes, { transaction });
-      if (substituiFotos) {
-        await FotoAnuncio.destroy({ where: { anuncio_id: id }, transaction });
-        if (fotosFinais.length > 0) {
-          await FotoAnuncio.bulkCreate(
-            fotosFinais.map((url_imagem) => ({
-              anuncio_id: anuncio.id,
-              url_imagem,
-            })),
-            { transaction },
-          );
-        }
+      if (fotosRemovidas.length > 0) {
+        await FotoAnuncio.destroy({
+          where: { id: fotosRemovidas.map((foto) => foto.id) },
+          transaction,
+        });
       }
     });
+
+    // Só apaga do disco depois que o banco confirmou
+    await MidiaStorage.remover(fotosRemovidas.map((foto) => foto.url_imagem));
 
     return this.buscarPorId(id);
   },
 
   async excluir(id, usuarioId) {
     const anuncio = await buscarAnuncioDoAutor(id, usuarioId);
+    const urlsDasFotos = anuncio.fotos.map((foto) => foto.url_imagem);
     // ON DELETE CASCADE remove fotos e comentários associados
     await anuncio.destroy();
+    // M-13: o arquivo não pode ficar órfão no volume /uploads
+    await MidiaStorage.remover(urlsDasFotos);
   },
 };

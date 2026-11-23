@@ -1,8 +1,7 @@
 const ValidationHandler = require("./ValidationHandler");
 const RegraNegocioError = require("../RegraNegocioError");
 const { MAX_FOTOS, MAX_BYTES, MIMES_PERMITIDOS } = require("../../config/upload");
-
-const EXTENSOES_FOTO = /\.(jpe?g|png|webp)$/i;
+const { ehUrlLocal } = require("../MidiaStorage");
 
 function conteudoCombinaComMime(buffer, mime) {
   if (!Buffer.isBuffer(buffer)) return false;
@@ -34,12 +33,12 @@ class FotosHandler extends ValidationHandler {
       );
     }
 
-    // 1. Fotos enviadas como URLs (JSON)
+    // Aqui só chega a edição (PUT), onde a lista serve para manter ou remover fotos.
     if (fotos !== undefined) {
       if (!Array.isArray(fotos)) {
         throw new RegraNegocioError(
           RegraNegocioError.CODIGOS.VALIDACAO,
-          "O campo fotos deve ser uma lista de URLs.",
+          "O campo fotos deve ser uma lista de caminhos de fotos já publicadas.",
         );
       }
 
@@ -50,14 +49,14 @@ class FotosHandler extends ValidationHandler {
         );
       }
 
-      const invalida = fotos.find(
-        (url) => typeof url !== "string" || !EXTENSOES_FOTO.test(url),
-      );
+      // M-16: na edição só vale caminho local gerado pela API (/uploads/<uuid>.<ext>).
+      // URL externa, caminho com "../" ou nome arbitrário são recusados.
+      const invalida = fotos.find((url) => !ehUrlLocal(url));
 
       if (invalida !== undefined) {
         throw new RegraNegocioError(
           RegraNegocioError.CODIGOS.VALIDACAO,
-          "Fotos devem ser JPG, PNG ou WEBP.",
+          "Na edição, as fotos devem ser caminhos locais em /uploads/ de fotos já publicadas. URLs externas não são aceitas.",
         );
       }
     }
