@@ -765,3 +765,31 @@ body.auth-page {
 /* Local + Data e hora: empilha quando não couberem lado a lado */
 .field-row { flex-wrap: wrap; }
 .field-row .field { flex: 1 1 200px; min-width: 0; }
+
+
+/* ---------- Sprint 8: ações do autor no card (RF-09) ---------- */
+
+.card-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 0 14px 14px;
+  margin-top: auto;
+}
+.btn-card {
+  flex: 1 1 auto;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1.5px solid var(--brand);
+  background: transparent;
+  color: var(--brand-dark);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.btn-resolver:hover { background: var(--ok-bg); }
+.btn-excluir { border-color: var(--danger); color: var(--danger); }
+.btn-excluir:hover { background: var(--danger-bg); }
+.btn-card:disabled { opacity: 0.6; cursor: not-allowed; }

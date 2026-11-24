@@ -38,6 +38,8 @@ function anuncioParaItem(anuncio) {
       : null;
 
   return {
+    id: anuncio.id,
+    autorId: anuncio.usuario ? anuncio.usuario.id : null,
     feed: anuncio.tipo === "ACHADO" ? "achados" : "perdidos",
     categoria: anuncio.categoria,
     titulo: anuncio.titulo,
@@ -46,6 +48,21 @@ function anuncioParaItem(anuncio) {
     imagem: primeiraFoto,
     meta: [anuncio.local_encontro, quando, autor].filter(Boolean).join(" · "),
   };
+}
+
+// Id do usuário logado, lido do payload do JWT (só para decidir se mostra os
+// botões do RF-09; quem autoriza de verdade é a API, que confere o autor — RN-02).
+function usuarioLogadoId() {
+  const token = localStorage.getItem("token");
+  if (!token) return null;
+  try {
+    const payload = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+    const dados = JSON.parse(atob(payload));
+    if (dados.exp && dados.exp * 1000 < Date.now()) return null;
+    return dados.id ?? null;
+  } catch {
+    return null;
+  }
 }
 
 // --- Utilitários ---
@@ -111,6 +128,71 @@ function initFeed() {
 
   let activeFeed = "achados";
   let itens = [];
+  const meuId = usuarioLogadoId();
+
+  // Chama PUT/DELETE e trata os erros comuns (401, 403, 404)
+  async function chamarApi(item, opcoes, botao, rotuloEnvio) {
+    const token = localStorage.getItem("token");
+    const rotulo = botao.textContent;
+    limparMensagem();
+    botao.disabled = true;
+    botao.textContent = rotuloEnvio;
+    try {
+      const response = await fetch(`${API_BASE}/anuncios/${item.id}`, {
+        ...opcoes,
+        headers: { ...opcoes.headers, Authorization: `Bearer ${token}` },
+      });
+      if (response.ok) return true;
+
+      const data = await response.json().catch(() => ({}));
+      if (response.status === 401) {
+        localStorage.removeItem("token");
+        mostrarMensagem("Sua sessão expirou. Entre novamente.");
+        setTimeout(() => (window.location.href = "login.html"), 1500);
+      } else if (response.status === 404) {
+        mostrarMensagem("Este anúncio não existe mais. Atualizando a lista...");
+        itens = itens.filter((i) => i.id !== item.id);
+        render();
+      } else {
+        mostrarMensagem(data.error || "Não foi possível concluir a ação. Tente novamente.");
+      }
+    } catch (err) {
+      console.error(err);
+      mostrarMensagem("Não foi possível conectar ao servidor.");
+    }
+    botao.disabled = false;
+    botao.textContent = rotulo;
+    return false;
+  }
+
+  async function resolverAnuncio(item, botao) {
+    if (!window.confirm(`Marcar "${item.titulo}" como resolvido? Ele sairá da vitrine.`)) return;
+    const ok = await chamarApi(
+      item,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "RESOLVIDO" }),
+      },
+      botao,
+      "Salvando...",
+    );
+    if (ok) {
+      itens = itens.filter((i) => i.id !== item.id);
+      render();
+      mostrarMensagem("Anúncio marcado como resolvido.", "sucesso");
+    }
+  }
+
+  async function excluirAnuncio(item, botao) {
+    if (!window.confirm(`Excluir "${item.titulo}" definitivamente? Esta ação não pode ser desfeita.`)) return;
+    const ok = await chamarApi(item, { method: "DELETE", headers: {} }, botao, "Excluindo...");
+    if (ok) {
+      itens = itens.filter((i) => i.id !== item.id);
+      render();
+      mostrarMensagem("Anúncio excluído.", "sucesso");
+    }
+  }
 
   function categoriasAtivas() {
     return Array.from(categoriaChecks)
@@ -164,6 +246,29 @@ function initFeed() {
         img.addEventListener("error", () => img.remove());
         img.src = item.imagem; // atribuído como propriedade, nunca interpolado no HTML
         thumb.appendChild(img);
+      }
+
+      // RF-09: só o autor vê os botões (a API também confere: RN-02)
+      if (meuId !== null && item.autorId === meuId) {
+        const acoes = document.createElement("div");
+        acoes.className = "card-actions";
+
+        const resolver = document.createElement("button");
+        resolver.type = "button";
+        resolver.className = "btn-card btn-resolver";
+        resolver.textContent = "Marcar como Resolvido";
+        resolver.setAttribute("aria-label", `Marcar como resolvido: ${item.titulo}`);
+        resolver.addEventListener("click", () => resolverAnuncio(item, resolver));
+
+        const excluir = document.createElement("button");
+        excluir.type = "button";
+        excluir.className = "btn-card btn-excluir";
+        excluir.textContent = "Excluir";
+        excluir.setAttribute("aria-label", `Excluir anúncio: ${item.titulo}`);
+        excluir.addEventListener("click", () => excluirAnuncio(item, excluir));
+
+        acoes.append(resolver, excluir);
+        card.appendChild(acoes);
       }
       feedEl.appendChild(card);
     });
