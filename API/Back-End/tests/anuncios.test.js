@@ -419,6 +419,48 @@ describe("Anúncios", () => {
     });
   });
 
+  describe("Limite da descrição (Sprint 8)", () => {
+    const LIMITE = 200;
+
+    it("aceita descrição com exatamente 200 caracteres", async () => {
+      const res = await publicar(autor.token, { campos: { descricao: "a".repeat(LIMITE) } });
+      expect(res.status).toBe(201);
+    });
+
+    it("recusa descrição com 201 caracteres (400)", async () => {
+      const res = await publicar(autor.token, { campos: { descricao: "a".repeat(LIMITE + 1) } });
+      expect(res.status).toBe(400);
+      expect(res.body.error).toMatch(/200 caracteres/);
+    });
+
+    it("recusa descrição gigante sem travar a API", async () => {
+      const inicio = Date.now();
+      const res = await publicar(autor.token, { campos: { descricao: "a".repeat(50000) } });
+      expect(res.status).toBe(400);
+      expect(Date.now() - inicio).toBeLessThan(2000);
+    });
+
+    it("na edição, recusa descrição acima do limite", async () => {
+      const criado = await publicar(autor.token);
+      const res = await request(app)
+        .put(`/api/anuncios/${criado.body.anuncio.id}`)
+        .set("Authorization", `Bearer ${autor.token}`)
+        .send({ descricao: "a".repeat(LIMITE + 1) });
+      expect(res.status).toBe(400);
+    });
+
+    it("anúncio antigo com descrição longa ainda pode ser marcado como resolvido", async () => {
+      const criado = await publicar(autor.token);
+      const id = criado.body.anuncio.id;
+      await Anuncio.update({ descricao: "a".repeat(500) }, { where: { id } });
+      const res = await request(app)
+        .put(`/api/anuncios/${id}`)
+        .set("Authorization", `Bearer ${autor.token}`)
+        .send({ status: "RESOLVIDO" });
+      expect(res.status).toBe(200);
+    });
+  });
+
   describe("M-10: CORS restrito", () => {
     const origemPermitida = () => (process.env.CORS_ORIGINS || "http://localhost:8000").split(",")[0].trim();
 

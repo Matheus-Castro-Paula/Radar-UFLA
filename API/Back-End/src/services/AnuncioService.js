@@ -58,6 +58,22 @@ module.exports = {
     return anuncio;
   },
 
+  // Contato do autor, só para usuários autenticados (a rota exige JWT).
+  // Devolve apenas o e-mail (minimização de dados: o telefone nunca sai daqui)
+  // e só de anúncios ativos, já que resolvido/arquivado não precisa de contato.
+  async contatoDoAutor(id) {
+    const anuncio = await Anuncio.findByPk(id, {
+      include: [{ model: Usuario, as: "usuario", attributes: ["email"] }],
+    });
+    if (!anuncio || anuncio.status !== "ATIVO" || !anuncio.usuario) {
+      throw new RegraNegocioError(
+        RegraNegocioError.CODIGOS.NAO_ENCONTRADO,
+        "Anúncio não encontrado.",
+      );
+    }
+    return { email: anuncio.usuario.email };
+  },
+
   async criar(dados, usuarioId, arquivos = []) {
     // 1. Corrente de validação. Os arquivos seguem em memória: nada vai ao disco se alguma regra falhar.
     await anuncioValidationChain.executar(dados, { acao: "CRIAR", arquivos });
