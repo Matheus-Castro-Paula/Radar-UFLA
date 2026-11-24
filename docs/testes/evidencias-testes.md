@@ -15,7 +15,9 @@ Relatório final de verificação e validação. Consolida as execuções das Sp
 | 22/11/2026 | Suíte automatizada com cobertura, após M-11 e M-17 (PR #66) | Container de teste (`npm run test:docker`) | 31 de 31 aprovados; 88,88% das linhas | [`2026-11-22_0957_suite-automatizada.md`](evidencias/2026-11-22_0957_suite-automatizada.md) |
 | 22/11/2026 | Idempotência dos seeders (M-17) | Container de teste | Três execuções sem erro e sem duplicação | [`2026-11-22_0956_seeders-idempotentes.md`](evidencias/2026-11-22_0956_seeders-idempotentes.md) |
 | 22/11/2026 | Ambiente de teste com senha vinda do `.env` (M-11) e volume de fotos | Container de teste e Compose novo | Aprovado | [`2026-11-22_0957_ambiente-de-teste.md`](evidencias/2026-11-22_0957_ambiente-de-teste.md), [`2026-11-22_0957_volume-uploads.md`](evidencias/2026-11-22_0957_volume-uploads.md) |
-| 22/11/2026 | Suíte final com prefixos `CT-xx`, após M-05, M-10, M-13 e M-16 (PR #68) | Container de teste (`npm run test:docker`) | **50 de 50 aprovados; 92,03% das linhas** | [`2026-11-22_2252_suite-automatizada.md`](evidencias/2026-11-22_2252_suite-automatizada.md) |
+| 22/11/2026 | Suíte final com prefixos `CT-xx`, após M-05, M-10, M-13 e M-16 (PR #68) | Container de teste (`npm run test:docker`) | 50 de 50 aprovados; 92,03% das linhas | [`2026-11-22_2252_suite-automatizada.md`](evidencias/2026-11-22_2252_suite-automatizada.md) |
+| 23/11/2026 | Suíte na `main` após o merge do PR #68, com os testes da correção do M-05 | Container de teste (`npm run test:docker`) | **52 de 52 aprovados; 92,11% das linhas** | [`2026-11-23_2151_suite-automatizada.md`](evidencias/2026-11-23_2151_suite-automatizada.md) |
+| 23/11/2026 | Teste exploratório no navegador com a API real: cadastro, login, publicação, CPF recusado, CNH com telefone aceita, resolver e excluir (RF-09), CORS | Docker Compose de desenvolvimento, front na porta 8000 | Aprovado, exceto `privacidade.html` (404) | Registro nesta seção e na seção 5 |
 
 Para reproduzir: na pasta `API/Back-End`, copie o `.env.example` para `.env`, preencha `DB_PASSWORD`, `DB_TEST_PASSWORD` e `JWT_SECRET` e rode `npm run test:docker`. O relatório e o log saem em `docs/testes/evidencias/`, já agrupados por caso `CT-xx`.
 
@@ -62,7 +64,7 @@ O arquivo menos coberto é o `FotosHandler.js` (81,1% das linhas): os ramos de a
 
 ### 2.3 Testes adicionados depois da execução final
 
-A revisão do PR #68 encontrou dois problemas na regra do M-05, corrigidos antes do merge (commit `56d7c00`): telefone de contato ao lado de "CNH" era recusado, e anúncios antigos com número de documento no texto não podiam mais ser resolvidos. Os dois testes que cobrem a correção ("aceita telefone de contato junto da palavra CNH" e "permite resolver anúncio antigo que já tinha documento no texto") foram verificados chamando o handler diretamente, mas **ainda não rodaram na suíte completa**. A próxima execução de `npm run test:docker` deve ter 52 testes.
+A revisão do PR #68 encontrou dois problemas na regra do M-05, corrigidos antes do merge (commit `56d7c00`): telefone de contato ao lado de "CNH" era recusado, e anúncios antigos com número de documento no texto não podiam mais ser resolvidos. Os dois testes que cobrem a correção ("aceita telefone de contato junto da palavra CNH" e "permite resolver anúncio antigo que já tinha documento no texto") foram verificados primeiro chamando o handler diretamente e depois na suíte completa de 23/11/2026: **52 de 52 aprovados** ([suíte](evidencias/2026-11-23_2151_suite-automatizada.md)).
 
 ## 3. Defeitos encontrados e correções
 
@@ -78,7 +80,7 @@ A revisão do PR #68 encontrou dois problemas na regra do M-05, corrigidos antes
 | D-08 | Senha do MySQL escrita no Compose (M-11) | Alta | Revisão da arquitetura (Sprint 6) | Senhas lidas do `.env`, porta do MySQL só em `127.0.0.1`, PR [#66](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/66) | Corrigido em parte: a aplicação ainda usa o usuário `root` | [`ambiente-de-teste`](evidencias/2026-11-22_0957_ambiente-de-teste.md) |
 | D-09 | CORS aceitava qualquer origem e a porta 3000 era fixa (M-10) | Média | Revisão da arquitetura (Sprint 6) | Origens em `CORS_ORIGINS` e porta em `PORT`, PR [#68](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/68) | Corrigido | 4 testes de M-10 |
 | D-10 | CPF e número de documento só eram bloqueados no front-end (M-05) | Alta | Revisão de código (Sprint 5) | Validação no `RegraLGPDHandler`, PR [#68](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/68) | Corrigido | 6 testes de M-05 |
-| D-11 | A regra do M-05 recusava telefone ao lado de "CNH" e travava a edição de anúncios antigos | Média | Revisão do PR #68 | Telefone desconsiderado e checagem só do texto alterado, commit `56d7c00` | Corrigido; testes ainda não executados na suíte (seção 2.3) | Verificação direta do handler |
+| D-11 | A regra do M-05 recusava telefone ao lado de "CNH" e travava a edição de anúncios antigos | Média | Revisão do PR #68 | Telefone desconsiderado e checagem só do texto alterado, commit `56d7c00` | Corrigido | 2 testes, aprovados na suíte de 23/11 (seção 2.3) |
 
 **Análise.** Os três defeitos revelados pela primeira execução da suíte (D-02, D-03 e D-05) tinham a mesma origem: colunas e regras criadas na Sprint 6 sem teste que as exercitasse. Na Sprint 8, os débitos de segurança e de arquivos (D-04, D-07, D-09 e D-10) foram corrigidos junto com os testes que os comprovam, e o D-11 mostra que a revisão de código continua encontrando o que os testes não cobrem. Resta aberto só o que depende de infraestrutura: HTTPS (M-08) e o usuário próprio do banco (resto do M-11), descritos na seção 5.
 
@@ -132,6 +134,7 @@ O `RNF-02` conta como atendido para a escala testada (50 anúncios). Com o cresc
 - **Corrente de validação:** cada handler precisa chamar `super.validar` para a corrente seguir (M-07, Template Method).
 - **Regra do M-05:** é baseada em padrões de texto. Um número de documento escrito de forma incomum pode passar, e um número de 11 dígitos que por acaso forme um CPF válido é recusado.
 - **Testes:** os handlers não têm testes de unidade isolados, só de integração. A interface é verificada só por roteiro manual.
+- **Página de privacidade:** em 23/11/2026, `privacidade.html` não existia na `main`, e os links do rodapé e do cadastro davam 404. A página está prevista na Sprint 8 (`@rodrigopenha13`).
 - **Funcionalidades não implementadas:** `RF-03`, `RF-10` a `RF-14`, listadas na seção 4.3 e justificadas no [backlog](../backlog-produto.md).
 
 ## 6. Evolução ao longo das oito sprints
@@ -145,4 +148,4 @@ O `RNF-02` conta como atendido para a escala testada (50 anúncios). Com o cresc
 | 5 | Padrões de projeto | Chain of Responsibility nas validações (ADR-04) | 12 cenários iguais antes e depois da refatoração |
 | 6 | Arquitetura | Arquitetura C4, Docker, upload com Multer em volume local (ADR-05 a ADR-08) | Débitos M-08 a M-18 levantados; base para os riscos do plano |
 | 7 | Estratégia de testes | Plano de testes, suíte Jest/Supertest em banco isolado, roteiro CT-12 | 31 testes; D-02, D-03 e D-05 encontrados e corrigidos |
-| 8 | Validação final | Correção de M-05, M-10, M-11, M-13, M-16 e M-17, `RF-09` na interface, acessibilidade e este relatório | 50 testes, 13 de 13 casos aprovados e 92,03% das linhas cobertas |
+| 8 | Validação final | Correção de M-05, M-10, M-11, M-13, M-16 e M-17, `RF-09` na interface, acessibilidade e este relatório | 52 testes, 13 de 13 casos aprovados e 92,11% das linhas cobertas |
