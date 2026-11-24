@@ -24,7 +24,7 @@ Este documento define o que será testado no Radar UFLA, em quais níveis, com q
 | `RF-03`, `RF-10` a `RF-14` | Funcionalidades ainda não implementadas |
 | `RF-05` e `RF-06` (busca e filtros) | Executados no navegador, sobre a lista já carregada; verificados apenas no roteiro manual da vitrine |
 | `RNF-04` (auditoria) | Não há log de auditoria (melhoria M-09) |
-| `RNF-05` (acessibilidade) | Validação com Axe e WAVE prevista para a Sprint 8 |
+| `RNF-05` (acessibilidade) | Validação com Axe e WAVE prevista para a Sprint 8; executada em 24/11/2026 com axe-core ([relatório](evidencias/2026-11-24_acessibilidade-axe.md)) |
 | HTTPS/TLS | A API responde apenas em HTTP (melhoria M-08) |
 
 ## 3. Níveis e tipos de teste

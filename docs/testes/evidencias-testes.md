@@ -17,6 +17,7 @@ Relatório final de verificação e validação. Consolida as execuções das Sp
 | 22/11/2026 | Ambiente de teste com senha vinda do `.env` (M-11) e volume de fotos | Container de teste e Compose novo | Aprovado | [`2026-11-22_0957_ambiente-de-teste.md`](evidencias/2026-11-22_0957_ambiente-de-teste.md), [`2026-11-22_0957_volume-uploads.md`](evidencias/2026-11-22_0957_volume-uploads.md) |
 | 22/11/2026 | Suíte final com prefixos `CT-xx`, após M-05, M-10, M-13 e M-16 (PR #68) | Container de teste (`npm run test:docker`) | 50 de 50 aprovados; 92,03% das linhas | [`2026-11-22_2252_suite-automatizada.md`](evidencias/2026-11-22_2252_suite-automatizada.md) |
 | 23/11/2026 | Suíte na `main` após o merge do PR #68, com os testes da correção do M-05 | Container de teste (`npm run test:docker`) | **52 de 52 aprovados; 92,11% das linhas** | [`2026-11-23_2151_suite-automatizada.md`](evidencias/2026-11-23_2151_suite-automatizada.md) |
+| 24/11/2026 | Auditoria de acessibilidade com axe-core (WCAG 2.1 A e AA) nas 5 páginas | Navegador, API no Docker | 1 violação de contraste encontrada e corrigida; 0 na reexecução | [`2026-11-24_acessibilidade-axe.md`](evidencias/2026-11-24_acessibilidade-axe.md) |
 | 23/11/2026 | Teste exploratório no navegador com a API real: cadastro, login, publicação, CPF recusado, CNH com telefone aceita, resolver e excluir (RF-09), CORS e página de privacidade | Docker Compose de desenvolvimento, front na porta 8000 | Aprovado. A `privacidade.html` faltava na primeira rodada e foi conferida depois do commit `4e98032` | Registro nesta seção |
 
 Para reproduzir: na pasta `API/Back-End`, copie o `.env.example` para `.env`, preencha `DB_PASSWORD`, `DB_TEST_PASSWORD` e `JWT_SECRET` e rode `npm run test:docker`. O relatório e o log saem em `docs/testes/evidencias/`, já agrupados por caso `CT-xx`.
@@ -96,6 +97,7 @@ A revisão do PR #68 encontrou dois problemas na regra do M-05, corrigidos antes
 | `RF-08` Upload de até 3 fotos | CT-03, CT-05, CT-06, CT-08, CT-09, CT-12 |
 | `RN-04` LGPD: sem dados pessoais, sem foto de documento, sem CPF no texto | CT-07, CT-10, CT-12, testes de M-05 |
 | `RNF-02` Desempenho | CT-13: média de 8,5 ms com 50 anúncios (meta de 800 ms) |
+| `RNF-05` Acessibilidade (WCAG 2.1 AA) | Auditoria com axe-core em 24/11: 0 violações nas 5 páginas, após corrigir o contraste do selo "Achado"; teclado e foco visível conferidos ([relatório](evidencias/2026-11-24_acessibilidade-axe.md)) |
 | `RNF-06` Arquitetura em camadas com Docker | Ambiente de teste e volume validados nas evidências de 22/11 |
 
 ### 4.2 Parcialmente atendidos
@@ -105,11 +107,10 @@ A revisão do PR #68 encontrou dois problemas na regra do M-05, corrigidos antes
 | `RF-02` Papéis (RBAC) | `tipo_usuario` gravado no cadastro (sempre `comum`) e presente no JWT | Nenhuma permissão de administrador é aplicada |
 | `RF-05` Filtros combinados | Categoria e local, combinados na vitrine | Filtro por período |
 | `RF-06` Pesquisa textual | Busca em título, descrição e local, sem diferenciar maiúsculas | Não ignora acentos |
-| `RF-09` Editar e encerrar anúncio | API `PUT` e `DELETE` com checagem de autoria (CT-11) | Botões na interface, em desenvolvimento na Sprint 8 (`@rodrigopenha13`) |
+| `RF-09` Editar e encerrar anúncio | Botões "Marcar como Resolvido" e "Excluir" no card do autor, com confirmação, testados no navegador em 23/11; checagem de autoria na API (CT-11) | Editar título, descrição e demais campos pela interface (existe só na API) |
 | `RN-02` Gestão só pelo autor ou admin | Autor verificado na API (CT-11) | O administrador não tem a exceção prevista |
 | `RNF-01` Usabilidade | Layout responsivo com breakpoint em 720 px | Não foi construído como mobile-first |
 | `RNF-03` Segurança | bcrypt, JWT, SQL parametrizado, LGPD, validação de fotos, CORS restrito e senhas fora do Compose | HTTPS (M-08) e usuário próprio do banco (resto do M-11) |
-| `RNF-05` Acessibilidade | Atributos ARIA em `index.html` | Auditoria com Axe ou WAVE, em execução na Sprint 8 (`@rodrigopenha13`) |
 
 O `RNF-02` conta como atendido para a escala testada (50 anúncios). Com o crescimento da base, a falta de paginação (M-12) volta a ser um risco.
 

@@ -30,7 +30,7 @@ Avaliação do próprio grupo sobre cada sprint, segundo as quatro dimensões da
 | Requisitos, modelos, projeto, padrões e arquitetura alinhados ao código | [`requisitos.md`](../docs/requisitos/requisitos.md), [`modelagem.md`](../docs/modelagem/modelagem.md), [`decisoes-de-projeto.md`](../docs/projeto/decisoes-de-projeto.md), [`padroes-de-projeto.md`](../docs/padroes/padroes-de-projeto.md), [`arquitetura.md`](../docs/arquitetura/arquitetura.md) | Atendido |
 | Plano de testes e matriz atualizados | [`plano-de-testes.md`](../docs/testes/plano-de-testes.md) | Atendido |
 | Backlog com a situação final de cada item | [`backlog-produto.md`](../docs/backlog-produto.md) | Responsável: PO |
-| README final com imagens e instruções | [`README.md`](../README.md) | Responsável: Front-end |
+| README final com imagens e instruções | [`README.md`](../README.md) | Atendido: telas, execução com Docker e testes |
 | Correção dos defeitos críticos | PRs [#66](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/66) (M-11, M-17) e [#68](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/68) (M-05, M-10, M-13, M-16) | Corrigidos; M-11 em parte (aplicação ainda usa `root`) |
 | Suíte de testes executável | `npm run test:docker` em `API/Back-End` | Atendido: 50 de 50 testes, 13 de 13 casos, 92,03% das linhas |
 | Issues encerradas ou justificadas | GitHub Project | Responsável: PO |
@@ -40,7 +40,7 @@ Avaliação do próprio grupo sobre cada sprint, segundo as quatro dimensões da
 
 | Item da seção 12.1 | Situação |
 | --- | --- |
-| README com problema, solução, integrantes, tecnologias e execução | Em atualização na Sprint 8 |
+| README com problema, solução, integrantes, tecnologias e execução | Atualizado na Sprint 8; falta o link do vídeo |
 | Código-fonte da aplicação web | Presente em `API/` |
 | Documentação de requisitos, modelagem, projeto, padrões, arquitetura e testes | Presente e alinhada na Sprint 8 |
 | Backlog final e documentação das 8 sprints | `sprint-01.md` a `sprint-08.md` |
