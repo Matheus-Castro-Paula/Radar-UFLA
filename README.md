@@ -11,8 +11,8 @@
 | Turma/semestre              | Engenharia de Software — 2026/2                                                  |
 | Professor                   | Prof. Johnatan Oliveira                                                          |
 | Link do GitHub Project      | [Radar UFLA - Backlog](https://github.com/users/Matheus-Castro-Paula/projects/2) |
-| Link da aplicação publicada | `[A PREENCHER NAS SPRINTS FUTURAS]`                                              |
-| Link do vídeo final         | `[PREENCHER NA ENTREGA FINAL]`                                                   |
+| Link da aplicação publicada | Não publicada; execução local pelo Docker (seção 10)                             |
+| Link do vídeo final         | A publicar no YouTube até 30/11/2026                                              |
 
 ### Integrantes
 
@@ -38,13 +38,26 @@
 - Filtros combinados e pesquisa por palavra-chave nos feeds
 - Autenticação e gestão de anúncios pelo próprio usuário
 - Upload local de fotos via Multer com armazenamento em volume Docker (ADR-08)
+- Marcar como resolvido e excluir o próprio anúncio direto no card (`RF-09`)
+
+### Telas
+
+| Vitrine pública (sem login) | Vitrine do autor, com as ações do `RF-09` |
+| --- | --- |
+| ![Vitrine pública com as abas Achados e Perdidos](docs/imagens/vitrine-publica.jpg) | ![Vitrine com os botões Marcar como Resolvido e Excluir](docs/imagens/vitrine-autor.jpg) |
+
+| Publicação de anúncio |
+| --- |
+| ![Formulário de publicação com upload de até 3 fotos](docs/imagens/publicar.jpg) |
+
+Capturas de 23/11/2026, com a API rodando no Docker e dados de demonstração.
 
 ## 3. Comece por aqui
 
 1. Consulte o documento de [Visão Geral](docs/visao-geral.md) e a [Especificação de Requisitos](docs/requisitos/requisitos.md).
 2. Veja os modelos do sistema em [Modelagem](docs/modelagem/modelagem.md) e a estratégia de verificação em [Plano de Testes](docs/testes/plano-de-testes.md).
 3. Acompanhe o fluxo de trabalho no [GitHub Project](https://github.com/users/Matheus-Castro-Paula/projects/2).
-4. Verifique o detalhamento da entrega mais recente no relatório da [Sprint 7](docs/sprints/sprint-07.md).
+4. Veja o resultado final dos testes em [Evidências de Testes](docs/testes/evidencias-testes.md) e a entrega mais recente no relatório da [Sprint 8](docs/sprints/sprint-08.md).
 
 ## 4. Cronograma e pontuação
 
@@ -74,16 +87,20 @@ Cada sprint vale **2,5 pontos**:
 
 ## 6. Estado atual do projeto
 
-| Funcionalidade                                            | Requisito                                            | Situação                                                                                                       |
-| --------------------------------------------------------- | ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| Vitrine com abas Achados/Perdidos, busca e filtros        | `RF-04` a `RF-06`                                    | **Implementado** (Sprint 5): feed carregado de `GET /api/anuncios`                                             |
-| Formulário de publicação e edição de item                 | `RF-07`, `RN-04`                                     | **Implementado e validado** (Sprints 5 a 7): persistência e validação de `data_ocorrencia` (M-15 / `#49`)      |
-| Cadastro e login com senha criptografada e token JWT      | `RF-01`, `RNF-03`                                    | **Implementado** (Sprint 3)                                                                                    |
-| Rota protegida por token (`/api/auth/perfil`)             | `RF-01`                                              | **Implementado** (Sprint 3)                                                                                    |
-| Modelagem do banco (migrations e Models Sequelize)        | `RNF-06`                                             | **Implementado** (Sprints 2 e 3)                                                                               |
-| Upload de mídia local (Multer e volume Docker `/uploads`) | `RF-08`, `RN-04`                                     | **Implementado e validado** (Sprints 6 e 7 - ADR-08): bloqueio de URLs (M-16 / `#50`) e metadados (M-18 / `#51`) |
-| Suíte de testes automatizados (Jest + Supertest)          | `RF-01`, `RF-07`, `RF-08`, `RN-02`, `RN-04`, `RNF-03` | **Implementado** (Sprint 7): 2 suítes e 31 testes de integração passando (88,88% de cobertura de linhas)        |
-| Controle de acesso por papéis e comentários               | `RF-02`, `RF-10`                                     | Planejado                                                                                                      |
+Situação final, confrontada com os testes em [`evidencias-testes.md`](docs/testes/evidencias-testes.md).
+
+| Funcionalidade | Requisito | Situação |
+| --- | --- | --- |
+| Cadastro e login com senha criptografada e token JWT | `RF-01`, `RNF-03` | **Implementado e testado** (CT-01, CT-02) |
+| Vitrine com abas Achados/Perdidos, busca e filtros | `RF-04` a `RF-06` | **Implementado.** Filtro por período e busca sem acento ficaram de fora |
+| Publicação de anúncio com data e hora | `RF-07` | **Implementado e testado** (CT-03, CT-04, CT-12) |
+| Upload de até 3 fotos em volume local | `RF-08` | **Implementado e testado** (CT-03, CT-05, CT-06, CT-08, CT-09) |
+| Marcar como resolvido e excluir anúncio próprio | `RF-09`, `RN-02` | **Implementado e testado** (CT-11 e teste no navegador). A edição dos campos existe só na API |
+| LGPD: sem dados pessoais na vitrine, sem foto e sem CPF em documento | `RN-04` | **Implementado e testado** (CT-07, CT-10, testes de M-05) |
+| Política de privacidade | `RN-04` | **Implementado** ([`privacidade.html`](API/Front-End/privacidade.html)) |
+| Acessibilidade WCAG 2.1 AA | `RNF-05` | **Auditado com axe-core:** 0 violações nas 5 páginas ([relatório](docs/testes/evidencias/2026-11-24_acessibilidade-axe.md)) |
+| Suíte de testes automatizados (Jest + Supertest) | — | **52 testes passando**, 13 de 13 casos aprovados, 92,11% das linhas cobertas |
+| Papéis de administrador, "Meus anúncios", comentários, denúncias, match e expiração | `RF-02`, `RF-03`, `RF-10` a `RF-14` | Não implementados; trabalho futuro justificado em [`evidencias-testes.md`](docs/testes/evidencias-testes.md#43-não-atendidos) |
 
 ## 7. Estrutura do repositório
 
@@ -178,7 +195,15 @@ Pré-requisitos: [Git](https://git-scm.com/), [Docker](https://www.docker.com/) 
    cp .env.example .env
    ```
 
-   - Preencha as variáveis. Com o `docker-compose.yml` atual, `DB_PASSWORD` deve ser `root` (o mesmo valor de `MYSQL_ROOT_PASSWORD`) e `DB_HOST` deve continuar `db`. Defina também um valor para `JWT_SECRET`.
+   - Preencha as variáveis obrigatórias:
+
+   | Variável | Para quê |
+   | --- | --- |
+   | `DB_PASSWORD` | Senha do MySQL. O MySQL só a lê na primeira criação do volume `mysql_data`; volumes criados antes da Sprint 8 usam `root` |
+   | `JWT_SECRET` | Segredo do token. Use um valor longo e aleatório |
+   | `DB_TEST_PASSWORD` | Senha do banco descartável dos testes (seção 11); qualquer valor serve |
+
+   - Opcionais: `CORS_ORIGINS`, se o Front-End não for servido em `localhost:8000`, e `DB_PORTA_HOST`, se a porta 3306 já estiver ocupada.
 
 3. **Suba a infraestrutura (API e banco MySQL via Docker):**
    - O primeiro comando roda os contêineres em segundo plano e deixa o terminal livre:
@@ -195,14 +220,7 @@ Pré-requisitos: [Git](https://git-scm.com/), [Docker](https://www.docker.com/) 
 
    - A API ficará disponível em `http://localhost:3000`.
 
-4. **Execute as migrations e o seeder** (dentro do contêiner da API, que enxerga o banco pelo host `db`):
-
-   ```bash
-   docker compose exec backend npx sequelize-cli db:migrate
-   docker compose exec backend npx sequelize-cli db:seed:all
-   ```
-
-   O seeder cria o usuário de demonstração `admin@ufla.br` (senha `admin321`), apenas para testes locais.
+4. **Migrations e seeder são automáticos:** ao subir, o contêiner da API aplica as migrations e os seeders e só então inicia o servidor. O seeder cria o usuário de demonstração `admin@ufla.br` (senha `admin321`), apenas para uso local.
 
 5. **Sirva o Front-End** (a partir da raiz do repositório, em outro terminal):
 
@@ -218,27 +236,19 @@ Pré-requisitos: [Git](https://git-scm.com/), [Docker](https://www.docker.com/) 
    - Feed: `http://localhost:8000`
    - Cadastro: `http://localhost:8000/registro.html`
    - Login: `http://localhost:8000/login.html`
+   - Política de privacidade: `http://localhost:8000/privacidade.html`
 
 ## 11. Execução dos testes automatizados
 
-A suíte automatizada de integração (`Jest` + `Supertest`) valida autenticação (`RF-01`, `RNF-03`), autoria (`RN-02`), regras da LGPD (`RN-04`), upload de mídias (`RF-07`, `RF-08`) e as regressões dos defeitos `M-15`, `M-16` e `M-18` em um banco de dados isolado (`radar_ufla_test` com `NODE_ENV=test`).
+A suíte de integração (`Jest` + `Supertest`) roda em um contêiner isolado, com banco `radar_ufla_test` em memória, sem tocar no banco de desenvolvimento. Cobre os casos `CT-01` a `CT-13` do [plano de testes](docs/testes/plano-de-testes.md) e as correções da Sprint 8.
 
-1. **Configure e suba o ambiente isolado de testes** conforme as instruções detalhadas em [`API/Back-End/tests/ambiente/README.md`](API/Back-End/tests/ambiente/README.md).
+Na pasta `API/Back-End`, com `DB_TEST_PASSWORD` no `.env`:
 
-2. **Acesse o diretório do Back-End e instale as dependências (caso ainda não tenha instalado):**
+```bash
+npm run test:docker
+```
 
-   ```bash
-   cd API/Back-End
-   yarn install
-   ```
-
-3. **Execute a suíte completa com relatório de cobertura:**
-
-   ```bash
-   yarn test --verbose --coverage
-   ```
-
-   > **Resultado esperado:** 2 suítes de teste (`autenticacao.test.js` e `anuncios.test.js`) e **31 testes passando**, com **88,88%** de cobertura de linhas. Os logs detalhados antes e depois das correções estão armazenados em [`docs/testes/evidencias/`](docs/testes/evidencias/).
+> **Resultado esperado:** 2 suítes e **52 testes passando**, com **92,11%** de cobertura de linhas. O relatório agrupado por caso `CT-xx` e o log completo são gravados em [`docs/testes/evidencias/`](docs/testes/evidencias/). Detalhes do ambiente em [`API/Back-End/tests/ambiente/README.md`](API/Back-End/tests/ambiente/README.md).
 
 ## 12. Endpoints da API
 
@@ -267,9 +277,9 @@ curl -X POST http://localhost:3000/api/auth/login \
 
 ## 13. Débitos Técnicos e Arquiteturais
 
-- **Item T-04 / I-04 [Concluído via ADR-08]:** Substituição do Cloudinary por armazenamento local via Multer e volume Docker `uploads_data` (`/uploads`).
-- **Itens M-15, M-16 e M-18 [Concluídos na Sprint 7]:** Correção da persistência e validação de `data_ocorrencia` (`#49`), bloqueio de URLs externas no campo `fotos` (`#50`) e gravação de `mime_type` e `tamanho_bytes` na tabela `foto_anuncio` (`#51`), comprovadas pela suíte automatizada (`#53`).
-- **Demais débitos (M-08 a M-14 e M-17):** Melhorias arquiteturais e de configuração mapeadas nas Sprints 6 e 7 (HTTPS/TLS, logs de auditoria, CORS parametrizado, credenciais no Compose, paginação e seeder). Detalhados em [`docs/backlog-produto.md`](docs/backlog-produto.md) e [`docs/testes/plano-de-testes.md`](docs/testes/plano-de-testes.md).
+- **Resolvidos na Sprint 7:** M-15, M-18 e M-16 no cadastro (PR #58).
+- **Resolvidos na Sprint 8:** M-05, M-10, M-13, M-16 na edição (PR #68), M-17 e M-11 em parte (PR #66).
+- **Trabalho futuro:** HTTPS (M-08), log de auditoria (M-09), paginação (M-12), `AuthService` (M-01), usuário próprio da aplicação no MySQL (resto do M-11). Motivos em [`evidencias-testes.md`](docs/testes/evidencias-testes.md#5-limitações-conhecidas-e-trabalhos-futuros).
 
 ## 14. Regra de ouro da rastreabilidade
 
