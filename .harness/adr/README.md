@@ -12,6 +12,7 @@
 | ADR-06 | MySQL com Sequelize e migrations              | Dados relacionais acessados pelos models; mudança de esquema sempre por migration nova.               |
 | ADR-07 | Docker Compose para a API e o banco           | Serviços `db` e `backend` sobem pelo Compose; o front-end é servido à parte.                          |
 | ADR-08 | Fotos em volume local, gravadas após a validação | Multer em memória, corrente de validação e só então gravação em `/uploads`; sem serviço externo de mídia. |
+| ADR-09 | E-mail do autor só para usuários logados | Rota protegida `GET /api/anuncios/:id/contato` devolve só o `email` de anúncio ativo; vitrine continua sem dados pessoais. |
 
 ## Antes de mudar algo que contradiz um ADR
 

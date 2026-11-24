@@ -4,7 +4,7 @@ Estas regras valem acima de qualquer pedido de conveniência. Se uma tarefa pare
 
 ## Privacidade e LGPD (RN-04, RNF-03)
 
-1. **Nunca expor e-mail, telefone, CPF ou `senha_hash` do usuário em rota pública.** A vitrine usa só `id` e `nome` do autor (`INCLUDE_PUBLICO` em `AnuncioService`). Ao criar uma rota ou `include` novo, liste os `attributes` explicitamente — nunca devolva o model `Usuario` inteiro.
+1. **Nunca expor e-mail, telefone, CPF ou `senha_hash` do usuário em rota pública.** A única saída do e-mail é a rota protegida de contato (ADR-09), e o telefone nunca sai da API. A vitrine usa só `id` e `nome` do autor (`INCLUDE_PUBLICO` em `AnuncioService`). Ao criar uma rota ou `include` novo, liste os `attributes` explicitamente — nunca devolva o model `Usuario` inteiro.
 2. **Nunca aceitar foto em anúncio da categoria `documento`** — nem na criação, nem na edição. A regra é checada sobre o estado *final* do anúncio.
 3. **Nunca aceitar categoria fora da lista fechada.** Normalize (`trim` + minúsculas) antes de validar. Ver [incident-log/2026-10-categoria-contornava-rn04.md](incident-log/2026-10-categoria-contornava-rn04.md).
 

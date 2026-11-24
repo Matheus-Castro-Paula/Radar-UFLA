@@ -6,7 +6,7 @@
 >
 > **Atualizado na Sprint 6** — Issue [#40](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/40): ADR-05 a ADR-08 (decisões de arquitetura global) e melhorias M-08 a M-18, identificadas ao documentar a arquitetura em [`arquitetura.md`](../arquitetura/arquitetura.md). As PRs [#46](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/46), [#47](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/47) e [#48](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/48) implementaram a ADR-08 e resolveram as melhorias M-02, M-04, M-06 e M-14.
 >
-> **Atualizado na Sprint 8:** situação final das melhorias (seção 4) e consequências dos ADR-07 e ADR-08 alinhadas ao código após as PRs [#58](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/58), [#66](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/66) e [#68](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/68).
+> **Atualizado na Sprint 8:** ADR-09 (contato do autor, PR [#70](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/70)), situação final das melhorias (seção 4) e consequências dos ADR-07 e ADR-08 alinhadas ao código após as PRs [#58](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/58), [#66](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/66) e [#68](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/68).
 
 Este documento registra a decomposição do back-end em módulos e camadas, as principais decisões locais de projeto (no formato de ADRs), a análise de coesão e acoplamento do código antes e depois da refatoração da Sprint 4 e as melhorias identificadas.
 
@@ -63,6 +63,7 @@ flowchart LR
 | ADR-06 | MySQL com Sequelize e migrations | Implementada desde a estrutura inicial, registrada na Sprint 6 | [#40](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/40) | [`4cb769c`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/4cb769c), [`4fcfdf3`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/4fcfdf3) |
 | ADR-07 | Docker Compose para a API e o banco | Implementada desde a estrutura inicial, registrada na Sprint 6 | [#40](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/40) | [`f7c6b5d`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/f7c6b5d) |
 | ADR-08 | Fotos em volume local, gravadas após a validação | Implementada na Sprint 6 (PRs [#46](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/46), [#47](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/47) e [#48](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/48)) | [#40](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/40), [#41](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/41), [#42](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/42), [#43](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/43) | [`da9f0d2`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/da9f0d2), [`33c4503`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/33c4503), [`b92d989`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/b92d989), [`a6348c2`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/a6348c2), [`1550607`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/1550607) |
+| ADR-09 | E-mail do autor só para usuários logados, por rota própria | Implementada na Sprint 8 (PR [#70](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/70)) | — | [`7d844ad`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/7d844ad) |
 
 ### ADR-01 — Criar uma camada de Serviços entre Controllers e Models
 
@@ -209,6 +210,22 @@ flowchart LR
   - ✅ O cadastro recusa URLs externas como foto (PR #58), e a edição aceita só caminhos de `/uploads/` já publicados no próprio anúncio (PR #68). Juntas, fecham o M-16.
   - ✅ As colunas `mime_type` e `tamanho_bytes` são preenchidas a cada upload (M-18, PR #58).
   - ⚠️ O README, o item T-04 do backlog e a Issue [#10](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/10) ainda citam o Cloudinary e precisam ser atualizados.
+
+### ADR-09 — Mostrar o e-mail do autor só a usuários logados, por uma rota própria
+
+- **Status:** Aceita e implementada na Sprint 8, no PR [#70](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/70).
+- **Contexto:** Até a Sprint 7, a `RN-04` proibia mostrar o e-mail do autor em qualquer lugar, e o sistema não oferecia nenhum canal para quem achou um item falar com quem o perdeu: os comentários (`RF-10`) não foram implementados. Sem contato, a vitrine mostrava o item, mas não permitia combinar a devolução, que é o objetivo do produto.
+- **Alternativas consideradas:**
+  1. Manter o e-mail oculto e implementar comentários (`RF-10`).
+  2. Incluir o e-mail na resposta pública de `GET /api/anuncios/:id`.
+  3. Rota separada `GET /api/anuncios/:id/contato`, protegida por JWT, que devolve só o e-mail do autor de anúncio ativo.
+- **Decisão:** Alternativa 3. O `AnuncioService.contatoDoAutor` busca apenas o `email` do autor e responde 404 para anúncio inexistente, resolvido ou arquivado. O modal de detalhes chama a rota só quando há token; sem login, mostra um convite para entrar.
+- **Justificativa:** Os comentários exigiriam rotas, moderação e interface novas, fora do tempo da Sprint 8. Pôr o e-mail na resposta pública violaria a `RN-04` e o `CT-10`. A rota separada mantém a vitrine e o detalhe públicos sem dados pessoais e limita o contato a quem tem conta.
+- **Consequências:**
+  - ✅ A vitrine pública continua sem e-mail e telefone (`CT-10`); o telefone nunca sai da API.
+  - ✅ A regra é verificável pelo `CT-14` (401 sem token, só e-mail com token, 404 para anúncio fechado).
+  - ⚠️ A `RN-04` foi reescrita em [`requisitos.md`](../requisitos/requisitos.md) e a [`privacidade.html`](../../API/Front-End/privacidade.html) informa a nova regra.
+  - ⚠️ Qualquer conta logada pode consultar o contato de todos os anúncios ativos e reunir os e-mails dos autores. Um limite de consultas por usuário reduziria esse risco (trabalho futuro).
 
 ## 3. Análise de coesão e acoplamento
 
