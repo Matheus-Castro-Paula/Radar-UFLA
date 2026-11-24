@@ -17,7 +17,7 @@ Relatório final de verificação e validação. Consolida as execuções das Sp
 | 22/11/2026 | Ambiente de teste com senha vinda do `.env` (M-11) e volume de fotos | Container de teste e Compose novo | Aprovado | [`2026-11-22_0957_ambiente-de-teste.md`](evidencias/2026-11-22_0957_ambiente-de-teste.md), [`2026-11-22_0957_volume-uploads.md`](evidencias/2026-11-22_0957_volume-uploads.md) |
 | 22/11/2026 | Suíte final com prefixos `CT-xx`, após M-05, M-10, M-13 e M-16 (PR #68) | Container de teste (`npm run test:docker`) | 50 de 50 aprovados; 92,03% das linhas | [`2026-11-22_2252_suite-automatizada.md`](evidencias/2026-11-22_2252_suite-automatizada.md) |
 | 23/11/2026 | Suíte na `main` após o merge do PR #68, com os testes da correção do M-05 | Container de teste (`npm run test:docker`) | **52 de 52 aprovados; 92,11% das linhas** | [`2026-11-23_2151_suite-automatizada.md`](evidencias/2026-11-23_2151_suite-automatizada.md) |
-| 23/11/2026 | Teste exploratório no navegador com a API real: cadastro, login, publicação, CPF recusado, CNH com telefone aceita, resolver e excluir (RF-09), CORS | Docker Compose de desenvolvimento, front na porta 8000 | Aprovado, exceto `privacidade.html` (404) | Registro nesta seção e na seção 5 |
+| 23/11/2026 | Teste exploratório no navegador com a API real: cadastro, login, publicação, CPF recusado, CNH com telefone aceita, resolver e excluir (RF-09), CORS e página de privacidade | Docker Compose de desenvolvimento, front na porta 8000 | Aprovado. A `privacidade.html` faltava na primeira rodada e foi conferida depois do commit `4e98032` | Registro nesta seção |
 
 Para reproduzir: na pasta `API/Back-End`, copie o `.env.example` para `.env`, preencha `DB_PASSWORD`, `DB_TEST_PASSWORD` e `JWT_SECRET` e rode `npm run test:docker`. O relatório e o log saem em `docs/testes/evidencias/`, já agrupados por caso `CT-xx`.
 
@@ -134,7 +134,6 @@ O `RNF-02` conta como atendido para a escala testada (50 anúncios). Com o cresc
 - **Corrente de validação:** cada handler precisa chamar `super.validar` para a corrente seguir (M-07, Template Method).
 - **Regra do M-05:** é baseada em padrões de texto. Um número de documento escrito de forma incomum pode passar, e um número de 11 dígitos que por acaso forme um CPF válido é recusado.
 - **Testes:** os handlers não têm testes de unidade isolados, só de integração. A interface é verificada só por roteiro manual.
-- **Página de privacidade:** em 23/11/2026, `privacidade.html` não existia na `main`, e os links do rodapé e do cadastro davam 404. A página está prevista na Sprint 8 (`@rodrigopenha13`).
 - **Funcionalidades não implementadas:** `RF-03`, `RF-10` a `RF-14`, listadas na seção 4.3 e justificadas no [backlog](../backlog-produto.md).
 
 ## 6. Evolução ao longo das oito sprints
