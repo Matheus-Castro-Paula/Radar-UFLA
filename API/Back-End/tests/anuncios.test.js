@@ -461,6 +461,42 @@ describe("Anúncios", () => {
     });
   });
 
+  describe("CT-14: contato do autor só para usuário logado (RN-04)", () => {
+    const contato = (id, token) => {
+      const req = request(app).get(`/api/anuncios/${id}/contato`);
+      return token ? req.set("Authorization", `Bearer ${token}`) : req;
+    };
+
+    it("CT-14: recusa sem token (401)", async () => {
+      const criado = await publicar(autor.token);
+      const res = await contato(criado.body.anuncio.id);
+      expect(res.status).toBe(401);
+    });
+
+    it("CT-14: devolve só o e-mail do autor para outro usuário logado", async () => {
+      const criado = await publicar(autor.token);
+      const outro = await criarUsuarioLogado("visitante");
+      const res = await contato(criado.body.anuncio.id, outro.token);
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual({ email: autor.email });
+      expect(JSON.stringify(res.body)).not.toContain(TELEFONE);
+    });
+
+    it("CT-14: devolve 404 para anúncio inexistente ou resolvido", async () => {
+      const inexistente = await contato(999999, autor.token);
+      expect(inexistente.status).toBe(404);
+
+      const criado = await publicar(autor.token);
+      const id = criado.body.anuncio.id;
+      await request(app)
+        .put(`/api/anuncios/${id}`)
+        .set("Authorization", `Bearer ${autor.token}`)
+        .send({ status: "RESOLVIDO" });
+      const resolvido = await contato(id, autor.token);
+      expect(resolvido.status).toBe(404);
+    });
+  });
+
   describe("M-10: CORS restrito", () => {
     const origemPermitida = () => (process.env.CORS_ORIGINS || "http://localhost:8000").split(",")[0].trim();
 
