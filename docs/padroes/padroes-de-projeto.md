@@ -118,6 +118,9 @@ classDiagram
     class CategoriaEStatusHandler {
         +validar(dados, contexto)
     }
+    class DataOcorrenciaHandler {
+        +validar(dados, contexto)
+    }
     class RegraLGPDHandler {
         +validar(dados, contexto)
     }
@@ -127,6 +130,7 @@ classDiagram
     class AnuncioValidationChain {
         -camposObrigatorios
         -categoriaEStatus
+        -dataOcorrencia
         -lgpdHandler
         -fotosHandler
         +executar(dados, contexto)
@@ -142,6 +146,7 @@ classDiagram
 
     ValidationHandler <|-- CamposObrigatoriosHandler
     ValidationHandler <|-- CategoriaEStatusHandler
+    ValidationHandler <|-- DataOcorrenciaHandler
     ValidationHandler <|-- RegraLGPDHandler
     ValidationHandler <|-- FotosHandler
     ValidationHandler o-- ValidationHandler : proximo
@@ -179,12 +184,13 @@ sequenceDiagram
 
 ### 4.3 A corrente e o que cada elo faz em cada operação
 
-A ordem é definida uma vez, no construtor de [`AnuncioValidationChain`](../../API/Back-End/src/services/validations/AnuncioValidationChain.js): **`CamposObrigatoriosHandler` → `CategoriaEStatusHandler` → `RegraLGPDHandler` → `FotosHandler`**, a mesma ordem do diagrama 2.3 de [`modelagem.md`](../modelagem/modelagem.md). O `AnuncioService` chama a mesma corrente nas três operações, mudando só `contexto.acao`:
+A ordem é definida uma vez, no construtor de [`AnuncioValidationChain`](../../API/Back-End/src/services/validations/AnuncioValidationChain.js): **`CamposObrigatoriosHandler` → `CategoriaEStatusHandler` → `DataOcorrenciaHandler` → `RegraLGPDHandler` → `FotosHandler`**, a mesma ordem do diagrama 2.3 de [`modelagem.md`](../modelagem/modelagem.md). O `AnuncioService` chama a mesma corrente nas três operações, mudando só `contexto.acao`:
 
 | Handler                      | `CRIAR` (`criar`)                     | `ATUALIZAR` (`atualizar`)                                        | `LISTAR` (`listar` com filtro `tipo`) |
 | ---------------------------- | ------------------------------------- | ---------------------------------------------------------------- | ------------------------------------- |
 | `CamposObrigatoriosHandler`  | Verifica os 5 campos obrigatórios     | Não atua                                                         | Não atua                              |
 | `CategoriaEStatusHandler`    | Confere `tipo`, `status` e categoria normalizada contra as listas fechadas | Idem, sobre o estado final                       | Confere o `tipo` do filtro            |
+| `DataOcorrenciaHandler`      | `RF-07`: data válida e não futura, se informada | Idem, sobre o estado final                  | Sem efeito                            |
 | `RegraLGPDHandler`           | `RN-04`: documento não pode ter foto  | `RN-04` sobre o estado final (pega a troca de categoria)         | Sem efeito (não há categoria nem fotos) |
 | `FotosHandler`               | `RF-08`: até 3 fotos JPG/PNG/WEBP, se houver | Idem, sobre as fotos finais                               | Sem efeito                            |
 
@@ -199,8 +205,9 @@ Os dois handlers que dependem da categoria (`CategoriaEStatusHandler` e `RegraLG
 | **Handler** (base)            | `ValidationHandler`            | [`validations/ValidationHandler.js`](../../API/Back-End/src/services/validations/ValidationHandler.js)                    | Guarda o próximo elo (`definirProximo`) e repassa a requisição (`validar`)                               | [`c05a69c`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/c05a69c) |
 | **ConcreteHandler**           | `CamposObrigatoriosHandler`    | [`validations/CamposObrigatoriosHandler.js`](../../API/Back-End/src/services/validations/CamposObrigatoriosHandler.js)    | Na criação: título, descrição, tipo, categoria e local preenchidos                                        | [`e26c6aa`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/e26c6aa) |
 | **ConcreteHandler**           | `CategoriaEStatusHandler`      | [`validations/CategoriaEStatusHandler.js`](../../API/Back-End/src/services/validations/CategoriaEStatusHandler.js)        | `tipo`, `status` e categoria (normalizada) dentro das listas fechadas                                     | [`e26c6aa`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/e26c6aa) |
+| **ConcreteHandler**           | `DataOcorrenciaHandler`        | [`validations/DataOcorrenciaHandler.js`](../../API/Back-End/src/services/validations/DataOcorrenciaHandler.js)            | `RF-07`: `data_ocorrencia` válida e não futura (incluído na Sprint 7, M-15)                                | [`6fb6ee9`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/6fb6ee9) |
 | **ConcreteHandler**           | `RegraLGPDHandler`             | [`validations/RegraLGPDHandler.js`](../../API/Back-End/src/services/validations/RegraLGPDHandler.js)                      | `RN-04`: categoria `documento` não pode ter foto                                                           | [`e26c6aa`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/e26c6aa) |
-| **ConcreteHandler**           | `FotosHandler`                 | [`validations/FotosHandler.js`](../../API/Back-End/src/services/validations/FotosHandler.js)                              | `RF-08`: lista de até 3 URLs, JPG/PNG/WEBP                                                                | [`e26c6aa`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/e26c6aa) |
+| **ConcreteHandler**           | `FotosHandler`                 | [`validations/FotosHandler.js`](../../API/Back-End/src/services/validations/FotosHandler.js)                              | `RF-08`: até 3 fotos JPG/PNG/WEBP; desde a Sprint 6, tipo, tamanho e bytes iniciais do arquivo           | [`e26c6aa`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/e26c6aa) |
 | **Montador da corrente**      | `AnuncioValidationChain`       | [`validations/AnuncioValidationChain.js`](../../API/Back-End/src/services/validations/AnuncioValidationChain.js)          | Instancia os handlers, define a ordem e expõe `executar(dados, contexto)`                                 | [`cc1e2b3`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/cc1e2b3) |
 | **Client**                    | `AnuncioService`               | [`services/AnuncioService.js`](../../API/Back-End/src/services/AnuncioService.js)                                         | Monta os dados (o estado final, na edição), dispara a corrente e só depois abre a transação               | [`d6b6a3d`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/d6b6a3d) |
 | **Interrupção da corrente**   | `RegraNegocioError`            | [`services/RegraNegocioError.js`](../../API/Back-End/src/services/RegraNegocioError.js)                                   | Erro com código de negócio; o controller o traduz em status HTTP (ADR-01)                                 | Sprint 4 |
@@ -293,7 +300,8 @@ class RegraLGPDHandler extends ValidationHandler {
 - **O usuário vê um erro por vez:** a corrente para na primeira violação. Se o formulário tiver dois problemas, o segundo só aparece depois de corrigir o primeiro.
 - **A normalização da categoria está repetida** em `CategoriaEStatusHandler`, `RegraLGPDHandler` e `AnuncioService`. Isso protege contra erros de ordem, mas são três lugares para manter iguais.
 - **Não cobre autorização.** A verificação de autoria (`RN-02`, `buscarAnuncioDoAutor`) depende de consultar o banco e continua fora da corrente.
-- **Ainda não há testes automatizados** dos handlers. Eles estão previstos para a Sprint 7; nesta sprint, o funcionamento foi verificado pelos cenários da seção 8.
+- **Os handlers não têm testes de unidade isolados.** Desde a Sprint 7 eles são exercitados pela suíte de integração (casos CT-03 a CT-09 de [`plano-de-testes.md`](../testes/plano-de-testes.md)), com 89,4% das linhas de `services/validations/` cobertas ([`evidencias-testes.md`](../testes/evidencias-testes.md)).
+- **Extensibilidade comprovada:** a validação de data da Sprint 7 (`DataOcorrenciaHandler`) entrou como um handler novo e uma linha no montador, sem alterar o `AnuncioService`.
 
 ## 8. Evidências
 

@@ -6,6 +6,7 @@
   --brand-dark: #234534;
   --achados: #C68A2E;
   --achados-bg: #FBF1DF;
+  --achados-texto: #8F5F14; /* RNF-05: 5,5:1 no branco e 4,9:1 no achados-bg (WCAG AA) */
   --perdidos: #4C6E8A;
   --perdidos-bg: #E9F0F5;
   --border: #DDD7C7;
@@ -133,7 +134,7 @@ body {
 
 .tab.active { color: var(--ink); }
 .tab-achados.active { border-color: var(--achados); }
-.tab-achados.active .tab-count { background: var(--achados-bg); color: var(--achados); }
+.tab-achados.active .tab-count { background: var(--achados-bg); color: var(--achados-texto); }
 .tab-perdidos.active { border-color: var(--perdidos); }
 .tab-perdidos.active .tab-count { background: var(--perdidos-bg); color: var(--perdidos); }
 
@@ -466,7 +467,7 @@ input:focus-visible {
   background: var(--card-bg);
   box-shadow: var(--shadow-sm);
 }
-.card[data-feed="achados"] .card-badge { color: var(--achados); }
+.card[data-feed="achados"] .card-badge { color: var(--achados-texto); }
 .card[data-feed="perdidos"] .card-badge { color: var(--perdidos); }
 
 .card-title { line-height: 1.3; }

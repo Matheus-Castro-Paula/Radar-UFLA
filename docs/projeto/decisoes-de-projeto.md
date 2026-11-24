@@ -5,6 +5,8 @@
 > **Atualizado na Sprint 5** — Issue [#32](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/32): ADR-04 (Chain of Responsibility nas validações de anúncio, implementado no PR [#38](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/38)) e melhorias M-05, M-06 e M-07. Detalhamento do padrão em [`padroes-de-projeto.md`](../padroes/padroes-de-projeto.md).
 >
 > **Atualizado na Sprint 6** — Issue [#40](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/40): ADR-05 a ADR-08 (decisões de arquitetura global) e melhorias M-08 a M-18, identificadas ao documentar a arquitetura em [`arquitetura.md`](../arquitetura/arquitetura.md). As PRs [#46](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/46), [#47](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/47) e [#48](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/48) implementaram a ADR-08 e resolveram as melhorias M-02, M-04, M-06 e M-14.
+>
+> **Atualizado na Sprint 8:** situação final das melhorias (seção 4) e consequências dos ADR-07 e ADR-08 alinhadas ao código após as PRs [#58](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/58), [#66](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/66) e [#68](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/68).
 
 Este documento registra a decomposição do back-end em módulos e camadas, as principais decisões locais de projeto (no formato de ADRs), a análise de coesão e acoplamento do código antes e depois da refatoração da Sprint 4 e as melhorias identificadas.
 
@@ -147,7 +149,7 @@ flowchart LR
   - ✅ Uma única unidade de implantação para a API, com transações locais entre anúncio e fotos.
   - ✅ Front-end e back-end evoluem em paralelo, ligados pelo contrato HTTP.
   - ⚠️ Toda a API escala em conjunto, e uma falha no processo afeta todas as funcionalidades.
-  - ⚠️ Front-end e API têm origens diferentes, o que exige CORS (ver melhoria M-10).
+  - ✅ Front-end e API têm origens diferentes, o que exige CORS. Desde a Sprint 8, só as origens de `CORS_ORIGINS` são liberadas (M-10, PR #68).
   - ⚠️ A separação entre camadas depende de convenção e de code review, como já indicado no ADR-01.
 
 ### ADR-06 — Persistir os dados em MySQL com Sequelize e migrations
@@ -183,7 +185,7 @@ flowchart LR
   - ✅ A API e o banco sobem com um único comando e se comunicam pelo nome do serviço (`db`).
   - ✅ Os dados do banco persistem no volume `mysql_data`.
   - ⚠️ O front-end exige um comando separado para ser servido.
-  - ⚠️ O arquivo define a senha do MySQL em texto e expõe a porta 3306 (ver melhoria M-11).
+  - ✅ Desde a Sprint 8, a senha do MySQL vem do `.env` e a porta só é aberta em `127.0.0.1` (M-11, PR #66). A aplicação ainda usa o usuário `root`.
   - ⚠️ A configuração é voltada a desenvolvimento e demonstração: o código é montado por bind mount e não há TLS (ver melhoria M-08).
 
 ### ADR-08 — Armazenar as fotos em volume local, gravando após a validação
@@ -202,10 +204,10 @@ flowchart LR
   - ✅ A `RN-04` continua valendo sem alteração no `RegraLGPDHandler`.
   - ⚠️ As fotos ficam presas à máquina que executa a aplicação, sem CDN e com backup manual do volume.
   - ⚠️ Cada requisição pode manter até 15 MB em memória.
-  - ⚠️ Excluir um anúncio remove as linhas do banco, mas não os arquivos (ver melhoria M-13).
+  - ✅ Excluir um anúncio ou remover fotos na edição apaga os arquivos do volume, depois da confirmação do banco (M-13, PR #68).
   - ✅ O `FotosHandler` confere os bytes iniciais de cada arquivo, o que barra um arquivo com MIME falsificado (melhoria M-14, resolvida na PR #47).
-  - ⚠️ O cadastro ainda aceita URLs externas como foto quando enviadas em JSON, sem passar por essas validações (ver melhoria M-16).
-  - ⚠️ As colunas `mime_type` e `tamanho_bytes`, criadas para a foto, ainda não são preenchidas (ver melhoria M-18).
+  - ✅ O cadastro recusa URLs externas como foto (PR #58), e a edição aceita só caminhos de `/uploads/` já publicados no próprio anúncio (PR #68). Juntas, fecham o M-16.
+  - ✅ As colunas `mime_type` e `tamanho_bytes` são preenchidas a cada upload (M-18, PR #58).
   - ⚠️ O README, o item T-04 do backlog e a Issue [#10](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/10) ainda citam o Cloudinary e precisam ser atualizados.
 
 ## 3. Análise de coesão e acoplamento
@@ -302,3 +304,7 @@ function validarRegraLGPD(categoria, fotos) {
 | M-18 | Gravar `mime_type` e `tamanho_bytes` das fotos | As colunas foram criadas na PR #46, mas o `MidiaStorage` ainda não as preenche (ADR-08) | Baixa      |
 
 Resolvidas na Sprint 6, na PR [#47](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/47): M-02, M-04, M-06 e M-14.
+
+Resolvidas na Sprint 7, na PR [#58](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/58): M-15, M-18 e M-16 no cadastro.
+
+Sprint 8: M-17 resolvida e M-11 resolvida em parte na PR [#66](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/66); M-05, M-10, M-13 e M-16 na edição resolvidas na PR [#68](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/68). Ficam como trabalho futuro M-01, M-03, M-07, M-08, M-09 e M-12, justificadas em [`evidencias-testes.md`](../testes/evidencias-testes.md#5-limitações-conhecidas-e-trabalhos-futuros).

@@ -1,6 +1,8 @@
 # Plano de Testes — Radar UFLA
 
 > Sprint 7 — Issue [#52](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/52) | Responsável: Tech Lead (`@BernarDEVthomaz`)
+>
+> **Atualizado na Sprint 8:** matriz de rastreabilidade e registro de execução com o resultado do CT-12 e as execuções de 22/11/2026 (PRs #66 e [#68](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/68)). O resultado consolidado e a classificação dos requisitos estão em [`evidencias-testes.md`](evidencias-testes.md).
 
 Este documento define o que será testado no Radar UFLA, em quais níveis, com quais casos e com quais critérios de aprovação. Os casos usam a numeração `CT-xx`, que deve aparecer no nome dos testes automatizados, nas evidências e no relatório da sprint, para manter a rastreabilidade.
 
@@ -22,7 +24,7 @@ Este documento define o que será testado no Radar UFLA, em quais níveis, com q
 | `RF-03`, `RF-10` a `RF-14` | Funcionalidades ainda não implementadas |
 | `RF-05` e `RF-06` (busca e filtros) | Executados no navegador, sobre a lista já carregada; verificados apenas no roteiro manual da vitrine |
 | `RNF-04` (auditoria) | Não há log de auditoria (melhoria M-09) |
-| `RNF-05` (acessibilidade) | Validação com Axe e WAVE prevista para a Sprint 8 |
+| `RNF-05` (acessibilidade) | Validação com Axe e WAVE prevista para a Sprint 8; executada em 24/11/2026 com axe-core ([relatório](evidencias/2026-11-24_acessibilidade-axe.md)) |
 | HTTPS/TLS | A API responde apenas em HTTP (melhoria M-08) |
 
 ## 3. Níveis e tipos de teste
@@ -89,20 +91,20 @@ Este documento define o que será testado no Radar UFLA, em quais níveis, com q
 
 | Requisito | Descrição | Casos | Situação dos casos |
 | --- | --- | --- | --- |
-| `RF-01` | Autenticação e cadastro | CT-01, CT-02 | CT-01 aprovado; CT-02 parcial |
-| `RF-07` | Cadastro de anúncio | CT-03, CT-04, CT-12 | CT-03 e CT-04 aprovados; CT-12 não executado |
-| `RF-08` | Upload de fotos | CT-03, CT-05, CT-06, CT-08, CT-09, CT-12 | CT-03, CT-06, CT-08 e CT-09 aprovados; CT-05 parcial; CT-12 não executado |
+| `RF-01` | Autenticação e cadastro | CT-01, CT-02 | Aprovados |
+| `RF-07` | Cadastro de anúncio | CT-03, CT-04, CT-12 | Aprovados |
+| `RF-08` | Upload de fotos | CT-03, CT-05, CT-06, CT-08, CT-09, CT-12 | Aprovados |
 | `RN-02` | Só o autor altera o anúncio | CT-11 | Aprovado |
-| `RN-04` | LGPD: sem dados pessoais e sem foto de documento | CT-07, CT-10, CT-12 | CT-07 e CT-10 aprovados; CT-12 não executado |
-| `RNF-02` | Desempenho | CT-13 | Não executado |
-| `RNF-03` | Segurança | CT-01, CT-02, CT-05, CT-09 | CT-01 e CT-09 aprovados; CT-02 e CT-05 parciais |
+| `RN-04` | LGPD: sem dados pessoais e sem foto de documento | CT-07, CT-10, CT-12 | Aprovados |
+| `RNF-02` | Desempenho | CT-13 | Aprovado (média de 8,5 ms) |
+| `RNF-03` | Segurança | CT-01, CT-02, CT-05, CT-09 | Aprovados |
 
 ### 7.2 Defeitos e casos de teste
 
 | Defeito | Issue | Descrição | Casos que comprovam a correção | Resultado |
 | --- | --- | --- | --- | --- |
 | M-15 | [#49](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/49) | `data_ocorrencia` não é gravada | CT-04, CT-12 | Corrigido: CT-04 aprovado |
-| M-16 | [#50](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/50) | URLs externas aceitas como foto em JSON | CT-05 | Corrigido no cadastro; a edição ainda aceita URL (seção 9.1) |
+| M-16 | [#50](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/50) | URLs externas aceitas como foto em JSON | CT-05 | Corrigido no cadastro (PR #58) e na edição (PR [#68](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/68)) |
 | M-18 | [#51](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/51) | `mime_type` e `tamanho_bytes` não são gravados | CT-06 | Corrigido: CT-06 aprovado |
 
 ## 8. Critérios de aprovação e reprovação
@@ -148,21 +150,25 @@ Os testes automatizados não citam os IDs `CT-xx` no nome. A coluna **Testes** r
 | CT-09 | Automatizada (integração, e não unidade como previsto) | 16/11/2026 | "recusa arquivo com MIME falso (conteúdo não é imagem)" | Aprovado | [suíte](evidencias/2026-11-16_1956_suite-automatizada.md) |
 | CT-10 | Automatizada | 16/11/2026 | "a vitrine pública não expõe e-mail, telefone nem senha_hash de nenhum autor" | Aprovado | [suíte](evidencias/2026-11-16_1956_suite-automatizada.md) |
 | CT-11 | Automatizada | 16/11/2026 | "só o autor edita e exclui" | Aprovado | [suíte](evidencias/2026-11-16_1956_suite-automatizada.md) |
-| CT-12 | Manual | — | — | Não executado: depende das evidências de interface da Issue [#54](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/54) | — |
+| CT-12 | Manual | 16/11/2026 | Roteiro de 9 passos no Firefox (Issue [#54](https://github.com/Matheus-Castro-Paula/Radar-UFLA/issues/54)) | Aprovado: 9 de 9 passos | [roteiro](evidencias/2026-11-16_front-ct12-interface.md) |
 | CT-13 | Automatizada | — | — | Não executado: a medição de tempo de resposta não foi implementada | — |
 
 ### 9.1 Resumo e defeitos encontrados
 
 | Situação | Casos |
 | --- | --- |
-| Aprovados | CT-01, CT-03, CT-04, CT-06, CT-07, CT-08, CT-09, CT-10, CT-11 |
-| Parciais | CT-02, CT-05 |
-| Não executados | CT-12, CT-13 |
+| Aprovados | CT-01 a CT-13 (situação final, após a PR #68) |
+| Parciais | Nenhum |
+| Não executados | Nenhum |
 | Reprovados | Nenhum |
 
 A suíte também cobre comportamentos fora dos casos do plano: cadastro sem `senha_hash` na resposta, e-mail duplicado, `tipo_usuario` enviado pelo cliente ignorado, campos obrigatórios, categoria fora da lista, formato GIF recusado, data futura ou inválida e documento sem foto aceito.
 
-**Defeito encontrado na revisão:** a correção da Issue #50 (M-16) bloqueia URLs apenas no cadastro. Na edição (`PUT /api/anuncios/:id`), uma URL externa com extensão de imagem ainda é aceita e gravada como foto ([`FotosHandler.js`](../../API/Back-End/src/services/validations/FotosHandler.js), condição `contexto.acao === "CRIAR"`). Severidade alta (seção 8), por permitir foto sem validação de tipo, tamanho e conteúdo. Deve virar Issue com o rótulo `bug`, citando o CT-05.
+**Reexecução em 22/11/2026** (Sprint 8, após a PR [#66](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/66)): 31 de 31 aprovados, com 88,88% das linhas cobertas ([suíte](evidencias/2026-11-22_0957_suite-automatizada.md)).
+
+**Execução final em 22/11/2026** (após a PR [#68](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/68)): 50 de 50 aprovados, com 92,03% das linhas cobertas e os testes já agrupados por `CT-xx` ([suíte](evidencias/2026-11-22_2252_suite-automatizada.md)). O passo 3 do CT-02 e o passo 2 do CT-05 ganharam testes, e o CT-13 mediu 8,5 ms de média. A tabela de resumo acima mostra a situação final; a tabela de execução mostra a da Sprint 7.
+
+**Defeito encontrado na revisão:** a correção da Issue #50 (M-16) bloqueia URLs apenas no cadastro. Na edição (`PUT /api/anuncios/:id`), uma URL externa com extensão de imagem ainda é aceita e gravada como foto ([`FotosHandler.js`](../../API/Back-End/src/services/validations/FotosHandler.js), condição `contexto.acao === "CRIAR"`). Severidade alta (seção 8), por permitir foto sem validação de tipo, tamanho e conteúdo. Deve virar Issue com o rótulo `bug`, citando o CT-05. **Corrigido na Sprint 8** (PR [#68](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/68)).
 
 **Situação frente aos critérios da seção 8:** os casos de risco alto CT-01, CT-07, CT-08, CT-09, CT-10 e CT-11 estão aprovados, assim como CT-03, CT-04 e CT-06. CT-02 e CT-05 ficaram parciais, e o defeito do CT-05 é de severidade alta. A tag `sprint-07` pode ser criada com essas pendências justificadas aqui, ou depois da correção do PUT e do teste do token com segredo antigo.
 
@@ -170,7 +176,7 @@ A suíte também cobre comportamentos fora dos casos do plano: cadastro sem `sen
 
 | Defeito | Situação | Motivo |
 | --- | --- | --- |
-| M-17 | Sem Issue | O seeder impede a API de subir em bancos anteriores à Sprint 6. A suíte parte de banco vazio e não reproduz o problema |
-| M-11 | Débito registrado | A senha do banco aparece em três pontos do `docker-compose.yml`. É um problema de configuração, não de comportamento testável pela suíte |
+| M-17 | Corrigido na Sprint 8 (PR [#66](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/66)) | Verificado fora da suíte Jest pelo script `npm run test:seeders`, que roda os seeders três vezes ([evidência](evidencias/2026-11-22_0956_seeders-idempotentes.md)) |
+| M-11 | Corrigido em parte na Sprint 8 (PR [#66](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/66)) | Verificado pela subida do ambiente de teste com a senha lida do `.env` ([evidência](evidencias/2026-11-22_0957_ambiente-de-teste.md)) |
 
 As melhorias e os defeitos citados estão descritos na seção 4 de [`decisoes-de-projeto.md`](../projeto/decisoes-de-projeto.md).
