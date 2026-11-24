@@ -84,6 +84,7 @@ Este documento define o que será testado no Radar UFLA, em quais níveis, com q
 | CT-11 | `RN-02` | Anúncio de A e usuário B autenticado | 1. `PUT /api/anuncios/:id` com o token de B<br>2. `DELETE /api/anuncios/:id` com o token de B | — | `403` "Apenas o autor pode alterar este anúncio."; anúncio inalterado e ainda existente |
 | CT-12 | `RF-07`, `RF-08`, `RN-04` | API e Front-End no ar; usuário logado | 1. Abrir `publicar.html`<br>2. Informar data no futuro e publicar<br>3. Escolher uma foto de 6 MB e depois um `.txt`<br>4. Escolher a categoria "Documento"<br>5. Voltar a "Objeto", anexar uma foto válida e publicar com data passada<br>6. Abrir a vitrine | Fotos reais; data e hora do achado | 2. "A data e a hora não podem estar no futuro."<br>3. Mensagens de tamanho e de formato<br>4. Área de upload oculta e aviso de LGPD<br>5. "Item publicado!"<br>6. Card com a foto e a data e hora informadas |
 | CT-13 | `RNF-02` | 50 anúncios ativos no banco de teste | 1. Fazer 20 requisições `GET /api/anuncios` e medir cada uma | — | Tempo médio abaixo de 800 ms, registrado na evidência |
+| CT-14 | `RN-04` | Anúncio ativo de A; usuário B cadastrado | 1. `GET /api/anuncios/:id/contato` sem token<br>2. Com o token de B<br>3. Para anúncio inexistente e para anúncio resolvido | — | 1. `401`<br>2. `200` com apenas `{ email }` de A, sem telefone<br>3. `404` (incluído na Sprint 8, PR #70) |
 
 ## 7. Matriz de rastreabilidade
 
@@ -95,7 +96,7 @@ Este documento define o que será testado no Radar UFLA, em quais níveis, com q
 | `RF-07` | Cadastro de anúncio | CT-03, CT-04, CT-12 | Aprovados |
 | `RF-08` | Upload de fotos | CT-03, CT-05, CT-06, CT-08, CT-09, CT-12 | Aprovados |
 | `RN-02` | Só o autor altera o anúncio | CT-11 | Aprovado |
-| `RN-04` | LGPD: sem dados pessoais e sem foto de documento | CT-07, CT-10, CT-12 | Aprovados |
+| `RN-04` | LGPD: sem dados pessoais e sem foto de documento | CT-07, CT-10, CT-12, CT-14 | Aprovados |
 | `RNF-02` | Desempenho | CT-13 | Aprovado (média de 8,5 ms) |
 | `RNF-03` | Segurança | CT-01, CT-02, CT-05, CT-09 | Aprovados |
 

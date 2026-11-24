@@ -41,6 +41,15 @@ module.exports = {
     }
   },
 
+  async contato(req, res) {
+    try {
+      const contato = await AnuncioService.contatoDoAutor(req.params.id);
+      return res.status(200).json(contato);
+    } catch (error) {
+      return responderErro(res, error, "Erro ao buscar contato do autor.");
+    }
+  },
+
   async criar(req, res) {
     try {
       const anuncio = await AnuncioService.criar(

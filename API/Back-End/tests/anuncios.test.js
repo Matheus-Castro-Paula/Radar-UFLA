@@ -419,6 +419,84 @@ describe("Anúncios", () => {
     });
   });
 
+  describe("Limite da descrição (Sprint 8)", () => {
+    const LIMITE = 200;
+
+    it("aceita descrição com exatamente 200 caracteres", async () => {
+      const res = await publicar(autor.token, { campos: { descricao: "a".repeat(LIMITE) } });
+      expect(res.status).toBe(201);
+    });
+
+    it("recusa descrição com 201 caracteres (400)", async () => {
+      const res = await publicar(autor.token, { campos: { descricao: "a".repeat(LIMITE + 1) } });
+      expect(res.status).toBe(400);
+      expect(res.body.error).toMatch(/200 caracteres/);
+    });
+
+    it("recusa descrição gigante sem travar a API", async () => {
+      const inicio = Date.now();
+      const res = await publicar(autor.token, { campos: { descricao: "a".repeat(50000) } });
+      expect(res.status).toBe(400);
+      expect(Date.now() - inicio).toBeLessThan(2000);
+    });
+
+    it("na edição, recusa descrição acima do limite", async () => {
+      const criado = await publicar(autor.token);
+      const res = await request(app)
+        .put(`/api/anuncios/${criado.body.anuncio.id}`)
+        .set("Authorization", `Bearer ${autor.token}`)
+        .send({ descricao: "a".repeat(LIMITE + 1) });
+      expect(res.status).toBe(400);
+    });
+
+    it("anúncio antigo com descrição longa ainda pode ser marcado como resolvido", async () => {
+      const criado = await publicar(autor.token);
+      const id = criado.body.anuncio.id;
+      await Anuncio.update({ descricao: "a".repeat(500) }, { where: { id } });
+      const res = await request(app)
+        .put(`/api/anuncios/${id}`)
+        .set("Authorization", `Bearer ${autor.token}`)
+        .send({ status: "RESOLVIDO" });
+      expect(res.status).toBe(200);
+    });
+  });
+
+  describe("CT-14: contato do autor só para usuário logado (RN-04)", () => {
+    const contato = (id, token) => {
+      const req = request(app).get(`/api/anuncios/${id}/contato`);
+      return token ? req.set("Authorization", `Bearer ${token}`) : req;
+    };
+
+    it("CT-14: recusa sem token (401)", async () => {
+      const criado = await publicar(autor.token);
+      const res = await contato(criado.body.anuncio.id);
+      expect(res.status).toBe(401);
+    });
+
+    it("CT-14: devolve só o e-mail do autor para outro usuário logado", async () => {
+      const criado = await publicar(autor.token);
+      const outro = await criarUsuarioLogado("visitante");
+      const res = await contato(criado.body.anuncio.id, outro.token);
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual({ email: autor.email });
+      expect(JSON.stringify(res.body)).not.toContain(TELEFONE);
+    });
+
+    it("CT-14: devolve 404 para anúncio inexistente ou resolvido", async () => {
+      const inexistente = await contato(999999, autor.token);
+      expect(inexistente.status).toBe(404);
+
+      const criado = await publicar(autor.token);
+      const id = criado.body.anuncio.id;
+      await request(app)
+        .put(`/api/anuncios/${id}`)
+        .set("Authorization", `Bearer ${autor.token}`)
+        .send({ status: "RESOLVIDO" });
+      const resolvido = await contato(id, autor.token);
+      expect(resolvido.status).toBe(404);
+    });
+  });
+
   describe("M-10: CORS restrito", () => {
     const origemPermitida = () => (process.env.CORS_ORIGINS || "http://localhost:8000").split(",")[0].trim();
 

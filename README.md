@@ -38,7 +38,8 @@
 - Filtros combinados e pesquisa por palavra-chave nos feeds
 - Autenticação e gestão de anúncios pelo próprio usuário
 - Upload local de fotos via Multer com armazenamento em volume Docker (ADR-08)
-- Marcar como resolvido e excluir o próprio anúncio direto no card (`RF-09`)
+- Editar, marcar como resolvido e excluir o próprio anúncio direto no card (`RF-09`)
+- Detalhes do anúncio em um modal, com galeria de fotos e contato do autor para usuários logados
 
 ### Telas
 
@@ -46,11 +47,11 @@
 | --- | --- |
 | ![Vitrine pública com as abas Achados e Perdidos](docs/imagens/vitrine-publica.jpg) | ![Vitrine com os botões Marcar como Resolvido e Excluir](docs/imagens/vitrine-autor.jpg) |
 
-| Publicação de anúncio |
-| --- |
-| ![Formulário de publicação com upload de até 3 fotos](docs/imagens/publicar.jpg) |
+| Publicação de anúncio | Detalhes do anúncio, com o contato para usuários logados |
+| --- | --- |
+| ![Formulário de publicação com upload de até 3 fotos](docs/imagens/publicar.jpg) | ![Modal de detalhes com descrição completa e e-mail do autor](docs/imagens/detalhes-anuncio.jpg) |
 
-Capturas de 23/11/2026, com a API rodando no Docker e dados de demonstração.
+Capturas de 23/11/2026, com a API rodando no Docker e dados de demonstração. Na vitrine do autor aparecem os botões Editar, Marcar como Resolvido e Excluir (`RF-09`).
 
 ## 3. Comece por aqui
 
@@ -95,11 +96,11 @@ Situação final, confrontada com os testes em [`evidencias-testes.md`](docs/tes
 | Vitrine com abas Achados/Perdidos, busca e filtros | `RF-04` a `RF-06` | **Implementado.** Filtro por período e busca sem acento ficaram de fora |
 | Publicação de anúncio com data e hora | `RF-07` | **Implementado e testado** (CT-03, CT-04, CT-12) |
 | Upload de até 3 fotos em volume local | `RF-08` | **Implementado e testado** (CT-03, CT-05, CT-06, CT-08, CT-09) |
-| Marcar como resolvido e excluir anúncio próprio | `RF-09`, `RN-02` | **Implementado e testado** (CT-11 e teste no navegador). A edição dos campos existe só na API |
+| Editar, marcar como resolvido e excluir anúncio próprio | `RF-09`, `RN-02` | **Implementado e testado** (CT-11 e teste no navegador): editar, marcar como resolvido e excluir no card do autor |
 | LGPD: sem dados pessoais na vitrine, sem foto e sem CPF em documento | `RN-04` | **Implementado e testado** (CT-07, CT-10, testes de M-05) |
 | Política de privacidade | `RN-04` | **Implementado** ([`privacidade.html`](API/Front-End/privacidade.html)) |
 | Acessibilidade WCAG 2.1 AA | `RNF-05` | **Auditado com axe-core:** 0 violações nas 5 páginas ([relatório](docs/testes/evidencias/2026-11-24_acessibilidade-axe.md)) |
-| Suíte de testes automatizados (Jest + Supertest) | — | **52 testes passando**, 13 de 13 casos aprovados, 92,11% das linhas cobertas |
+| Suíte de testes automatizados (Jest + Supertest) | — | **60 testes passando**, 14 de 14 casos aprovados, 92,32% das linhas cobertas |
 | Papéis de administrador, "Meus anúncios", comentários, denúncias, match e expiração | `RF-02`, `RF-03`, `RF-10` a `RF-14` | Não implementados; trabalho futuro justificado em [`evidencias-testes.md`](docs/testes/evidencias-testes.md#43-não-atendidos) |
 
 ## 7. Estrutura do repositório
@@ -248,7 +249,7 @@ Na pasta `API/Back-End`, com `DB_TEST_PASSWORD` no `.env`:
 npm run test:docker
 ```
 
-> **Resultado esperado:** 2 suítes e **52 testes passando**, com **92,11%** de cobertura de linhas. O relatório agrupado por caso `CT-xx` e o log completo são gravados em [`docs/testes/evidencias/`](docs/testes/evidencias/). Detalhes do ambiente em [`API/Back-End/tests/ambiente/README.md`](API/Back-End/tests/ambiente/README.md).
+> **Resultado esperado:** 2 suítes e **60 testes passando**, com **92,32%** de cobertura de linhas. O relatório agrupado por caso `CT-xx` e o log completo são gravados em [`docs/testes/evidencias/`](docs/testes/evidencias/). Detalhes do ambiente em [`API/Back-End/tests/ambiente/README.md`](API/Back-End/tests/ambiente/README.md).
 
 ## 12. Endpoints da API
 
@@ -262,6 +263,7 @@ Base: `http://localhost:3000`
 | GET    | `/api/auth/perfil`  | Protegido | Retorna os dados do usuário; exige `Authorization: Bearer <token>`                                                                           |
 | GET    | `/api/anuncios`     | Público   | Lista anúncios ativos (filtro opcional `?tipo=ACHADO` ou `PERDIDO`); autor só com `id` e `nome`                                              |
 | GET    | `/api/anuncios/:id` | Público   | Detalha um anúncio                                                                                                                           |
+| GET    | `/api/anuncios/:id/contato` | Protegido | Devolve só o e-mail do autor de um anúncio ativo (`RN-04`, `CT-14`) |
 | POST   | `/api/anuncios`     | Protegido | Cria anúncio (`titulo`, `descricao`, `tipo`, `categoria`, `local_encontro`, `data_ocorrencia`, `fotos` via Multer / ADR-08); aplica `RN-04` |
 | PUT    | `/api/anuncios/:id` | Protegido | Edita anúncio (só o autor); a `RN-04` vale sobre o estado final                                                                              |
 | DELETE | `/api/anuncios/:id` | Protegido | Exclui anúncio (só o autor)                                                                                                                  |

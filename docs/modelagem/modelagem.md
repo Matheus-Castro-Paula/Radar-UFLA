@@ -178,6 +178,9 @@ sequenceDiagram
             alt campo obrigatório ausente, tipo ou categoria inválidos
                 S-->>C: RegraNegocioError VALIDACAO
                 C-->>F: 400 Campos ou categoria inválidos
+            else descrição com mais de 200 caracteres
+                S-->>C: RegraNegocioError VALIDACAO
+                C-->>F: 400 Descrição acima do limite (RF-07)
             else data da ocorrência inválida ou no futuro
                 S-->>C: RegraNegocioError VALIDACAO
                 C-->>F: 400 Data e hora inválidas (RF-07)
@@ -210,10 +213,54 @@ sequenceDiagram
 
 - **Onde a `RN-04` (LGPD) é aplicada:** em dois pontos do fluxo, ambos no `AnuncioService`. (1) _Na entrada:_ o `RegraLGPDHandler` (até a Sprint 4, a função `validarRegraLGPD`), um dos elos da corrente de validação do ADR-04, rejeita foto quando a categoria é `documento`, na criação e também na edição (`PUT /api/anuncios/:id`), porque olha o estado final do anúncio. (2) _Na saída:_ a listagem pública devolve apenas os campos do anúncio, as fotos e o `id` e `nome` do autor, nunca e-mail ou telefone. A combinação evita depender de análise de imagem, que está fora do escopo (`requisitos.md`, seção 7).
 - **Status HTTP:** a `RN-04` responde **400**, conforme o critério de aceitação da Issue #25. Na Sprint 3 este diagrama previa 422; a mudança ficou restrita ao mapeamento de códigos do controller (commit `593156b`).
-- **Ordem das validações:** autenticação → campos obrigatórios → tipo e status → categoria (normalizada e conferida contra `objeto, eletronico, documento, material, outro`) → data da ocorrência (`DataOcorrenciaHandler`, desde a Sprint 7) → regra `RN-04` → regras de foto (`RF-08`: até 3, JPG/PNG/WEBP) → persistência. Desde a Sprint 6, o `uploadMiddleware` barra antes do controller o envio com mais de 3 arquivos ou acima de 5 MB, e o `FotosHandler` confere tipo, tamanho e os bytes iniciais de cada arquivo.
+- **Ordem das validações:** autenticação → campos obrigatórios → limite de 200 caracteres na descrição (`DescricaoHandler`, desde a Sprint 8) → tipo e status → categoria (normalizada e conferida contra `objeto, eletronico, documento, material, outro`) → data da ocorrência (`DataOcorrenciaHandler`, desde a Sprint 7) → regra `RN-04` → regras de foto (`RF-08`: até 3, JPG/PNG/WEBP) → persistência. Desde a Sprint 6, o `uploadMiddleware` barra antes do controller o envio com mais de 3 arquivos ou acima de 5 MB, e o `FotosHandler` confere tipo, tamanho e os bytes iniciais de cada arquivo.
 - **Persistência:** o anúncio nasce com `status = ATIVO` (critério de aceitação 1 de `US-01`). Anúncio e fotos são gravados na mesma transação, então uma falha não deixa anúncio sem as fotos informadas. Os arquivos só chegam ao disco depois da validação, e uma falha na transação os remove.
 - **Data da ocorrência:** o `DataOcorrenciaHandler` recusa data inválida ou no futuro (com 5 minutos de tolerância para diferença de relógio), e o `AnuncioService` grava `data_ocorrencia` na criação e na edição. Corrigido na Sprint 7 (M-15, Issue #49), comprovado pelos casos CT-04 e CT-12.
 - **Decisão sobre fotos de documentos:** o grupo confirmou a abordagem de **proibir** a foto na categoria `documento` (ADR-03). O campo `contem_dado_sensivel`, comentado no model `FotoAnuncio`, não é necessário.
+
+### 2.4 Diagrama de Sequência: detalhes do anúncio e contato do autor (OK implementado)
+
+Adicionado na Sprint 8 (PR [#70](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/70)). Representa a `US-04`: o modal de detalhes usa os dados que a vitrine já carregou, e só o contato exige token.
+
+```mermaid
+sequenceDiagram
+    actor U as Usuário
+    participant F as Front-End (index.html)
+    participant MW as authMiddleware
+    participant C as anuncioController
+    participant S as AnuncioService
+    participant DB as MySQL
+
+    U->>F: Clica no card (ou Enter/Espaço)
+    F-->>U: Modal com descrição completa, até 3 fotos e dados do anúncio
+    alt usuário sem token
+        F-->>U: "Entre na sua conta para ver o contato"
+    else usuário logado
+        F->>MW: GET /api/anuncios/:id/contato com Bearer token
+        alt token inválido
+            MW-->>F: 401
+        else token válido
+            MW->>C: contato(req)
+            C->>S: contatoDoAutor(id)
+            S->>DB: select anuncio + usuario(email)
+            alt anúncio inexistente, resolvido ou arquivado
+                S-->>C: RegraNegocioError NAO_ENCONTRADO
+                C-->>F: 404
+            else anúncio ativo
+                S-->>C: { email }
+                C-->>F: 200 só com o e-mail, nunca o telefone (RN-04)
+                F-->>U: Link mailto com o e-mail do autor
+            end
+        end
+    end
+```
+
+**Descrição e decisões representadas:**
+
+- **Minimização de dados:** a rota devolve apenas o e-mail. O telefone, embora cadastrado, nunca sai da API. A listagem pública continua sem dados pessoais (`CT-10`).
+- **Por que uma rota separada:** a vitrine e o detalhe público seguem sem token. Só o contato exige autenticação, o que permite cachear e abrir a vitrine para visitantes sem expor o e-mail (ADR-09 de [`decisoes-de-projeto.md`](../projeto/decisoes-de-projeto.md)).
+- **Anúncio fechado não tem contato:** resolvido ou arquivado responde 404, porque não há mais devolução a combinar.
+- **Comprovação:** caso `CT-14` do [plano de testes](../testes/plano-de-testes.md).
 
 ## 3. Modelos estruturais: Diagrama de Classes UML e Diagrama Entidade-Relacionamento
 
@@ -341,6 +388,7 @@ classDiagram
     class anuncioRoutes {
         +GET listar()
         +GET buscarPorId()
+        +GET contato() com JWT
         +POST criar() com JWT
         +PUT atualizar() com JWT
         +DELETE excluir() com JWT
@@ -349,6 +397,7 @@ classDiagram
         -STATUS_POR_CODIGO
         +listar(req, res)
         +buscarPorId(req, res)
+        +contato(req, res)
         +criar(req, res)
         +atualizar(req, res)
         +excluir(req, res)
@@ -356,6 +405,7 @@ classDiagram
     class AnuncioService {
         +listar(filtros)
         +buscarPorId(id)
+        +contatoDoAutor(id)
         +criar(dados, usuarioId, arquivos)
         +atualizar(id, dados, usuarioId)
         +excluir(id, usuarioId)
@@ -373,6 +423,9 @@ classDiagram
         +validar(dados, contexto)
     }
     class CategoriaEStatusHandler {
+        +validar(dados, contexto)
+    }
+    class DescricaoHandler {
         +validar(dados, contexto)
     }
     class DataOcorrenciaHandler {
@@ -411,6 +464,7 @@ classDiagram
     AnuncioValidationChain ..> ValidationHandler : monta
     ValidationHandler <|-- CamposObrigatoriosHandler
     ValidationHandler <|-- CategoriaEStatusHandler
+    ValidationHandler <|-- DescricaoHandler
     ValidationHandler <|-- DataOcorrenciaHandler
     ValidationHandler <|-- RegraLGPDHandler
     ValidationHandler <|-- FotosHandler
@@ -425,7 +479,7 @@ classDiagram
 
 - O controller não depende de nenhum model: só do service e do erro de negócio. O service não depende do Express.
 - Na Sprint 4, as validações eram funções internas do `AnuncioService` (`validarCamposObrigatorios`, `validarCategoria`, `validarRegraLGPD`, `validarFotos`). Na Sprint 5 (PR #38) elas passaram a ser handlers em `services/validations/`, encadeados uma única vez pelo `AnuncioValidationChain` na ordem obrigatórios → categoria e status → `RN-04` → fotos. O `AnuncioService` chama `executar(dados, { acao })` em `criar`, `atualizar` e `listar`, e cada handler decide se se aplica à operação (por exemplo, os campos obrigatórios só são cobrados na criação). O `AnuncioService` só continua com a regra de autoria (`buscarAnuncioDoAutor`, `RN-02`), que depende de consultar o banco.
-- Na Sprint 7 (Issue #49), o `DataOcorrenciaHandler` entrou entre `CategoriaEStatusHandler` e `RegraLGPDHandler` sem alterar o `AnuncioService`: só uma linha nova no `AnuncioValidationChain`. A ordem atual é obrigatórios → categoria e status → data da ocorrência → `RN-04` → fotos.
+- Na Sprint 7 (Issue #49), o `DataOcorrenciaHandler` entrou entre `CategoriaEStatusHandler` e `RegraLGPDHandler` sem alterar o `AnuncioService`: só uma linha nova no `AnuncioValidationChain`. Na Sprint 8 (PR [#70](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/70)), o `DescricaoHandler` entrou logo depois dos campos obrigatórios, também sem alterar o `AnuncioService`. A ordem atual é obrigatórios → limite da descrição → categoria e status → data da ocorrência → `RN-04` → fotos. Na edição, o `AnuncioService` passa em `contexto.camposAlterados` os campos recebidos, e o `DescricaoHandler` e a checagem de texto do `RegraLGPDHandler` só conferem o que foi alterado.
 - A ordem da corrente segue o diagrama de sequência 2.3. Cada handler concreto sobrescreve `validar` e termina chamando `super.validar(...)`, que repassa ao próximo elo.
 - Na Sprint 6, o `uploadMiddleware` passou a receber as fotos do `POST` em memória, e o `AnuncioService` delega ao `MidiaStorage` a gravação em disco, que só ocorre depois da corrente de validação (ADR-08).
 
@@ -437,11 +491,12 @@ Código: [`anuncioRoutes.js`](../../API/Back-End/src/routes/anuncioRoutes.js), [
 | :--------- | :-------------------------------------------- | :------------------------------ | :---------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **RF-01**  | Autenticação Local e Cadastro (JWT / Bcrypt)  | `#4`              | Casos de Uso / Sequência      | `API/Back-End/src/controllers/authController.js`<br>`API/Back-End/src/middlewares/authMiddleware.js`<br>`API/Back-End/src/migrations/*create-usuarios.js` |
 | **RF-02**  | Controle de Acesso Baseado em Papéis (RBAC)   | `#4`                   | Casos de Uso                  | `API/Back-End/src/middlewares/authMiddleware.js`                                                                                                          |
-| **RF-04**  | Vitrine Pública de Achados e Perdidos         | `#5`                  | Casos de Uso / ER             | `API/Front-End/index.html`<br>`API/Front-End/app.js`                                                                                                      |
-| **RF-07**  | Cadastrar Novo Anúncio                        | `#6`, `#7`, `#11` | Casos de Uso / Sequência / ER / Classes (3.3) | `API/Front-End/publicar.html`<br>`API/Back-End/src/routes/anuncioRoutes.js`<br>`API/Back-End/src/controllers/anuncioController.js`<br>`API/Back-End/src/services/AnuncioService.js`<br>`API/Back-End/src/models/anuncio.js`<br>`API/Back-End/src/migrations/*create-anuncios.js`<br>`API/Back-End/src/migrations/*add-data-ocorrencia-to-anuncio.js`<br>`API/Back-End/src/services/validations/DataOcorrenciaHandler.js` |
+| **RF-04**  | Vitrine Pública de Achados e Perdidos         | `#5`, PR #70 | Casos de Uso / ER / Sequência 2.4 | `API/Front-End/index.html`<br>`API/Front-End/app.js`<br>`API/Back-End/src/services/AnuncioService.js` (`contatoDoAutor`) |
+| **RF-07**  | Cadastrar Novo Anúncio                        | `#6`, `#7`, `#11` | Casos de Uso / Sequência / ER / Classes (3.3) | `API/Front-End/publicar.html`<br>`API/Back-End/src/routes/anuncioRoutes.js`<br>`API/Back-End/src/controllers/anuncioController.js`<br>`API/Back-End/src/services/AnuncioService.js`<br>`API/Back-End/src/models/anuncio.js`<br>`API/Back-End/src/migrations/*create-anuncios.js`<br>`API/Back-End/src/migrations/*add-data-ocorrencia-to-anuncio.js`<br>`API/Back-End/src/services/validations/DataOcorrenciaHandler.js`<br>`API/Back-End/src/services/validations/DescricaoHandler.js` |
 | **RF-08**  | Upload de Fotos de Anúncios                   | `#10`, `#41`, `#42`, `#43` | ER / Sequência / Classes (3.3) | `API/Front-End/publicar.html`<br>`API/Back-End/src/middlewares/uploadMiddleware.js`<br>`API/Back-End/src/services/MidiaStorage.js`<br>`API/Back-End/src/services/validations/FotosHandler.js`<br>`API/Back-End/src/models/foto_anuncio.js`<br>`API/Back-End/src/migrations/*add-metadados-to-foto-anuncio.js` |
+| **RF-09**  | Editar e encerrar anúncio próprio            | `#11`, PR #70          | Classes (3.3)                 | `API/Front-End/app.js` (modal de edição e diálogos)<br>`API/Back-End/src/services/AnuncioService.js` (`atualizar`, `excluir`, `buscarAnuncioDoAutor`) |
 | **RF-10**  | Seção de Comentários no Anúncio (não implementado: só tabela e model) | `#11`                  | Casos de Uso / ER             | `API/Back-End/src/models/comentario.js`<br>`API/Back-End/src/migrations/*create-comentarios.js`                                                           |
-| **RN-04**  | Ocultar dados/fotos de "Documentos" (LGPD)    | `#9`                   | Diagrama de Sequência / Classes (3.3) | `API/Back-End/src/services/validations/RegraLGPDHandler.js` (desde a Sprint 5; antes `validarRegraLGPD` no `AnuncioService.js`)<br>`API/Front-End/app.js`<br>`API/Front-End/publicar.html` |
+| **RN-04**  | Ocultar dados/fotos de "Documentos" (LGPD)    | `#9`                   | Sequência 2.3 e 2.4 / Classes (3.3) | `API/Back-End/src/services/validations/RegraLGPDHandler.js` (desde a Sprint 5; antes `validarRegraLGPD` no `AnuncioService.js`)<br>`API/Front-End/app.js`<br>`API/Front-End/publicar.html` |
 | **RNF-01** | Interface Responsiva e Identidade Visual UFLA | `#5`                            | Casos de Uso                  | `API/Front-End/styles.css`                                                                                                                                |
 | **RNF-03** | Segurança e Hash de Senhas (Bcrypt / JWT)     | `#4`              | Diagrama de Sequência         | `API/Back-End/src/controllers/authController.js`                                                                                                          |
 | **RNF-06** | Arquitetura Cliente-Servidor e Docker         | `#2`, `#3`                      | Diagrama ER                   | `API/Back-End/docker-compose.yml`<br>`API/Back-End/Dockerfile`                                                                                            |
@@ -489,3 +544,4 @@ A modelagem revelou lacunas entre requisitos, modelos e código. Cada item deve 
 | Sprint 6 | Sequência 2.3 e Classes 3.3: upload em `multipart` com `uploadMiddleware` e `MidiaStorage` | Implementação da ADR-08 | PRs #46, #47 e #48 |
 | Sprint 6 | Classes 3.1 e ER 3.2: `data_ocorrencia` em `ANUNCIO`, `mime_type` e `tamanho_bytes` em `FOTO_ANUNCIO`; matriz e correspondência com o código atualizadas | Migrations da PR #46 | [`sprint-06-docker-migrations.txt`](../sprints/evidencias/sprint-06-docker-migrations.txt) |
 | Sprint 8 | Sequência 2.3 e Classes 3.3 com o `DataOcorrenciaHandler`; Classes 3.1 e ER 3.2 com `tipo_usuario` e `telefone`; `RF-10` marcado como não implementado; refinamento 2 atualizado | Alinhar os modelos à versão implementada (validação de data da Sprint 7 e migration da Sprint 5) | [`AnuncioValidationChain.js`](../../API/Back-End/src/services/validations/AnuncioValidationChain.js), [`evidencias-testes.md`](../testes/evidencias-testes.md) |
+| Sprint 8 | Sequência 2.3 e Classes 3.3 com o `DescricaoHandler`; nova Sequência 2.4 (detalhes e contato do autor); rota `contato` e `contatoDoAutor` no diagrama 3.3 | Funcionalidades do PR #70 (`RF-04`, `RF-07`, `RN-04`) | PR [#70](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/70), [`DescricaoHandler.js`](../../API/Back-End/src/services/validations/DescricaoHandler.js) |

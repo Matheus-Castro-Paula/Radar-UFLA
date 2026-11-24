@@ -115,6 +115,9 @@ classDiagram
     class CamposObrigatoriosHandler {
         +validar(dados, contexto)
     }
+    class DescricaoHandler {
+        +validar(dados, contexto)
+    }
     class CategoriaEStatusHandler {
         +validar(dados, contexto)
     }
@@ -129,6 +132,7 @@ classDiagram
     }
     class AnuncioValidationChain {
         -camposObrigatorios
+        -descricaoHandler
         -categoriaEStatus
         -dataOcorrencia
         -lgpdHandler
@@ -145,6 +149,7 @@ classDiagram
     }
 
     ValidationHandler <|-- CamposObrigatoriosHandler
+    ValidationHandler <|-- DescricaoHandler
     ValidationHandler <|-- CategoriaEStatusHandler
     ValidationHandler <|-- DataOcorrenciaHandler
     ValidationHandler <|-- RegraLGPDHandler
@@ -166,29 +171,38 @@ sequenceDiagram
     participant S as AnuncioService
     participant C as AnuncioValidationChain
     participant H1 as CamposObrigatoriosHandler
+    participant HD as DescricaoHandler
     participant H2 as CategoriaEStatusHandler
+    participant HO as DataOcorrenciaHandler
     participant H3 as RegraLGPDHandler
     participant H4 as FotosHandler
 
     S->>C: executar(dados, acao CRIAR)
     C->>H1: validar(dados, contexto)
     H1->>H1: acao é CRIAR, campos preenchidos
-    H1->>H2: super.validar repassa
+    H1->>HD: super.validar repassa
+    HD->>HD: descrição com até 200 caracteres
+    HD->>H2: super.validar repassa
     H2->>H2: tipo válido, categoria "documento" está na lista
-    H2->>H3: super.validar repassa
+    H2->>HO: super.validar repassa
+    HO->>HO: data ausente ou no passado
+    HO->>H3: super.validar repassa
     H3->>H3: categoria normalizada é documento e há fotos
     H3--xS: throw RegraNegocioError(LGPD)
     Note over H4: FotosHandler não chega a ser executado
     Note over S: o service não abre a transação, e o controller responde 400
 ```
 
+Atualizado na Sprint 8 com os elos incluídos depois da Sprint 5: `DataOcorrenciaHandler` (Sprint 7) e `DescricaoHandler` (Sprint 8).
+
 ### 4.3 A corrente e o que cada elo faz em cada operação
 
-A ordem é definida uma vez, no construtor de [`AnuncioValidationChain`](../../API/Back-End/src/services/validations/AnuncioValidationChain.js): **`CamposObrigatoriosHandler` → `CategoriaEStatusHandler` → `DataOcorrenciaHandler` → `RegraLGPDHandler` → `FotosHandler`**, a mesma ordem do diagrama 2.3 de [`modelagem.md`](../modelagem/modelagem.md). O `AnuncioService` chama a mesma corrente nas três operações, mudando só `contexto.acao`:
+A ordem é definida uma vez, no construtor de [`AnuncioValidationChain`](../../API/Back-End/src/services/validations/AnuncioValidationChain.js): **`CamposObrigatoriosHandler` → `DescricaoHandler` → `CategoriaEStatusHandler` → `DataOcorrenciaHandler` → `RegraLGPDHandler` → `FotosHandler`**, a mesma ordem do diagrama 2.3 de [`modelagem.md`](../modelagem/modelagem.md). O `AnuncioService` chama a mesma corrente nas três operações, mudando só `contexto.acao`:
 
 | Handler                      | `CRIAR` (`criar`)                     | `ATUALIZAR` (`atualizar`)                                        | `LISTAR` (`listar` com filtro `tipo`) |
 | ---------------------------- | ------------------------------------- | ---------------------------------------------------------------- | ------------------------------------- |
 | `CamposObrigatoriosHandler`  | Verifica os 5 campos obrigatórios     | Não atua                                                         | Não atua                              |
+| `DescricaoHandler`           | `RF-07`: descrição com até 200 caracteres | Idem, só se a descrição veio na edição (`contexto.camposAlterados`) | Sem efeito |
 | `CategoriaEStatusHandler`    | Confere `tipo`, `status` e categoria normalizada contra as listas fechadas | Idem, sobre o estado final                       | Confere o `tipo` do filtro            |
 | `DataOcorrenciaHandler`      | `RF-07`: data válida e não futura, se informada | Idem, sobre o estado final                  | Sem efeito                            |
 | `RegraLGPDHandler`           | `RN-04`: documento não pode ter foto  | `RN-04` sobre o estado final (pega a troca de categoria)         | Sem efeito (não há categoria nem fotos) |
@@ -204,6 +218,7 @@ Os dois handlers que dependem da categoria (`CategoriaEStatusHandler` e `RegraLG
 | ----------------------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | ------ |
 | **Handler** (base)            | `ValidationHandler`            | [`validations/ValidationHandler.js`](../../API/Back-End/src/services/validations/ValidationHandler.js)                    | Guarda o próximo elo (`definirProximo`) e repassa a requisição (`validar`)                               | [`c05a69c`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/c05a69c) |
 | **ConcreteHandler**           | `CamposObrigatoriosHandler`    | [`validations/CamposObrigatoriosHandler.js`](../../API/Back-End/src/services/validations/CamposObrigatoriosHandler.js)    | Na criação: título, descrição, tipo, categoria e local preenchidos                                        | [`e26c6aa`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/e26c6aa) |
+| **ConcreteHandler**           | `DescricaoHandler`             | [`validations/DescricaoHandler.js`](../../API/Back-End/src/services/validations/DescricaoHandler.js)                      | `RF-07`: descrição com até 200 caracteres (incluído na Sprint 8, PR #70)                                   | [`7d844ad`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/7d844ad) |
 | **ConcreteHandler**           | `CategoriaEStatusHandler`      | [`validations/CategoriaEStatusHandler.js`](../../API/Back-End/src/services/validations/CategoriaEStatusHandler.js)        | `tipo`, `status` e categoria (normalizada) dentro das listas fechadas                                     | [`e26c6aa`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/e26c6aa) |
 | **ConcreteHandler**           | `DataOcorrenciaHandler`        | [`validations/DataOcorrenciaHandler.js`](../../API/Back-End/src/services/validations/DataOcorrenciaHandler.js)            | `RF-07`: `data_ocorrencia` válida e não futura (incluído na Sprint 7, M-15)                                | [`6fb6ee9`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/6fb6ee9) |
 | **ConcreteHandler**           | `RegraLGPDHandler`             | [`validations/RegraLGPDHandler.js`](../../API/Back-End/src/services/validations/RegraLGPDHandler.js)                      | `RN-04`: categoria `documento` não pode ter foto                                                           | [`e26c6aa`](https://github.com/Matheus-Castro-Paula/Radar-UFLA/commit/e26c6aa) |
@@ -301,7 +316,7 @@ class RegraLGPDHandler extends ValidationHandler {
 - **A normalização da categoria está repetida** em `CategoriaEStatusHandler`, `RegraLGPDHandler` e `AnuncioService`. Isso protege contra erros de ordem, mas são três lugares para manter iguais.
 - **Não cobre autorização.** A verificação de autoria (`RN-02`, `buscarAnuncioDoAutor`) depende de consultar o banco e continua fora da corrente.
 - **Os handlers não têm testes de unidade isolados.** Desde a Sprint 7 eles são exercitados pela suíte de integração (casos CT-03 a CT-09 de [`plano-de-testes.md`](../testes/plano-de-testes.md)), com 89,4% das linhas de `services/validations/` cobertas ([`evidencias-testes.md`](../testes/evidencias-testes.md)).
-- **Extensibilidade comprovada:** a validação de data da Sprint 7 (`DataOcorrenciaHandler`) entrou como um handler novo e uma linha no montador, sem alterar o `AnuncioService`.
+- **Extensibilidade comprovada:** a validação de data da Sprint 7 (`DataOcorrenciaHandler`) e o limite de descrição da Sprint 8 (`DescricaoHandler`) entraram cada um como um handler novo e uma linha no montador, sem alterar a lógica do `AnuncioService`.
 
 ## 8. Evidências
 

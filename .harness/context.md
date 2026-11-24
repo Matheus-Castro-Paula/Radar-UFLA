@@ -40,7 +40,7 @@ Rotas da API: `/api/auth/*` e `/api/anuncios` (GET público; POST/PUT/DELETE com
 ## Regras de negócio mais sensíveis
 
 - **RN-02**: só o autor (ou o Administrador Geral) edita/resolve o anúncio.
-- **RN-04 (LGPD)**: vitrine nunca mostra e-mail, telefone ou CPF do autor; anúncio de categoria `documento` não aceita foto.
+- **RN-04 (LGPD)**: vitrine nunca mostra e-mail, telefone ou CPF do autor; anúncio de categoria `documento` não aceita foto; título e descrição não aceitam CPF nem número de documento. O e-mail só sai pela rota protegida `GET /api/anuncios/:id/contato` (ADR-09).
 - **RF-08**: até 3 fotos por anúncio, JPG/PNG/WEBP.
 
 ## Estado atual e dívidas conhecidas

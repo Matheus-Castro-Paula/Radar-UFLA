@@ -7,6 +7,19 @@ const MAX_FOTOS = 3;
 const MAX_BYTES = 5 * 1024 * 1024;
 const TIPOS_FOTO = ["image/jpeg", "image/png", "image/webp"];
 
+// Limite da descrição — o back-end valida o mesmo valor (DescricaoHandler)
+const LIMITE_DESCRICAO = 200;
+// Quantos caracteres da primeira linha aparecem no card do feed
+const RESUMO_FEED = 100;
+
+const ROTULOS_CATEGORIA = {
+  objeto: "Objeto pessoal",
+  eletronico: "Eletrônico",
+  documento: "Documento",
+  material: "Material acadêmico",
+  outro: "Outro",
+};
+
 const ICONS = {
   objeto: "🔑",
   eletronico: "🎧",
@@ -24,6 +37,18 @@ function urlDaFoto(url) {
   return null;
 }
 
+// Resumo para o card do feed: só a primeira linha, com reticências se houver mais.
+// O texto completo aparece no pop-up de detalhes.
+function resumoDescricao(texto) {
+  const limpo = String(texto || "").trim();
+  const primeiraLinha = limpo.split(/\r?\n/)[0].trim();
+  const cortada = Array.from(primeiraLinha);
+  if (cortada.length > RESUMO_FEED) {
+    return `${cortada.slice(0, RESUMO_FEED).join("").trimEnd()}…`;
+  }
+  return primeiraLinha.length < limpo.length ? `${primeiraLinha}…` : primeiraLinha;
+}
+
 // Converte um anúncio da API (GET /api/anuncios) para o formato usado nos cards
 function anuncioParaItem(anuncio) {
   // Data em que o item foi achado/perdido (RF-07); anúncios antigos usam a data de criação
@@ -32,10 +57,16 @@ function anuncioParaItem(anuncio) {
   const autor = anuncio.usuario ? `por ${anuncio.usuario.nome}` : "";
 
   // RN-04: documento nunca mostra foto, mesmo que a API devolva alguma
-  const primeiraFoto =
+  const fotosValidas =
     anuncio.categoria !== "documento" && Array.isArray(anuncio.fotos)
-      ? urlDaFoto(anuncio.fotos[0]?.url_imagem)
-      : null;
+      ? anuncio.fotos
+          .map((f) => ({ caminho: f.url_imagem, url: urlDaFoto(f.url_imagem) }))
+          .filter((f) => f.url)
+      : [];
+  const fotos = fotosValidas.map((f) => f.url);
+  // Caminhos como a API guarda ("/uploads/..."): a edição devolve esses mesmos valores
+  const fotosCaminhos = fotosValidas.map((f) => f.caminho);
+  const primeiraFoto = fotos[0] || null;
 
   return {
     id: anuncio.id,
@@ -46,6 +77,11 @@ function anuncioParaItem(anuncio) {
     descricao: anuncio.descricao,
     local: anuncio.local_encontro || "",
     imagem: primeiraFoto,
+    fotos,
+    fotosCaminhos,
+    dataIso: anuncio.data_ocorrencia || anuncio.criado_em,
+    quando,
+    autorNome: anuncio.usuario ? anuncio.usuario.nome : "",
     meta: [anuncio.local_encontro, quando, autor].filter(Boolean).join(" · "),
   };
 }
@@ -111,6 +147,570 @@ function validarLGPDPublicacao(categoria, titulo, descricao) {
   return null;
 }
 
+// --- Diálogos do site (substituem o confirm() do navegador) ---
+
+// Monta o fundo escuro + diálogo e cuida de ESC, clique fora, Tab preso dentro,
+// rolagem da página e devolução do foco. Devolve a função que fecha o diálogo.
+function abrirDialogo(dialog, { focoInicial, origem, aoFechar } = {}) {
+  const focoAnterior = origem || document.activeElement;
+  const overlay = document.createElement("div");
+  overlay.className = "modal-overlay";
+  overlay.appendChild(dialog);
+  document.body.appendChild(overlay);
+  document.body.classList.add("modal-aberto");
+
+  function fechar() {
+    document.removeEventListener("keydown", aoTeclar);
+    overlay.remove();
+    document.body.classList.remove("modal-aberto");
+    if (focoAnterior && typeof focoAnterior.focus === "function") focoAnterior.focus();
+    if (aoFechar) aoFechar();
+  }
+
+  function aoTeclar(e) {
+    if (e.key === "Escape") {
+      e.preventDefault();
+      fechar();
+      return;
+    }
+    if (e.key === "Tab") {
+      const focaveis = Array.from(
+        dialog.querySelectorAll("button, input, select, textarea, a[href]"),
+      ).filter((el) => !el.disabled);
+      if (!focaveis.length) return;
+      const primeiro = focaveis[0];
+      const ultimo = focaveis[focaveis.length - 1];
+      if (e.shiftKey && document.activeElement === primeiro) {
+        e.preventDefault();
+        ultimo.focus();
+      } else if (!e.shiftKey && document.activeElement === ultimo) {
+        e.preventDefault();
+        primeiro.focus();
+      }
+    }
+  }
+
+  // mousedown (e não click): selecionar texto no formulário e soltar fora não fecha
+  overlay.addEventListener("mousedown", (e) => {
+    if (e.target === overlay) fechar();
+  });
+  document.addEventListener("keydown", aoTeclar);
+  (focoInicial || dialog).focus();
+  return fechar;
+}
+
+// Pergunta de confirmação no estilo do site. Devolve Promise<boolean>.
+// O foco começa em "Cancelar": Enter sem querer nunca confirma uma exclusão.
+function confirmarAcao({ titulo, mensagem, rotuloConfirmar = "Confirmar", perigo = false }) {
+  return new Promise((resolve) => {
+    const dialog = document.createElement("div");
+    dialog.className = "modal modal-confirm";
+    dialog.setAttribute("role", "alertdialog");
+    dialog.setAttribute("aria-modal", "true");
+    dialog.setAttribute("aria-labelledby", "confirm-titulo");
+    dialog.setAttribute("aria-describedby", "confirm-mensagem");
+    dialog.tabIndex = -1;
+
+    const corpo = document.createElement("div");
+    corpo.className = "modal-body";
+
+    const h2 = document.createElement("h2");
+    h2.id = "confirm-titulo";
+    h2.className = "modal-title";
+    h2.textContent = titulo;
+
+    const p = document.createElement("p");
+    p.id = "confirm-mensagem";
+    p.className = "modal-desc";
+    p.textContent = mensagem;
+
+    const acoes = document.createElement("div");
+    acoes.className = "dialog-actions";
+
+    const cancelar = document.createElement("button");
+    cancelar.type = "button";
+    cancelar.className = "btn-dialog";
+    cancelar.textContent = "Cancelar";
+
+    const confirmar = document.createElement("button");
+    confirmar.type = "button";
+    confirmar.className = "btn-dialog " + (perigo ? "perigo" : "primario");
+    confirmar.textContent = rotuloConfirmar;
+
+    acoes.append(cancelar, confirmar);
+    corpo.append(h2, p, acoes);
+    dialog.appendChild(corpo);
+
+    const fechar = abrirDialogo(dialog, {
+      focoInicial: cancelar,
+      aoFechar: () => resolve(false), // ESC, clique fora ou Cancelar
+    });
+    cancelar.addEventListener("click", fechar);
+    confirmar.addEventListener("click", () => {
+      resolve(true); // o primeiro resolve vale; o resolve(false) do fechar é ignorado
+      fechar();
+    });
+  });
+}
+
+// --- Edição do anúncio (RF-09) ---
+
+// Formulário de edição em um diálogo. Só envia o que mudou (PUT parcial), então um
+// anúncio antigo com descrição longa não é barrado por um campo que ninguém tocou.
+// A API repete todas as validações e confere o autor (RN-02). Na edição só dá para
+// remover fotos já publicadas; adicionar fotos novas continua sendo pela publicação.
+function abrirEdicaoAnuncio(item, origem, aoSalvar) {
+  const dialog = document.createElement("div");
+  dialog.className = "modal modal-edicao";
+  dialog.setAttribute("role", "dialog");
+  dialog.setAttribute("aria-modal", "true");
+  dialog.setAttribute("aria-labelledby", "edicao-titulo");
+  dialog.tabIndex = -1;
+
+  let fechar = () => {};
+
+  const fecharX = document.createElement("button");
+  fecharX.type = "button";
+  fecharX.className = "modal-close";
+  fecharX.setAttribute("aria-label", "Fechar edição");
+  fecharX.textContent = "×";
+  fecharX.addEventListener("click", () => fechar());
+
+  const corpo = document.createElement("div");
+  corpo.className = "modal-body";
+
+  const h2 = document.createElement("h2");
+  h2.id = "edicao-titulo";
+  h2.className = "modal-title";
+  h2.textContent = "Editar anúncio";
+
+  const form = document.createElement("form");
+  form.className = "edit-form";
+  form.noValidate = true;
+
+  function campo(rotulo, controle) {
+    const label = document.createElement("label");
+    label.className = "edit-field";
+    const span = document.createElement("span");
+    span.className = "edit-label";
+    span.textContent = rotulo;
+    label.append(span, controle);
+    return label;
+  }
+  function selectCom(opcoes, valor) {
+    const s = document.createElement("select");
+    opcoes.forEach(([v, rotulo]) => {
+      const o = document.createElement("option");
+      o.value = v;
+      o.textContent = rotulo;
+      s.appendChild(o);
+    });
+    s.value = valor;
+    return s;
+  }
+
+  const tipoOriginal = item.feed === "achados" ? "ACHADO" : "PERDIDO";
+  const tipoSel = selectCom([["ACHADO", "Achado"], ["PERDIDO", "Perdido"]], tipoOriginal);
+  const categoriaSel = selectCom(Object.entries(ROTULOS_CATEGORIA), item.categoria);
+
+  const tituloInput = document.createElement("input");
+  tituloInput.type = "text";
+  tituloInput.maxLength = 120;
+  tituloInput.value = item.titulo;
+
+  const descricaoInput = document.createElement("textarea");
+  descricaoInput.rows = 4;
+  descricaoInput.maxLength = LIMITE_DESCRICAO;
+  descricaoInput.value = item.descricao;
+  const contador = document.createElement("small");
+  contador.className = "contador-descricao";
+  contador.setAttribute("aria-live", "polite");
+  function atualizarContador() {
+    const usados = Array.from(descricaoInput.value).length;
+    contador.textContent = `${usados}/${LIMITE_DESCRICAO}`;
+    contador.classList.toggle("no-limite", usados >= LIMITE_DESCRICAO);
+  }
+  descricaoInput.addEventListener("input", atualizarContador);
+  atualizarContador();
+
+  const localInput = document.createElement("input");
+  localInput.type = "text";
+  localInput.maxLength = 150;
+  localInput.value = item.local;
+
+  // datetime-local trabalha na hora do navegador, sem fuso
+  function paraCampoData(data) {
+    if (Number.isNaN(data.getTime())) return "";
+    const ajustada = new Date(data.getTime() - data.getTimezoneOffset() * 60000);
+    return ajustada.toISOString().slice(0, 16);
+  }
+  const dataInput = document.createElement("input");
+  dataInput.type = "datetime-local";
+  dataInput.max = paraCampoData(new Date());
+  const dataInicial = paraCampoData(new Date(item.dataIso));
+  dataInput.value = dataInicial;
+
+  const linhaTipos = document.createElement("div");
+  linhaTipos.className = "edit-row";
+  linhaTipos.append(campo("Tipo", tipoSel), campo("Categoria", categoriaSel));
+
+  const campoDescricao = campo("Descrição", descricaoInput);
+  campoDescricao.appendChild(contador);
+
+  const linhaLocalData = document.createElement("div");
+  linhaLocalData.className = "edit-row";
+  linhaLocalData.append(campo("Local", localInput), campo("Data e hora", dataInput));
+
+  form.append(linhaTipos, campo("Título", tituloInput), campoDescricao, linhaLocalData);
+
+  // Fotos já publicadas: dá para marcar para remover (e desfazer antes de salvar)
+  const removidas = new Set();
+  if (item.fotos.length > 0) {
+    const fieldset = document.createElement("fieldset");
+    fieldset.className = "edit-fotos";
+    const legend = document.createElement("legend");
+    legend.className = "edit-label";
+    legend.textContent = "Fotos";
+    fieldset.appendChild(legend);
+
+    const lista = document.createElement("div");
+    lista.className = "edit-fotos-lista";
+    item.fotos.forEach((url, i) => {
+      const caixa = document.createElement("div");
+      caixa.className = "edit-foto";
+      const img = document.createElement("img");
+      img.alt = `Foto ${i + 1}`;
+      img.src = url;
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "edit-foto-btn";
+      btn.textContent = "Remover";
+      btn.setAttribute("aria-pressed", "false");
+      btn.setAttribute("aria-label", `Remover foto ${i + 1}`);
+      btn.addEventListener("click", () => {
+        const marcada = !removidas.has(i);
+        if (marcada) removidas.add(i);
+        else removidas.delete(i);
+        caixa.classList.toggle("removida", marcada);
+        btn.textContent = marcada ? "Desfazer" : "Remover";
+        btn.setAttribute("aria-pressed", String(marcada));
+        btn.setAttribute("aria-label", `${marcada ? "Desfazer remoção da" : "Remover"} foto ${i + 1}`);
+      });
+      caixa.append(img, btn);
+      lista.appendChild(caixa);
+    });
+    fieldset.appendChild(lista);
+    const dica = document.createElement("p");
+    dica.className = "edit-dica";
+    dica.textContent = "Aqui só é possível remover fotos já publicadas. Para outras fotos, publique um novo anúncio.";
+    fieldset.appendChild(dica);
+    form.appendChild(fieldset);
+  }
+
+  const erro = document.createElement("p");
+  erro.className = "edit-erro";
+  erro.setAttribute("role", "alert");
+  erro.hidden = true;
+
+  const acoes = document.createElement("div");
+  acoes.className = "dialog-actions";
+  const cancelar = document.createElement("button");
+  cancelar.type = "button";
+  cancelar.className = "btn-dialog";
+  cancelar.textContent = "Cancelar";
+  cancelar.addEventListener("click", () => fechar());
+  const salvar = document.createElement("button");
+  salvar.type = "submit";
+  salvar.className = "btn-dialog primario";
+  salvar.textContent = "Salvar alterações";
+  acoes.append(cancelar, salvar);
+
+  form.append(erro, acoes);
+  corpo.append(h2, form);
+  dialog.append(fecharX, corpo);
+
+  function falhar(mensagem, campoComErro) {
+    erro.textContent = mensagem;
+    erro.hidden = false;
+    if (campoComErro) campoComErro.focus();
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    erro.hidden = true;
+
+    const titulo = tituloInput.value.trim();
+    const descricao = descricaoInput.value.trim();
+    const local = localInput.value.trim();
+
+    if (!titulo) return falhar("Informe um título para o item.", tituloInput);
+    if (!descricao) return falhar("Descreva o item para ajudar a identificá-lo.", descricaoInput);
+    if (Array.from(descricao).length > LIMITE_DESCRICAO) {
+      return falhar(`A descrição pode ter no máximo ${LIMITE_DESCRICAO} caracteres.`, descricaoInput);
+    }
+    if (!local) return falhar("Informe o local onde o item foi achado ou perdido.", localInput);
+    if (!dataInput.value) return falhar("Informe a data e a hora da ocorrência.", dataInput);
+    const dataNova = new Date(dataInput.value);
+    if (Number.isNaN(dataNova.getTime()) || dataNova > new Date()) {
+      return falhar("A data e a hora não podem estar no futuro.", dataInput);
+    }
+
+    // Só vai o que mudou
+    const mudancas = {};
+    if (tipoSel.value !== tipoOriginal) mudancas.tipo = tipoSel.value;
+    if (categoriaSel.value !== item.categoria) mudancas.categoria = categoriaSel.value;
+    if (titulo !== String(item.titulo).trim()) mudancas.titulo = titulo;
+    if (descricao !== String(item.descricao).trim()) mudancas.descricao = descricao;
+    if (local !== String(item.local).trim()) mudancas.local_encontro = local;
+    if (dataInput.value !== dataInicial) mudancas.data_ocorrencia = dataNova.toISOString();
+    if (removidas.size > 0) {
+      mudancas.fotos = item.fotosCaminhos.filter((_, i) => !removidas.has(i));
+    }
+
+    if (Object.keys(mudancas).length === 0) {
+      fechar();
+      return;
+    }
+
+    if (mudancas.titulo !== undefined || mudancas.descricao !== undefined || mudancas.categoria !== undefined) {
+      const erroLGPD = validarLGPDPublicacao(categoriaSel.value, titulo, descricao);
+      if (erroLGPD) return falhar(erroLGPD, descricaoInput);
+    }
+
+    const token = localStorage.getItem("token");
+    salvar.disabled = true;
+    salvar.textContent = "Salvando...";
+    try {
+      const response = await fetch(`${API_BASE}/anuncios/${item.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify(mudancas),
+      });
+      const data = await response.json().catch(() => ({}));
+
+      if (response.ok) {
+        fechar();
+        if (data.anuncio) aoSalvar(data.anuncio);
+        else window.location.reload();
+        return;
+      }
+      if (response.status === 401) {
+        localStorage.removeItem("token");
+        falhar("Sua sessão expirou. Entre novamente para editar.");
+        setTimeout(() => (window.location.href = "login.html"), 1500);
+      } else if (response.status === 404) {
+        falhar("Este anúncio não existe mais. Feche e atualize a página.");
+      } else {
+        falhar(data.error || "Não foi possível salvar as alterações. Tente novamente.");
+      }
+    } catch (err) {
+      console.error(err);
+      falhar("Não foi possível conectar ao servidor.");
+    }
+    salvar.disabled = false;
+    salvar.textContent = "Salvar alterações";
+  });
+
+  fechar = abrirDialogo(dialog, { focoInicial: tituloInput, origem });
+}
+
+// --- Pop-up de detalhes do anúncio ---
+
+// Busca o e-mail do autor e mostra no pop-up. A vitrine pública não traz e-mail
+// (RN-04): ele vem de uma rota que exige login. Sem login, mostra o convite para entrar.
+// Só vira link mailto: se o e-mail tiver formato simples, para nada estranho entrar na URL.
+function carregarContatoDoAutor(dd, item) {
+  const token = localStorage.getItem("token");
+
+  function mostrarLinkLogin(texto) {
+    dd.textContent = "";
+    const a = document.createElement("a");
+    a.href = "login.html";
+    a.textContent = texto;
+    dd.appendChild(a);
+  }
+
+  if (usuarioLogadoId() === null) {
+    mostrarLinkLogin("Entre na sua conta para ver o contato");
+    return;
+  }
+
+  dd.textContent = "Carregando...";
+  fetch(`${API_BASE}/anuncios/${item.id}/contato`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+    .then(async (response) => {
+      if (response.status === 401) {
+        localStorage.removeItem("token");
+        mostrarLinkLogin("Sua sessão expirou. Entre novamente para ver o contato");
+        return;
+      }
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const { email } = await response.json();
+      dd.textContent = "";
+      if (/^[^\s@?&<>"]+@[^\s@?&<>"]+$/.test(email)) {
+        const a = document.createElement("a");
+        a.href = `mailto:${email}`;
+        a.textContent = email;
+        dd.appendChild(a);
+      } else {
+        dd.textContent = email;
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      dd.textContent = "Não foi possível carregar o contato.";
+    });
+}
+
+// Abre um diálogo com fotos, descrição completa e dados do anúncio.
+// RN-04: a vitrine pública só traz o nome do autor; o e-mail é buscado à parte
+// e só para quem está logado (carregarContatoDoAutor).
+// Tudo é inserido com textContent/propriedades, nunca com innerHTML (anti-XSS).
+function abrirDetalhesAnuncio(item, elementoOrigem) {
+  const rotuloTipo = item.feed === "achados" ? "Achado" : "Perdido";
+  const focoAnterior = elementoOrigem || document.activeElement;
+
+  const overlay = document.createElement("div");
+  overlay.className = "modal-overlay";
+
+  const dialog = document.createElement("div");
+  dialog.className = "modal";
+  dialog.dataset.feed = item.feed;
+  dialog.setAttribute("role", "dialog");
+  dialog.setAttribute("aria-modal", "true");
+  dialog.setAttribute("aria-labelledby", "modal-titulo");
+
+  const fechar = document.createElement("button");
+  fechar.type = "button";
+  fechar.className = "modal-close";
+  fechar.setAttribute("aria-label", "Fechar detalhes do anúncio");
+  fechar.textContent = "×";
+
+  // Galeria: foto principal + miniaturas (até 3). Sem foto, mostra o ícone da categoria.
+  const galeria = document.createElement("div");
+  galeria.className = "modal-gallery";
+  if (item.fotos.length > 0) {
+    const principal = document.createElement("img");
+    principal.className = "modal-photo";
+    principal.alt = `Foto 1 de ${item.fotos.length}: ${item.titulo}`;
+    principal.src = item.fotos[0];
+    principal.addEventListener("error", () => principal.classList.add("sem-foto"));
+    galeria.appendChild(principal);
+
+    if (item.fotos.length > 1) {
+      const miniaturas = document.createElement("div");
+      miniaturas.className = "modal-thumbs";
+      item.fotos.forEach((url, i) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "modal-thumb" + (i === 0 ? " active" : "");
+        btn.setAttribute("aria-label", `Ver foto ${i + 1} de ${item.fotos.length}`);
+        const mini = document.createElement("img");
+        mini.alt = "";
+        mini.src = url;
+        btn.appendChild(mini);
+        btn.addEventListener("click", () => {
+          principal.src = url;
+          principal.alt = `Foto ${i + 1} de ${item.fotos.length}: ${item.titulo}`;
+          principal.classList.remove("sem-foto");
+          miniaturas.querySelectorAll(".modal-thumb").forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+        });
+        miniaturas.appendChild(btn);
+      });
+      galeria.appendChild(miniaturas);
+    }
+  } else {
+    const placeholder = document.createElement("div");
+    placeholder.className = "modal-placeholder";
+    placeholder.setAttribute("aria-hidden", "true");
+    placeholder.textContent = ICONS[item.categoria] || "📦";
+    galeria.appendChild(placeholder);
+  }
+
+  const corpo = document.createElement("div");
+  corpo.className = "modal-body";
+
+  const selo = document.createElement("span");
+  selo.className = "card-badge modal-badge";
+  selo.textContent = rotuloTipo;
+
+  const titulo = document.createElement("h2");
+  titulo.id = "modal-titulo";
+  titulo.className = "modal-title";
+  titulo.textContent = item.titulo;
+
+  const descricao = document.createElement("p");
+  descricao.className = "modal-desc";
+  descricao.textContent = item.descricao;
+
+  const detalhes = document.createElement("dl");
+  detalhes.className = "modal-details";
+  const linhas = [
+    ["Categoria", ROTULOS_CATEGORIA[item.categoria] || item.categoria],
+    ["Local", item.local],
+    [item.feed === "achados" ? "Achado em" : "Perdido em", item.quando],
+    ["Publicado por", item.autorNome],
+  ];
+  linhas.forEach(([rotulo, valor]) => {
+    if (!valor) return;
+    const dt = document.createElement("dt");
+    dt.textContent = rotulo;
+    const dd = document.createElement("dd");
+    dd.textContent = valor;
+    detalhes.append(dt, dd);
+  });
+
+  // Contato: preenchido depois, conforme o usuário esteja logado ou não
+  const dtContato = document.createElement("dt");
+  dtContato.textContent = "Contato";
+  const ddContato = document.createElement("dd");
+  detalhes.append(dtContato, ddContato);
+  carregarContatoDoAutor(ddContato, item);
+
+  corpo.append(selo, titulo, descricao, detalhes);
+  dialog.append(fechar, galeria, corpo);
+  overlay.appendChild(dialog);
+  document.body.appendChild(overlay);
+  document.body.classList.add("modal-aberto");
+  fechar.focus();
+
+  function encerrar() {
+    document.removeEventListener("keydown", aoTeclar);
+    overlay.remove();
+    document.body.classList.remove("modal-aberto");
+    if (focoAnterior && typeof focoAnterior.focus === "function") focoAnterior.focus();
+  }
+
+  function aoTeclar(e) {
+    if (e.key === "Escape") {
+      encerrar();
+      return;
+    }
+    // Mantém o foco do Tab dentro do pop-up
+    if (e.key === "Tab") {
+      const focaveis = dialog.querySelectorAll("button");
+      if (!focaveis.length) return;
+      const primeiro = focaveis[0];
+      const ultimo = focaveis[focaveis.length - 1];
+      if (e.shiftKey && document.activeElement === primeiro) {
+        e.preventDefault();
+        ultimo.focus();
+      } else if (!e.shiftKey && document.activeElement === ultimo) {
+        e.preventDefault();
+        primeiro.focus();
+      }
+    }
+  }
+
+  fechar.addEventListener("click", encerrar);
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) encerrar();
+  });
+  document.addEventListener("keydown", aoTeclar);
+}
+
 // --- Página do feed (index.html) ---
 
 function initFeed() {
@@ -166,7 +766,12 @@ function initFeed() {
   }
 
   async function resolverAnuncio(item, botao) {
-    if (!window.confirm(`Marcar "${item.titulo}" como resolvido? Ele sairá da vitrine.`)) return;
+    const confirmou = await confirmarAcao({
+      titulo: "Marcar como resolvido?",
+      mensagem: `“${item.titulo}” sairá da vitrine.`,
+      rotuloConfirmar: "Marcar como resolvido",
+    });
+    if (!confirmou) return;
     const ok = await chamarApi(
       item,
       {
@@ -185,13 +790,27 @@ function initFeed() {
   }
 
   async function excluirAnuncio(item, botao) {
-    if (!window.confirm(`Excluir "${item.titulo}" definitivamente? Esta ação não pode ser desfeita.`)) return;
+    const confirmou = await confirmarAcao({
+      titulo: "Excluir anúncio?",
+      mensagem: `“${item.titulo}” será excluído definitivamente. Esta ação não pode ser desfeita.`,
+      rotuloConfirmar: "Excluir",
+      perigo: true,
+    });
+    if (!confirmou) return;
     const ok = await chamarApi(item, { method: "DELETE", headers: {} }, botao, "Excluindo...");
     if (ok) {
       itens = itens.filter((i) => i.id !== item.id);
       render();
       mostrarMensagem("Anúncio excluído.", "sucesso");
     }
+  }
+
+  // Depois de editar, troca o item pelo que a API devolveu e redesenha o feed
+  function aoEditar(anuncioAtualizado) {
+    const novo = anuncioParaItem(anuncioAtualizado);
+    itens = itens.map((i) => (i.id === novo.id ? novo : i));
+    render();
+    mostrarMensagem("Anúncio atualizado.", "sucesso");
   }
 
   function categoriasAtivas() {
@@ -222,6 +841,10 @@ function initFeed() {
       const card = document.createElement("article");
       card.className = "card";
       card.dataset.feed = item.feed;
+      // Card inteiro abre o pop-up de detalhes (teclado: Enter ou Espaço)
+      card.tabIndex = 0;
+      card.setAttribute("aria-haspopup", "dialog");
+      card.setAttribute("aria-label", `Ver detalhes: ${item.titulo}`);
       const rotulo = item.feed === "achados" ? "Achado" : "Perdido";
       // escapeHTML evita XSS: título, descrição e local são digitados por usuários
       card.innerHTML = `
@@ -231,7 +854,7 @@ function initFeed() {
         </div>
         <div class="card-body">
           <h3 class="card-title">${escapeHTML(item.titulo)}</h3>
-          <p class="card-desc">${escapeHTML(item.descricao)}</p>
+          <p class="card-desc">${escapeHTML(resumoDescricao(item.descricao))}</p>
           <div class="card-meta">${escapeHTML(item.meta)}</div>
         </div>
       `;
@@ -260,6 +883,13 @@ function initFeed() {
         resolver.setAttribute("aria-label", `Marcar como resolvido: ${item.titulo}`);
         resolver.addEventListener("click", () => resolverAnuncio(item, resolver));
 
+        const editar = document.createElement("button");
+        editar.type = "button";
+        editar.className = "btn-card btn-editar";
+        editar.textContent = "Editar";
+        editar.setAttribute("aria-label", `Editar anúncio: ${item.titulo}`);
+        editar.addEventListener("click", () => abrirEdicaoAnuncio(item, editar, aoEditar));
+
         const excluir = document.createElement("button");
         excluir.type = "button";
         excluir.className = "btn-card btn-excluir";
@@ -267,9 +897,22 @@ function initFeed() {
         excluir.setAttribute("aria-label", `Excluir anúncio: ${item.titulo}`);
         excluir.addEventListener("click", () => excluirAnuncio(item, excluir));
 
-        acoes.append(resolver, excluir);
+        acoes.append(resolver, editar, excluir);
         card.appendChild(acoes);
       }
+
+      card.addEventListener("click", (e) => {
+        // Cliques nos botões do autor (resolver/excluir) não abrem o pop-up
+        if (e.target.closest(".card-actions")) return;
+        abrirDetalhesAnuncio(item, card);
+      });
+      card.addEventListener("keydown", (e) => {
+        if (e.target !== card) return;
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          abrirDetalhesAnuncio(item, card);
+        }
+      });
       feedEl.appendChild(card);
     });
 
@@ -376,6 +1019,20 @@ function initPublishPage() {
   const agora = new Date();
   agora.setMinutes(agora.getMinutes() - agora.getTimezoneOffset());
   dataInput.max = agora.toISOString().slice(0, 16);
+
+  // Limite da descrição (a API valida de novo) com contador de caracteres
+  descricaoInput.maxLength = LIMITE_DESCRICAO;
+  const contador = document.createElement("small");
+  contador.className = "contador-descricao";
+  contador.setAttribute("aria-live", "polite");
+  descricaoInput.insertAdjacentElement("afterend", contador);
+  function atualizarContador() {
+    const usados = Array.from(descricaoInput.value).length;
+    contador.textContent = `${usados}/${LIMITE_DESCRICAO}`;
+    contador.classList.toggle("no-limite", usados >= LIMITE_DESCRICAO);
+  }
+  descricaoInput.addEventListener("input", atualizarContador);
+  atualizarContador();
 
   let fotos = []; // arquivos escolhidos (File)
 
@@ -503,6 +1160,12 @@ function initPublishPage() {
     if (!descricao) {
       descricaoInput.classList.add("invalido");
       mostrarMensagem("Descreva o item para ajudar a identificá-lo.");
+      return;
+    }
+
+    if (Array.from(descricao).length > LIMITE_DESCRICAO) {
+      descricaoInput.classList.add("invalido");
+      mostrarMensagem(`A descrição pode ter no máximo ${LIMITE_DESCRICAO} caracteres.`);
       return;
     }
 
