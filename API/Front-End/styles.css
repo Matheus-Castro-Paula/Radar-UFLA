@@ -219,6 +219,17 @@ main { flex: 1; }
 .card-title { font-family: var(--font-display); font-size: 1rem; font-weight: 600; margin: 0; }
 .card-desc { font-size: 0.85rem; color: var(--ink-soft); margin: 0; }
 
+/* Texto longo ou sem espaços: quebra em qualquer ponto e corta com reticências */
+.card-title,
+.card-desc {
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.card-title { -webkit-line-clamp: 2; line-clamp: 2; }
+.card-desc { -webkit-line-clamp: 4; line-clamp: 4; }
+
 .card-meta {
   margin-top: auto;
   padding-top: 8px;
