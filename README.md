@@ -47,11 +47,11 @@
 | --- | --- |
 | ![Vitrine pública com as abas Achados e Perdidos](docs/imagens/vitrine-publica.jpg) | ![Vitrine com os botões Marcar como Resolvido e Excluir](docs/imagens/vitrine-autor.jpg) |
 
-| Publicação de anúncio |
-| --- |
-| ![Formulário de publicação com upload de até 3 fotos](docs/imagens/publicar.jpg) |
+| Publicação de anúncio | Detalhes do anúncio, com o contato para usuários logados |
+| --- | --- |
+| ![Formulário de publicação com upload de até 3 fotos](docs/imagens/publicar.jpg) | ![Modal de detalhes com descrição completa e e-mail do autor](docs/imagens/detalhes-anuncio.jpg) |
 
-Capturas de 23/11/2026, com a API rodando no Docker e dados de demonstração.
+Capturas de 23/11/2026, com a API rodando no Docker e dados de demonstração. Na vitrine do autor aparecem os botões Editar, Marcar como Resolvido e Excluir (`RF-09`).
 
 ## 3. Comece por aqui
 
