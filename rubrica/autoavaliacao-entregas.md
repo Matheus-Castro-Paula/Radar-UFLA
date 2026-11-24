@@ -32,7 +32,7 @@ Avaliação do próprio grupo sobre cada sprint, segundo as quatro dimensões da
 | Backlog com a situação final de cada item | [`backlog-produto.md`](../docs/backlog-produto.md) | Responsável: PO |
 | README final com imagens e instruções | [`README.md`](../README.md) | Atendido: telas, execução com Docker e testes |
 | Correção dos defeitos críticos | PRs [#66](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/66) (M-11, M-17) e [#68](https://github.com/Matheus-Castro-Paula/Radar-UFLA/pull/68) (M-05, M-10, M-13, M-16) | Corrigidos; M-11 em parte (aplicação ainda usa `root`) |
-| Suíte de testes executável | `npm run test:docker` em `API/Back-End` | Atendido: 50 de 50 testes, 13 de 13 casos, 92,03% das linhas |
+| Suíte de testes executável | `npm run test:docker` em `API/Back-End` | Atendido: 60 de 60 testes, 14 de 14 casos, 92,32% das linhas |
 | Issues encerradas ou justificadas | GitHub Project | Responsável: PO |
 | Tag `sprint-08` e preparação da `versao-final` | Repositório | Criada pelo Tech Lead após o merge dos PRs |
 

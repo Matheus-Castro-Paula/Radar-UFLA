@@ -16,8 +16,9 @@ Relatório final de verificação e validação. Consolida as execuções das Sp
 | 22/11/2026 | Idempotência dos seeders (M-17) | Container de teste | Três execuções sem erro e sem duplicação | [`2026-11-22_0956_seeders-idempotentes.md`](evidencias/2026-11-22_0956_seeders-idempotentes.md) |
 | 22/11/2026 | Ambiente de teste com senha vinda do `.env` (M-11) e volume de fotos | Container de teste e Compose novo | Aprovado | [`2026-11-22_0957_ambiente-de-teste.md`](evidencias/2026-11-22_0957_ambiente-de-teste.md), [`2026-11-22_0957_volume-uploads.md`](evidencias/2026-11-22_0957_volume-uploads.md) |
 | 22/11/2026 | Suíte final com prefixos `CT-xx`, após M-05, M-10, M-13 e M-16 (PR #68) | Container de teste (`npm run test:docker`) | 50 de 50 aprovados; 92,03% das linhas | [`2026-11-22_2252_suite-automatizada.md`](evidencias/2026-11-22_2252_suite-automatizada.md) |
-| 23/11/2026 | Suíte na `main` após o merge do PR #68, com os testes da correção do M-05 | Container de teste (`npm run test:docker`) | **52 de 52 aprovados; 92,11% das linhas** | [`2026-11-23_2151_suite-automatizada.md`](evidencias/2026-11-23_2151_suite-automatizada.md) |
+| 23/11/2026 | Suíte na `main` após o merge do PR #68, com os testes da correção do M-05 | Container de teste (`npm run test:docker`) | 52 de 52 aprovados; 92,11% das linhas | [`2026-11-23_2151_suite-automatizada.md`](evidencias/2026-11-23_2151_suite-automatizada.md) |
 | 24/11/2026 | Auditoria de acessibilidade com axe-core (WCAG 2.1 A e AA) nas 5 páginas | Navegador, API no Docker | 1 violação de contraste encontrada e corrigida; 0 na reexecução | [`2026-11-24_acessibilidade-axe.md`](evidencias/2026-11-24_acessibilidade-axe.md) |
+| 23/11/2026 | Suíte final, após o PR #70 (limite de descrição, rota de contato e CT-14) | Container de teste (`npm run test:docker`) | **60 de 60 aprovados; 92,32% das linhas** | [`2026-11-23_2305_suite-automatizada.md`](evidencias/2026-11-23_2305_suite-automatizada.md) |
 | 23/11/2026 | Teste exploratório no navegador com a API real: cadastro, login, publicação, CPF recusado, CNH com telefone aceita, resolver e excluir (RF-09), CORS e página de privacidade | Docker Compose de desenvolvimento, front na porta 8000 | Aprovado. A `privacidade.html` faltava na primeira rodada e foi conferida depois do commit `4e98032` | Registro nesta seção |
 
 Para reproduzir: na pasta `API/Back-End`, copie o `.env.example` para `.env`, preencha `DB_PASSWORD`, `DB_TEST_PASSWORD` e `JWT_SECRET` e rode `npm run test:docker`. O relatório e o log saem em `docs/testes/evidencias/`, já agrupados por caso `CT-xx`.
@@ -26,13 +27,13 @@ Para reproduzir: na pasta `API/Back-End`, copie o `.env.example` para `.env`, pr
 
 | Situação | Quantidade | Casos |
 | --- | --- | --- |
-| Aprovados | 13 | CT-01 a CT-13 |
+| Aprovados | 14 | CT-01 a CT-14 |
 | Parciais | 0 | — |
 | Reprovados | 0 | — |
 | Não executados | 0 | — |
-| **Total** | **13** | |
+| **Total** | **14** | |
 
-A execução final tem 50 testes automatizados, todos aprovados. Os 25 que citam um `CT-xx` cobrem 12 casos; o CT-12 é o roteiro manual. Dos outros 25, 14 comprovam as correções da Sprint 8 (6 de M-05, 4 de M-10 e 4 de M-13) e 11 verificam comportamentos fora dos casos do plano: cadastro sem `senha_hash` na resposta, e-mail duplicado, `tipo_usuario` enviado pelo cliente ignorado, campos obrigatórios, categoria fora da lista e data futura ou inválida.
+A execução final tem 60 testes automatizados, todos aprovados. Os 28 que citam um `CT-xx` cobrem 13 casos; o CT-12 é o roteiro manual. Dos outros 32, 21 comprovam as correções e funcionalidades da Sprint 8 (8 de M-05, 4 de M-10, 4 de M-13 e 5 do limite de descrição) e 11 verificam comportamentos fora dos casos do plano: cadastro sem `senha_hash` na resposta, e-mail duplicado, `tipo_usuario` enviado pelo cliente ignorado, campos obrigatórios, categoria fora da lista e data futura ou inválida.
 
 ### 2.1 Resultado por caso
 
@@ -51,15 +52,16 @@ A execução final tem 50 testes automatizados, todos aprovados. Os 25 que citam
 | CT-11 | `RN-02` | Automatizada | 1 | Aprovado | Usuário B recebe 403 ao editar e excluir anúncio de A |
 | CT-12 | `RF-07`, `RF-08`, `RN-04` | Manual | 9 passos | Aprovado | Capturas de tela de cada passo |
 | CT-13 | `RNF-02` | Automatizada | 1 | Aprovado | Média de 8,5 ms em 20 requisições com 50 anúncios ativos (meta: 800 ms) |
+| CT-14 | `RN-04` | Automatizada | 3 | Aprovado | Contato do autor: 401 sem token; com token, só o e-mail (sem telefone); 404 para anúncio inexistente ou resolvido |
 
 ### 2.2 Cobertura de código (execução final)
 
-| Métrica | Sprint 7 (22/11, PR #66) | Final (22/11, PR #68) |
-| --- | --- | --- |
-| Linhas | 88,88% | 92,03% (370/402) |
-| Instruções | 88,06% | 90,93% (381/419) |
-| Funções | 84,48% | 94,11% (64/68) |
-| Ramos | 69,58% | 74,55% (167/224) |
+| Métrica | 22/11, PR #66 | 22/11, PR #68 | Final (23/11, PR #70) |
+| --- | --- | --- | --- |
+| Linhas | 88,88% | 92,03% | 92,32% (397/430) |
+| Instruções | 88,06% | 90,93% | 91,27% (408/447) |
+| Funções | 84,48% | 94,11% | 94,44% (68/72) |
+| Ramos | 69,58% | 74,55% | 76,42% (188/246) |
 
 O arquivo menos coberto é o `FotosHandler.js` (81,1% das linhas): os ramos de assinatura de JPEG e WEBP não são exercitados, porque os testes usam PNG. O `MidiaStorage.js` subiu de 77,8% para 90,5% com os testes de remoção de arquivos (M-13).
 
@@ -95,7 +97,8 @@ A revisão do PR #68 encontrou dois problemas na regra do M-05, corrigidos antes
 | `RF-04` Vitrine pública | CT-10, CT-12.6 e CT-12.7 |
 | `RF-07` Cadastro de anúncio | CT-03, CT-04, CT-12 |
 | `RF-08` Upload de até 3 fotos | CT-03, CT-05, CT-06, CT-08, CT-09, CT-12 |
-| `RN-04` LGPD: sem dados pessoais, sem foto de documento, sem CPF no texto | CT-07, CT-10, CT-12, testes de M-05 |
+| `RF-09` Editar e encerrar anúncio | CT-11 (autoria na API); botões Editar, Marcar como Resolvido e Excluir no card do autor, testados no navegador (PR #70) |
+| `RN-04` LGPD: sem dados pessoais na vitrine pública, sem foto de documento, sem CPF no texto | CT-07, CT-10, CT-12, CT-14, testes de M-05 |
 | `RNF-02` Desempenho | CT-13: média de 8,5 ms com 50 anúncios (meta de 800 ms) |
 | `RNF-05` Acessibilidade (WCAG 2.1 AA) | Auditoria com axe-core em 24/11: 0 violações nas 5 páginas, após corrigir o contraste do selo "Achado"; teclado e foco visível conferidos ([relatório](evidencias/2026-11-24_acessibilidade-axe.md)) |
 | `RNF-06` Arquitetura em camadas com Docker | Ambiente de teste e volume validados nas evidências de 22/11 |
@@ -107,7 +110,6 @@ A revisão do PR #68 encontrou dois problemas na regra do M-05, corrigidos antes
 | `RF-02` Papéis (RBAC) | `tipo_usuario` gravado no cadastro (sempre `comum`) e presente no JWT | Nenhuma permissão de administrador é aplicada |
 | `RF-05` Filtros combinados | Categoria e local, combinados na vitrine | Filtro por período |
 | `RF-06` Pesquisa textual | Busca em título, descrição e local, sem diferenciar maiúsculas | Não ignora acentos |
-| `RF-09` Editar e encerrar anúncio | Botões "Marcar como Resolvido" e "Excluir" no card do autor, com confirmação, testados no navegador em 23/11; checagem de autoria na API (CT-11) | Editar título, descrição e demais campos pela interface (existe só na API) |
 | `RN-02` Gestão só pelo autor ou admin | Autor verificado na API (CT-11) | O administrador não tem a exceção prevista |
 | `RNF-01` Usabilidade | Layout responsivo com breakpoint em 720 px | Não foi construído como mobile-first |
 | `RNF-03` Segurança | bcrypt, JWT, SQL parametrizado, LGPD, validação de fotos, CORS restrito e senhas fora do Compose | HTTPS (M-08) e usuário próprio do banco (resto do M-11) |
@@ -133,6 +135,7 @@ O `RNF-02` conta como atendido para a escala testada (50 anúncios). Com o cresc
 - **Escala da vitrine:** a listagem carrega todos os anúncios ativos e filtra no navegador. Paginar e levar busca e filtros ao servidor (M-12).
 - **Autenticação:** o `authController` ainda concentra validação, hash e acesso ao banco (M-01, extrair um `AuthService`).
 - **Corrente de validação:** cada handler precisa chamar `super.validar` para a corrente seguir (M-07, Template Method).
+- **Contato do autor (PR #70):** o e-mail do autor aparece no modal de detalhes só para usuários logados (CT-14). Como qualquer conta logada pode consultar a rota de cada anúncio ativo, é possível reunir os e-mails de todos os autores. Um limite de consultas por usuário reduziria esse risco.
 - **Regra do M-05:** é baseada em padrões de texto. Um número de documento escrito de forma incomum pode passar, e um número de 11 dígitos que por acaso forme um CPF válido é recusado.
 - **Testes:** os handlers não têm testes de unidade isolados, só de integração. A interface é verificada só por roteiro manual.
 - **Funcionalidades não implementadas:** `RF-03`, `RF-10` a `RF-14`, listadas na seção 4.3 e justificadas no [backlog](../backlog-produto.md).
@@ -148,4 +151,4 @@ O `RNF-02` conta como atendido para a escala testada (50 anúncios). Com o cresc
 | 5 | Padrões de projeto | Chain of Responsibility nas validações (ADR-04) | 12 cenários iguais antes e depois da refatoração |
 | 6 | Arquitetura | Arquitetura C4, Docker, upload com Multer em volume local (ADR-05 a ADR-08) | Débitos M-08 a M-18 levantados; base para os riscos do plano |
 | 7 | Estratégia de testes | Plano de testes, suíte Jest/Supertest em banco isolado, roteiro CT-12 | 31 testes; D-02, D-03 e D-05 encontrados e corrigidos |
-| 8 | Validação final | Correção de M-05, M-10, M-11, M-13, M-16 e M-17, `RF-09` na interface, acessibilidade e este relatório | 52 testes, 13 de 13 casos aprovados e 92,11% das linhas cobertas |
+| 8 | Validação final | Correção de M-05, M-10, M-11, M-13, M-16 e M-17, `RF-09` na interface, acessibilidade e este relatório | 60 testes, 14 de 14 casos aprovados e 92,32% das linhas cobertas |
