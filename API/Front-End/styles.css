@@ -923,7 +923,7 @@ body.modal-aberto { overflow: hidden; }
 
 .modal-body { padding: 18px 20px 22px; display: flex; flex-direction: column; gap: 10px; }
 .modal-badge { position: static; align-self: flex-start; }
-.modal[data-feed="achados"] .modal-badge { color: var(--achados); background: var(--achados-bg); }
+.modal[data-feed="achados"] .modal-badge { color: var(--achados-texto); background: var(--achados-bg); }
 .modal[data-feed="perdidos"] .modal-badge { color: var(--perdidos); background: var(--perdidos-bg); }
 
 .modal-title {
